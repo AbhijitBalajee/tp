@@ -2,7 +2,6 @@ package seedu.duke.command;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import seedu.duke.Expense;
 import seedu.duke.ExpenseList;
 import seedu.duke.Ui;
 
