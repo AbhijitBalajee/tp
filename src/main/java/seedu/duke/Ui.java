@@ -155,6 +155,24 @@ public class Ui {
     }
 
     /**
+     * Displays the remaining balance against the set budget.
+     *
+     * @param budget     the monthly budget limit
+     * @param totalSpent the total amount spent
+     * @param remaining  the remaining balance
+     */
+    public void showRemaining(double budget, double totalSpent, double remaining) {
+        System.out.println(LINE);
+        System.out.printf(" Budget:         $%.2f%n", budget);
+        System.out.printf(" Total spent:    $%.2f%n", totalSpent);
+        System.out.printf(" Remaining:      $%.2f%n", remaining);
+        if (remaining < 0) {
+            System.out.printf(" WARNING: You are over budget by $%.2f!%n", Math.abs(remaining));
+        }
+        System.out.println(LINE);
+    }
+
+    /**
      * Displays all available commands.
      */
     public void showHelp() {

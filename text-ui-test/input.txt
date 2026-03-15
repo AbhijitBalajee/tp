@@ -4,7 +4,9 @@ delete 1
 add d/Bus a/2.00 c/Transport
 total
 list
+remaining
 budget 50
+remaining
 budget -1
 budget abc
 help

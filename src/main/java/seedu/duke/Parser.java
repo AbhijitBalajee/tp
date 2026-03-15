@@ -6,6 +6,7 @@ import seedu.duke.command.Command;
 import seedu.duke.command.DeleteCommand;
 import seedu.duke.command.HelpCommand;
 import seedu.duke.command.ListCommand;
+import seedu.duke.command.RemainingCommand;
 import seedu.duke.command.TotalCommand;
 
 /**
@@ -40,6 +41,8 @@ public class Parser {
             return new ListCommand();
         case "budget":
             return parseBudgetCommand(parts.length > 1 ? parts[1] : "");
+        case "remaining":
+            return new RemainingCommand();
         case "help":
             return new HelpCommand();
         case "bye":
