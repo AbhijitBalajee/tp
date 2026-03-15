@@ -3,4 +3,8 @@ add d/MRT top-up a/10.00 c/Transport
 delete 1
 add d/Bus a/2.00 c/Transport
 total
+list
+budget 50
+budget -1
+budget abc
 bye
