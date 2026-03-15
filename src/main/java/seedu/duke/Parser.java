@@ -1,5 +1,7 @@
 package seedu.duke;
 
+import java.util.logging.Logger;
+
 import seedu.duke.command.AddCommand;
 import seedu.duke.command.BudgetCommand;
 import seedu.duke.command.Command;
@@ -14,6 +16,13 @@ import seedu.duke.command.TotalCommand;
  */
 public class Parser {
 
+    private static final Logger logger = Logger.getLogger(Parser.class.getName());
+    private static final String TOKEN_SPLIT_REGEX = " (?=[dac]/)";
+
+    static {
+        logger.setUseParentHandlers(false);
+    }
+
     /**
      * Parses the user input and returns the corresponding command.
      *
@@ -22,9 +31,13 @@ public class Parser {
      * @throws SpendTrackException if input is invalid
      */
     public static Command parse(String input) throws SpendTrackException {
+        assert input != null : "Input to parser should not be null";
+
         String trimmed = input.trim();
         String[] parts = trimmed.split(" ", 2);
         String commandWord = parts[0].toLowerCase();
+
+        logger.info("Parsing command: " + commandWord);
 
         switch (commandWord) {
         case "add":
@@ -48,6 +61,7 @@ public class Parser {
         case "bye":
             return new ExitCommand();
         default:
+            logger.warning("Unknown command: " + commandWord);
             return new UnknownCommand();
         }
     }
@@ -57,7 +71,7 @@ public class Parser {
         double amount = 0.0;
         String category = "Uncategorised";
 
-        String[] tokens = args.split(" (?=[dac]/)");
+        String[] tokens = args.split(TOKEN_SPLIT_REGEX);
         for (String token : tokens) {
             token = token.trim();
             if (token.startsWith("d/")) {

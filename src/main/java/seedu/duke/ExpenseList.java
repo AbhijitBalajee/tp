@@ -1,11 +1,18 @@
 package seedu.duke;
 
 import java.util.ArrayList;
+import java.util.logging.Logger;
 
 /**
  * Manages the list of expenses.
  */
 public class ExpenseList {
+
+    private static final Logger logger = Logger.getLogger(ExpenseList.class.getName());
+
+    static {
+        logger.setUseParentHandlers(false);
+    }
 
     private ArrayList<Expense> expenses;
     private double budget;
@@ -24,7 +31,9 @@ public class ExpenseList {
      * @param expense the expense to add
      */
     public void addExpense(Expense expense) {
+        assert expense != null : "Expense to add should not be null";
         expenses.add(expense);
+        logger.info("Expense added: " + expense);
     }
 
     /**
@@ -34,6 +43,7 @@ public class ExpenseList {
      * @return the expense at that index
      */
     public Expense getExpense(int index) {
+        assert index >= 0 && index < expenses.size() : "Index out of bounds: " + index;
         return expenses.get(index);
     }
 
@@ -53,7 +63,10 @@ public class ExpenseList {
      * @return the removed expense
      */
     public Expense deleteExpense(int index) {
-        return expenses.remove(index);
+        assert index >= 0 && index < expenses.size() : "Delete index out of bounds: " + index;
+        Expense removed = expenses.remove(index);
+        logger.info("Expense deleted: " + removed);
+        return removed;
     }
 
     /**
@@ -75,6 +88,7 @@ public class ExpenseList {
         for (Expense expense : expenses) {
             total += expense.getAmount();
         }
+        logger.info("Total calculated: " + total);
         return total;
     }
 
@@ -86,6 +100,7 @@ public class ExpenseList {
     public void setBudget(double budget) {
         assert budget > 0 : "Budget must be positive";
         this.budget = budget;
+        logger.info("Budget set to: " + budget);
     }
 
     /**
