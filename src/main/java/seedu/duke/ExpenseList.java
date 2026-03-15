@@ -8,12 +8,14 @@ import java.util.ArrayList;
 public class ExpenseList {
 
     private ArrayList<Expense> expenses;
+    private double budget;
 
     /**
-     * Constructs an empty ExpenseList.
+     * Constructs an empty ExpenseList with no budget set.
      */
     public ExpenseList() {
         this.expenses = new ArrayList<>();
+        this.budget = 0.0;
     }
 
     /**
@@ -74,5 +76,33 @@ public class ExpenseList {
             total += expense.getAmount();
         }
         return total;
+    }
+
+    /**
+     * Sets the monthly budget limit.
+     *
+     * @param budget the budget amount to set
+     */
+    public void setBudget(double budget) {
+        assert budget > 0 : "Budget must be positive";
+        this.budget = budget;
+    }
+
+    /**
+     * Returns the current monthly budget.
+     *
+     * @return the budget amount, or 0.0 if not set
+     */
+    public double getBudget() {
+        return budget;
+    }
+
+    /**
+     * Returns true if a budget has been set.
+     *
+     * @return true if budget is greater than 0
+     */
+    public boolean hasBudget() {
+        return budget > 0.0;
     }
 }
