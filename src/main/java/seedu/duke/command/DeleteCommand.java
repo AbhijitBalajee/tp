@@ -2,6 +2,7 @@ package seedu.duke.command;
 
 import seedu.duke.Expense;
 import seedu.duke.ExpenseList;
+import seedu.duke.SpendTrackException;
 import seedu.duke.Ui;
 
 /**
@@ -21,7 +22,11 @@ public class DeleteCommand extends Command {
     }
 
     @Override
-    public void execute(ExpenseList expenses, Ui ui) {
+    public void execute(ExpenseList expenses, Ui ui) throws SpendTrackException {
+        if (index < 1 || index > expenses.size()) {
+            throw new SpendTrackException("Index " + index + " is out of range. "
+                    + "There are " + expenses.size() + " expense(s).");
+        }
         Expense removed = expenses.deleteExpense(index - 1);
         ui.showDeleteSuccess(removed);
     }

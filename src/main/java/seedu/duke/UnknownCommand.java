@@ -8,7 +8,7 @@ import seedu.duke.command.Command;
 public class UnknownCommand extends Command {
 
     @Override
-    public void execute(ExpenseList expenses, Ui ui) {
+    public void execute(ExpenseList expenses, Ui ui) throws SpendTrackException {
         ui.showError("Unknown command. Type 'help' for a list of commands.");
     }
 }

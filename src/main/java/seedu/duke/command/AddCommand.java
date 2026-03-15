@@ -2,6 +2,7 @@ package seedu.duke.command;
 
 import seedu.duke.Expense;
 import seedu.duke.ExpenseList;
+import seedu.duke.SpendTrackException;
 import seedu.duke.Ui;
 
 /**
@@ -33,7 +34,7 @@ public class AddCommand extends Command {
      * @param ui the UI for displaying output
      */
     @Override
-    public void execute(ExpenseList expenses, Ui ui) {
+    public void execute(ExpenseList expenses, Ui ui) throws SpendTrackException {
         Expense expense = new Expense(description, amount, category);
         expenses.addExpense(expense);
         ui.showAddSuccess(expense);
