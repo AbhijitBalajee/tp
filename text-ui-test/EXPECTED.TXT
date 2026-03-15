@@ -1,6 +1,7 @@
 ____________________________________________________________
  Welcome to SpendTrack!
  Type 'add d/<desc> a/<amount> c/<category>' to add an expense.
+ Type 'list' to view all expenses.
  Type 'bye' to exit.
 ____________________________________________________________
 > ____________________________________________________________
