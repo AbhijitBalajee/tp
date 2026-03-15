@@ -41,6 +41,11 @@ checkstyle {
     toolVersion = '10.2'
 }
 
-run{
+run {
     standardInput = System.in
+    jvmArgs '-ea'
+}
+
+tasks.withType(Test) {
+    jvmArgs '-ea'
 }
