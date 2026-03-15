@@ -8,7 +8,7 @@ import seedu.duke.command.Command;
 public class ExitCommand extends Command {
 
     @Override
-    public void execute(ExpenseList expenses, Ui ui) {
+    public void execute(ExpenseList expenses, Ui ui) throws SpendTrackException {
         ui.showGoodbye();
     }
 

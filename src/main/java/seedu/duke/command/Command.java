@@ -1,6 +1,7 @@
 package seedu.duke.command;
 
 import seedu.duke.ExpenseList;
+import seedu.duke.SpendTrackException;
 import seedu.duke.Ui;
 
 /**
@@ -14,7 +15,7 @@ public abstract class Command {
      * @param expenses the expense list to operate on
      * @param ui the UI for displaying output
      */
-    public abstract void execute(ExpenseList expenses, Ui ui);
+    public abstract void execute(ExpenseList expenses, Ui ui) throws SpendTrackException;
 
     /**
      * Returns true if this command signals the application to exit.

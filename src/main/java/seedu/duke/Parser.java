@@ -2,6 +2,7 @@ package seedu.duke;
 
 import seedu.duke.command.AddCommand;
 import seedu.duke.command.Command;
+import seedu.duke.command.DeleteCommand;
 import seedu.duke.command.ListCommand;
 import seedu.duke.command.TotalCommand;
 
@@ -16,7 +17,7 @@ public class Parser {
      * @param input the raw user input string
      * @return the parsed Command
      */
-    public static Command parse(String input) {
+    public static Command parse(String input) throws SpendTrackException {
         String trimmed = input.trim();
         String[] parts = trimmed.split(" ", 2);
         String commandWord = parts[0].toLowerCase();
@@ -24,6 +25,12 @@ public class Parser {
         switch (commandWord) {
         case "add":
             return parseAddCommand(parts.length > 1 ? parts[1] : "");
+        case "delete":
+            try {
+                return new DeleteCommand(Integer.parseInt(parts[1].trim()));
+            } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
+                throw new SpendTrackException("delete requires a number. Usage: delete <index>");
+            }
         case "list":
             return new ListCommand();
         case "total":

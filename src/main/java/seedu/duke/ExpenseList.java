@@ -45,6 +45,16 @@ public class ExpenseList {
     }
 
     /**
+     * Removes and returns the expense at the given zero-based index.
+     *
+     * @param index the zero-based index
+     * @return the removed expense
+     */
+    public Expense deleteExpense(int index) {
+        return expenses.remove(index);
+    }
+
+    /**
      * Returns the full list of expenses.
      *
      * @return the list of expenses
