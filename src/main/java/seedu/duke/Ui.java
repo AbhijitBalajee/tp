@@ -21,6 +21,7 @@ public class Ui {
         System.out.println(LINE);
         System.out.println(" Welcome to SpendTrack!");
         System.out.println(" Type 'add d/<desc> a/<amount> c/<category>' to add an expense.");
+        System.out.println(" Type 'list' to view all expenses.");
         System.out.println(" Type 'bye' to exit.");
         System.out.println(LINE);
     }
@@ -65,6 +66,51 @@ public class Ui {
         System.out.println(LINE);
         System.out.println(" Expense deleted:");
         System.out.println("   " + expense);
+     * Displays all expenses in a formatted table.
+     *
+     * @param expenses the list of expenses to display
+     */
+    public void showExpenseList(ExpenseList expenses) {
+        assert expenses != null : "ExpenseList passed to showExpenseList should not be null";
+
+        System.out.println(LINE);
+        System.out.println(" Your Expenses");
+        System.out.println(LINE);
+
+        if (expenses.size() == 0) {
+            System.out.println(" No expenses recorded yet.");
+            System.out.println(LINE);
+            return;
+        }
+
+        System.out.printf("  %-3s  %-14s %-24s %s%n", "#", "Category", "Description", "Amount");
+        System.out.println(" ---  -------------  --------------------  --------");
+
+        for (int i = 0; i < expenses.size(); i++) {
+            Expense e = expenses.getExpense(i);
+            assert e != null : "Expense at index " + i + " should not be null";
+
+            String category = (e.getCategory() == null || e.getCategory().isBlank())
+                    ? "Uncategorised" : e.getCategory();
+            String description = (e.getDescription() == null || e.getDescription().isBlank())
+                    ? "(no description)" : e.getDescription();
+
+            System.out.printf("  %-3s  %-14s %-24s $%.2f%n",
+                    (i + 1) + ".",
+                    "[" + category + "]",
+                    description,
+                    e.getAmount());
+        }
+
+        System.out.println(LINE);
+        System.out.println(" Total entries: " + expenses.size());
+     /* Displays the total sum of all expenses.
+     *
+     * @param total the total expense amount
+     */
+    public void showTotal(double total) {
+        System.out.println(LINE);
+        System.out.printf(" Total expenses: $%.2f%n", total);
         System.out.println(LINE);
     }
 

@@ -3,6 +3,8 @@ package seedu.duke;
 import seedu.duke.command.AddCommand;
 import seedu.duke.command.Command;
 import seedu.duke.command.DeleteCommand;
+import seedu.duke.command.ListCommand;
+import seedu.duke.command.TotalCommand;
 
 /**
  * Parses user input into commands.
@@ -29,6 +31,10 @@ public class Parser {
             } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
                 throw new SpendTrackException("delete requires a number. Usage: delete <index>");
             }
+        case "list":
+            return new ListCommand();
+        case "total":
+            return new TotalCommand();
         case "bye":
             return new ExitCommand();
         default:
