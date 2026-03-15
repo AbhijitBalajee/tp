@@ -12,6 +12,10 @@ public class ListCommand extends Command {
 
     private static final Logger logger = Logger.getLogger(ListCommand.class.getName());
 
+    static {
+        logger.setUseParentHandlers(false);
+    }
+
     @Override
     public void execute(ExpenseList expenses, Ui ui) {
         assert expenses != null : "ExpenseList should not be null";
