@@ -155,6 +155,23 @@ public class Ui {
     }
 
     /**
+     * Displays all available commands.
+     */
+    public void showHelp() {
+        System.out.println(LINE);
+        System.out.println(" Available commands:");
+        System.out.println("  add d/<desc> a/<amount> c/<category> -- add an expense");
+        System.out.println("  delete <index>                       -- delete an expense");
+        System.out.println("  list                                 -- list all expenses");
+        System.out.println("  total                                -- show total expenses");
+        System.out.println("  budget <amount>                      -- set monthly budget");
+        System.out.println("  remaining                            -- show remaining balance");
+        System.out.println("  help                                 -- show this help message");
+        System.out.println("  bye                                  -- exit the program");
+        System.out.println(LINE);
+    }
+
+    /**
      * Displays an error message to the user.
      *
      * @param message the error message to display

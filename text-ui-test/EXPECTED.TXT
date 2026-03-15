@@ -48,5 +48,16 @@ ____________________________________________________________
  Error: budget requires a number. Usage: budget <amount>
 ____________________________________________________________
 > ____________________________________________________________
+ Available commands:
+  add d/<desc> a/<amount> c/<category> -- add an expense
+  delete <index>                       -- delete an expense
+  list                                 -- list all expenses
+  total                                -- show total expenses
+  budget <amount>                      -- set monthly budget
+  remaining                            -- show remaining balance
+  help                                 -- show this help message
+  bye                                  -- exit the program
+____________________________________________________________
+> ____________________________________________________________
  Goodbye! Stay on budget!
 ____________________________________________________________
