@@ -1,2 +1,4 @@
 add d/Coffee a/4.50 c/Food
+add d/Bus a/2.00 c/Transport
+total
 bye

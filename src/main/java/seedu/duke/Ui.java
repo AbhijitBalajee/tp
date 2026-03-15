@@ -57,6 +57,17 @@ public class Ui {
     }
 
     /**
+     * Displays the total sum of all expenses.
+     *
+     * @param total the total expense amount
+     */
+    public void showTotal(double total) {
+        System.out.println(LINE);
+        System.out.printf(" Total expenses: $%.2f%n", total);
+        System.out.println(LINE);
+    }
+
+    /**
      * Displays an error message to the user.
      *
      * @param message the error message to display

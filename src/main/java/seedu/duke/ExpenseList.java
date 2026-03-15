@@ -52,4 +52,17 @@ public class ExpenseList {
     public ArrayList<Expense> getExpenses() {
         return expenses;
     }
+
+    /**
+     * Returns the total sum of all expense amounts.
+     *
+     * @return the total amount
+     */
+    public double getTotal() {
+        double total = 0;
+        for (Expense expense : expenses) {
+            total += expense.getAmount();
+        }
+        return total;
+    }
 }

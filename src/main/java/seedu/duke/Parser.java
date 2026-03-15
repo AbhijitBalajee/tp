@@ -2,6 +2,7 @@ package seedu.duke;
 
 import seedu.duke.command.AddCommand;
 import seedu.duke.command.Command;
+import seedu.duke.command.TotalCommand;
 
 /**
  * Parses user input into commands.
@@ -22,6 +23,8 @@ public class Parser {
         switch (commandWord) {
         case "add":
             return parseAddCommand(parts.length > 1 ? parts[1] : "");
+        case "total":
+            return new TotalCommand();
         case "bye":
             return new ExitCommand();
         default:
