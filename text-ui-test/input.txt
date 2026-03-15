@@ -7,4 +7,5 @@ list
 budget 50
 budget -1
 budget abc
+help
 bye

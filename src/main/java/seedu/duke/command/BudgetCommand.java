@@ -14,6 +14,10 @@ public class BudgetCommand extends Command {
     private static final Logger logger = Logger.getLogger(BudgetCommand.class.getName());
     private static final double MAX_BUDGET = 1_000_000.00;
 
+    static {
+        logger.setUseParentHandlers(false);
+    }
+
     private final double budgetAmount;
 
     /**
