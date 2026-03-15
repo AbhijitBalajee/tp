@@ -1,6 +1,7 @@
 package seedu.duke;
 
 import seedu.duke.command.AddCommand;
+import seedu.duke.command.BudgetCommand;
 import seedu.duke.command.Command;
 import seedu.duke.command.DeleteCommand;
 import seedu.duke.command.ListCommand;
@@ -16,6 +17,7 @@ public class Parser {
      *
      * @param input the raw user input string
      * @return the parsed Command
+     * @throws SpendTrackException if input is invalid
      */
     public static Command parse(String input) throws SpendTrackException {
         String trimmed = input.trim();
@@ -31,10 +33,12 @@ public class Parser {
             } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
                 throw new SpendTrackException("delete requires a number. Usage: delete <index>");
             }
-        case "list":
-            return new ListCommand();
         case "total":
             return new TotalCommand();
+        case "list":
+            return new ListCommand();
+        case "budget":
+            return parseBudgetCommand(parts.length > 1 ? parts[1] : "");
         case "bye":
             return new ExitCommand();
         default:
@@ -60,5 +64,14 @@ public class Parser {
         }
 
         return new AddCommand(description, amount, category);
+    }
+
+    private static Command parseBudgetCommand(String args) throws SpendTrackException {
+        try {
+            double amount = Double.parseDouble(args.trim());
+            return new BudgetCommand(amount);
+        } catch (NumberFormatException e) {
+            throw new SpendTrackException("budget requires a number. Usage: budget <amount>");
+        }
     }
 }
