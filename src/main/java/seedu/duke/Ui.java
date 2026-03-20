@@ -121,6 +121,8 @@ public class Ui {
      * @param total the total expense amount
      */
     public void showTotal(double total) {
+        assert Double.isFinite(total) : "Total shown to the user should be a finite number";
+
         System.out.println(LINE);
         System.out.printf(" Total expenses: $%.2f%n", total);
         System.out.println(LINE);
