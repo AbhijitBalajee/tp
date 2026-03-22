@@ -56,6 +56,16 @@ ____________________________________________________________
  Error: budget requires a number. Usage: budget <amount>
 ____________________________________________________________
 > ____________________________________________________________
+ ===== Expense #1 =====
+ Description : MRT top-up
+ Amount      : $10.00
+ Category    : Transport
+ Date        : 2026-03-22
+____________________________________________________________
+> ____________________________________________________________
+ Error: Index 99 is out of range. There are 2 expense(s).
+____________________________________________________________
+> ____________________________________________________________
  Available commands (alias in brackets):
   add (a)    d/<desc> a/<amt> c/<cat> [date/<YYYY-MM-DD>] -- add expense
   delete (d) <index>                                     -- delete expense

@@ -9,5 +9,7 @@ budget 50
 remaining
 budget -1
 budget abc
+find 1
+find 99
 help
 bye

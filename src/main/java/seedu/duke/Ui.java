@@ -221,6 +221,23 @@ public class Ui {
     }
 
     /**
+     * Displays full details of a single expense.
+     *
+     * @param index the 1-based index of the expense
+     * @param expense the expense to display
+     */
+    public void showExpenseDetail(int index, Expense expense) {
+        assert expense != null : "Expense passed to showExpenseDetail should not be null";
+        System.out.println(LINE);
+        System.out.println(" ===== Expense #" + index + " =====");
+        System.out.printf(" Description : %s%n", expense.getDescription());
+        System.out.printf(" Amount      : $%.2f%n", expense.getAmount());
+        System.out.printf(" Category    : %s%n", expense.getCategory());
+        System.out.printf(" Date        : %s%n", expense.getDate());
+        System.out.println(LINE);
+    }
+
+    /**
      * Displays an error message to the user.
      *
      * @param message the error message to display

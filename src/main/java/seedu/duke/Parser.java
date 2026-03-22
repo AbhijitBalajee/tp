@@ -10,6 +10,7 @@ import seedu.duke.command.AddCommand;
 import seedu.duke.command.BudgetCommand;
 import seedu.duke.command.Command;
 import seedu.duke.command.DeleteCommand;
+import seedu.duke.command.FindCommand;
 import seedu.duke.command.HelpCommand;
 import seedu.duke.command.ListCommand;
 import seedu.duke.command.RemainingCommand;
@@ -60,6 +61,14 @@ public class Parser {
                 return new DeleteCommand(Integer.parseInt(parts[1].trim()));
             } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
                 throw new SpendTrackException("delete requires a number. Usage: delete <index>");
+            }
+        case "find":
+            try {
+                return new FindCommand(Integer.parseInt(parts[1].trim()));
+            } catch (NumberFormatException e) {
+                throw new SpendTrackException("Index must be a whole number. Usage: find <index>");
+            } catch (ArrayIndexOutOfBoundsException e) {
+                throw new SpendTrackException("find requires an index. Usage: find <index>");
             }
         case "total":
             return new TotalCommand();
