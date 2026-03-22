@@ -2,6 +2,8 @@ package seedu.duke;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import seedu.duke.command.AddCommand;
@@ -21,9 +23,16 @@ public class Parser {
 
     private static final Logger logger = Logger.getLogger(Parser.class.getName());
     private static final String TOKEN_SPLIT_REGEX = " (?=(?:d|a|c|date)/)";
+    private static final Map<String, String> ALIASES = new HashMap<>();
 
     static {
         logger.setUseParentHandlers(false);
+        ALIASES.put("a", "add");
+        ALIASES.put("d", "delete");
+        ALIASES.put("l", "list");
+        ALIASES.put("s", "summary");
+        ALIASES.put("b", "budget");
+        ALIASES.put("h", "help");
     }
 
     /**
@@ -39,6 +48,7 @@ public class Parser {
         String trimmed = input.trim();
         String[] parts = trimmed.split(" ", 2);
         String commandWord = parts[0].toLowerCase();
+        commandWord = ALIASES.getOrDefault(commandWord, commandWord);
 
         logger.info("Parsing command: " + commandWord);
 

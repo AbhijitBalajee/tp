@@ -184,15 +184,16 @@ public class Ui {
      */
     public void showHelp() {
         System.out.println(LINE);
-        System.out.println(" Available commands:");
-        System.out.println("  add d/<desc> a/<amount> c/<category> [date/<YYYY-MM-DD>] -- add an expense");
-        System.out.println("  delete <index>                       -- delete an expense");
-        System.out.println("  list                                 -- list all expenses");
-        System.out.println("  total                                -- show total expenses");
-        System.out.println("  budget <amount>                      -- set monthly budget");
-        System.out.println("  remaining                            -- show remaining balance");
-        System.out.println("  help                                 -- show this help message");
-        System.out.println("  bye                                  -- exit the program");
+        System.out.println(" Available commands (alias in brackets):");
+        System.out.println("  add (a)    d/<desc> a/<amt> c/<cat> [date/<YYYY-MM-DD>] -- add expense");
+        System.out.println("  delete (d) <index>                                     -- delete expense");
+        System.out.println("  list (l)                                               -- list all");
+        System.out.println("  total                                                  -- show total");
+        System.out.println("  summary (s)                                            -- category breakdown");
+        System.out.println("  budget (b) <amount>                                    -- set budget");
+        System.out.println("  remaining                                              -- show remaining");
+        System.out.println("  help (h)                                               -- show this help");
+        System.out.println("  bye                                                    -- exit");
         System.out.println(LINE);
     }
 
