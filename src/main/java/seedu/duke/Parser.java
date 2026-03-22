@@ -1,5 +1,7 @@
 package seedu.duke;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.logging.Logger;
 
 import seedu.duke.command.AddCommand;
@@ -17,7 +19,7 @@ import seedu.duke.command.TotalCommand;
 public class Parser {
 
     private static final Logger logger = Logger.getLogger(Parser.class.getName());
-    private static final String TOKEN_SPLIT_REGEX = " (?=[dac]/)";
+    private static final String TOKEN_SPLIT_REGEX = " (?=(?:d|a|c|date)/)";
 
     static {
         logger.setUseParentHandlers(false);
@@ -66,15 +68,18 @@ public class Parser {
         }
     }
 
-    private static AddCommand parseAddCommand(String args) {
+    private static AddCommand parseAddCommand(String args) throws SpendTrackException {
         String description = "";
         double amount = 0.0;
         String category = "Uncategorised";
+        LocalDate date = LocalDate.now();
 
         String[] tokens = args.split(TOKEN_SPLIT_REGEX);
         for (String token : tokens) {
             token = token.trim();
-            if (token.startsWith("d/")) {
+            if (token.startsWith("date/")) {
+                date = parseDate(token.substring(5).trim());
+            } else if (token.startsWith("d/")) {
                 description = token.substring(2).trim();
             } else if (token.startsWith("a/")) {
                 amount = Double.parseDouble(token.substring(2).trim());
@@ -83,7 +88,15 @@ public class Parser {
             }
         }
 
-        return new AddCommand(description, amount, category);
+        return new AddCommand(description, amount, category, date);
+    }
+
+    private static LocalDate parseDate(String dateString) throws SpendTrackException {
+        try {
+            return LocalDate.parse(dateString);
+        } catch (DateTimeParseException e) {
+            throw new SpendTrackException("Invalid date format. Please use YYYY-MM-DD.");
+        }
     }
 
     private static Command parseBudgetCommand(String args) throws SpendTrackException {

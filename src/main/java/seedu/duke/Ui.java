@@ -21,7 +21,7 @@ public class Ui {
     public void showWelcome() {
         System.out.println(LINE);
         System.out.println(" Welcome to SpendTrack!");
-        System.out.println(" Type 'add d/<desc> a/<amount> c/<category>' to add an expense.");
+        System.out.println(" Type 'add d/<desc> a/<amount> c/<category> [date/<YYYY-MM-DD>]' to add an expense.");
         System.out.println(" Type 'list' to view all expenses.");
         System.out.println(" Type 'delete <index>' to delete an expense.");
         System.out.println(" Type 'total' to view total expenses.");
@@ -91,8 +91,9 @@ public class Ui {
             return;
         }
 
-        System.out.printf("  %-3s  %-14s %-24s %s%n", "#", "Category", "Description", "Amount");
-        System.out.println(" ---  -------------  --------------------  --------");
+        System.out.printf("  %-3s  %-14s %-20s %-12s %s%n",
+                "#", "Category", "Description", "Date", "Amount");
+        System.out.println(" ---  -------------  ------------------  ----------  --------");
 
         for (int i = 0; i < expenses.size(); i++) {
             Expense e = expenses.getExpense(i);
@@ -102,11 +103,13 @@ public class Ui {
                     ? "Uncategorised" : e.getCategory();
             String description = (e.getDescription() == null || e.getDescription().isBlank())
                     ? "(no description)" : e.getDescription();
+            String date = (e.getDate() != null) ? e.getDate().toString() : "-";
 
-            System.out.printf("  %-3s  %-14s %-24s $%.2f%n",
+            System.out.printf("  %-3s  %-14s %-20s %-12s $%.2f%n",
                     (i + 1) + ".",
                     "[" + category + "]",
                     description,
+                    date,
                     e.getAmount());
         }
 
@@ -180,7 +183,7 @@ public class Ui {
     public void showHelp() {
         System.out.println(LINE);
         System.out.println(" Available commands:");
-        System.out.println("  add d/<desc> a/<amount> c/<category> -- add an expense");
+        System.out.println("  add d/<desc> a/<amount> c/<category> [date/<YYYY-MM-DD>] -- add an expense");
         System.out.println("  delete <index>                       -- delete an expense");
         System.out.println("  list                                 -- list all expenses");
         System.out.println("  total                                -- show total expenses");

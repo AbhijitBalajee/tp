@@ -1,5 +1,6 @@
 package seedu.duke.command;
 
+import java.time.LocalDate;
 import java.util.logging.Logger;
 
 import seedu.duke.Expense;
@@ -21,6 +22,7 @@ public class AddCommand extends Command {
     private String description;
     private double amount;
     private String category;
+    private LocalDate date;
 
     /**
      * Constructs an AddCommand with the given expense details.
@@ -28,11 +30,13 @@ public class AddCommand extends Command {
      * @param description the description of the expense
      * @param amount the amount spent
      * @param category the category of the expense
+     * @param date the date of the expense
      */
-    public AddCommand(String description, double amount, String category) {
+    public AddCommand(String description, double amount, String category, LocalDate date) {
         this.description = description;
         this.amount = amount;
         this.category = category;
+        this.date = date;
     }
 
     /**
@@ -48,8 +52,9 @@ public class AddCommand extends Command {
         assert ui != null : "Ui should not be null";
         assert amount >= 0 : "Amount should not be negative";
 
-        logger.info("Adding expense: " + description + ", amount: " + amount + ", category: " + category);
-        Expense expense = new Expense(description, amount, category);
+        logger.info("Adding expense: " + description + ", amount: " + amount
+                + ", category: " + category + ", date: " + date);
+        Expense expense = new Expense(description, amount, category, date);
         expenses.addExpense(expense);
         ui.showAddSuccess(expense);
         logger.info("Expense added successfully. Total expenses: " + expenses.size());

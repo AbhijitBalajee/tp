@@ -1,5 +1,7 @@
 package seedu.duke;
 
+import java.time.LocalDate;
+
 import org.junit.jupiter.api.Test;
 import seedu.duke.command.ListCommand;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -23,8 +25,8 @@ public class ListCommandTest {
     @Test
     public void listCommand_executesWithExpenses() {
         ExpenseList expenses = new ExpenseList();
-        expenses.addExpense(new Expense("Lunch", 5.50, "Food"));
-        expenses.addExpense(new Expense("Bus", 1.20, "Transport"));
+        expenses.addExpense(new Expense("Lunch", 5.50, "Food", LocalDate.now()));
+        expenses.addExpense(new Expense("Bus", 1.20, "Transport", LocalDate.now()));
         ListCommand cmd = new ListCommand();
         cmd.execute(expenses, new Ui());
     }

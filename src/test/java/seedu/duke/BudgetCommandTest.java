@@ -1,5 +1,7 @@
 package seedu.duke;
 
+import java.time.LocalDate;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import seedu.duke.command.BudgetCommand;
@@ -52,7 +54,7 @@ public class BudgetCommandTest {
 
     @Test
     public void budgetCommand_withExistingExpenses_setsCorrectly() throws SpendTrackException {
-        expenses.addExpense(new Expense("Lunch", 50.00, "Food"));
+        expenses.addExpense(new Expense("Lunch", 50.00, "Food", LocalDate.now()));
         BudgetCommand cmd = new BudgetCommand(30.00);
         cmd.execute(expenses, ui);
         assertEquals(30.00, expenses.getBudget(), 0.001);

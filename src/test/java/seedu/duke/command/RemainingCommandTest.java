@@ -2,6 +2,8 @@ package seedu.duke.command;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import java.time.LocalDate;
+
 import seedu.duke.Expense;
 import seedu.duke.ExpenseList;
 import seedu.duke.SpendTrackException;
@@ -35,7 +37,7 @@ public class RemainingCommandTest {
     @Test
     public void remainingCommand_withBudgetAndExpenses_executesWithoutError() throws SpendTrackException {
         expenses.setBudget(100.00);
-        expenses.addExpense(new Expense("Lunch", 10.00, "Food"));
+        expenses.addExpense(new Expense("Lunch", 10.00, "Food", LocalDate.now()));
         new RemainingCommand().execute(expenses, ui);
     }
 }
