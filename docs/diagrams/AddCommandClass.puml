@@ -1,0 +1,49 @@
+@startuml
+!define BGCOLOR white
+skinparam backgroundColor BGCOLOR
+skinparam classAttributeIconSize 0
+
+class Parser {
+    - {static} TOKEN_SPLIT_REGEX : String
+    + {static} parse(input : String) : Command
+    - {static} parseAddCommand(args : String) : AddCommand
+}
+
+abstract class Command {
+    + {abstract} execute(expenses : ExpenseList, ui : Ui)
+    + isExit() : boolean
+}
+
+class AddCommand {
+    - description : String
+    - amount : double
+    - category : String
+    + execute(expenses : ExpenseList, ui : Ui)
+}
+
+class Expense {
+    - description : String
+    - amount : double
+    - category : String
+    + getDescription() : String
+    + getAmount() : double
+    + getCategory() : String
+}
+
+class ExpenseList {
+    - expenses : ArrayList<Expense>
+    + addExpense(e : Expense)
+    + size() : int
+}
+
+class Ui {
+    + showAddSuccess(e : Expense)
+}
+
+Command <|-- AddCommand
+Parser ..> AddCommand : creates
+AddCommand ..> Expense : creates
+AddCommand --> ExpenseList : adds to
+AddCommand --> Ui : displays via
+ExpenseList o-- Expense : stores
+@enduml

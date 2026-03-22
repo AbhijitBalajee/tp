@@ -1,0 +1,42 @@
+@startuml
+!define BGCOLOR white
+skinparam backgroundColor BGCOLOR
+skinparam sequenceMessageAlign center
+
+actor User
+participant ":SpendTrack" as ST
+participant "Parser" as P
+participant ":AddCommand" as AC
+participant ":Expense" as E
+participant ":ExpenseList" as EL
+participant ":Ui" as UI
+
+User -> ST : "add d/Coffee a/3.50 c/Food"
+activate ST
+
+ST -> P : parse(input)
+activate P
+P -> P : parseAddCommand(args)
+note right of P
+  Splits args by regex
+  " (?=[dac]/)"
+  to extract d/, a/, c/ tokens
+end note
+P --> ST : :AddCommand("Coffee", 3.50, "Food")
+deactivate P
+
+ST -> AC : execute(expenses, ui)
+activate AC
+AC -> E ** : new Expense("Coffee", 3.50, "Food")
+AC -> EL : addExpense(expense)
+activate EL
+EL --> AC
+deactivate EL
+AC -> UI : showAddSuccess(expense)
+activate UI
+UI --> User : "Added: Coffee | $3.50 | Food"
+deactivate UI
+deactivate AC
+
+deactivate ST
+@enduml
