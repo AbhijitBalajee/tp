@@ -56,15 +56,16 @@ ____________________________________________________________
  Error: budget requires a number. Usage: budget <amount>
 ____________________________________________________________
 > ____________________________________________________________
- Available commands:
-  add d/<desc> a/<amount> c/<category> [date/<YYYY-MM-DD>] -- add an expense
-  delete <index>                       -- delete an expense
-  list                                 -- list all expenses
-  total                                -- show total expenses
-  budget <amount>                      -- set monthly budget
-  remaining                            -- show remaining balance
-  help                                 -- show this help message
-  bye                                  -- exit the program
+ Available commands (alias in brackets):
+  add (a)    d/<desc> a/<amt> c/<cat> [date/<YYYY-MM-DD>] -- add expense
+  delete (d) <index>                                     -- delete expense
+  list (l)                                               -- list all
+  total                                                  -- show total
+  summary (s)                                            -- category breakdown
+  budget (b) <amount>                                    -- set budget
+  remaining                                              -- show remaining
+  help (h)                                               -- show this help
+  bye                                                    -- exit
 ____________________________________________________________
 > ____________________________________________________________
  Goodbye! Stay on budget!
