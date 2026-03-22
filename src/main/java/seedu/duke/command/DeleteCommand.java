@@ -18,7 +18,7 @@ public class DeleteCommand extends Command {
         logger.setUseParentHandlers(false);
     }
 
-    private int index;
+    private final int index;
 
     /**
      * Constructs a DeleteCommand for the given 1-based index.
@@ -50,5 +50,10 @@ public class DeleteCommand extends Command {
         Expense removed = expenses.deleteExpense(index - 1);
         logger.info("Expense deleted: " + removed);
         ui.showDeleteSuccess(removed);
+    }
+
+    @Override
+    public boolean mutatesData() {
+        return true;
     }
 }

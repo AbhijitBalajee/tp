@@ -25,4 +25,14 @@ public abstract class Command {
     public boolean isExit() {
         return false;
     }
+
+    /**
+     * Returns true if this command mutates the expense list or budget.
+     * Override in commands that add, delete, or modify data.
+     *
+     * @return false by default
+     */
+    public boolean mutatesData() {
+        return false;
+    }
 }

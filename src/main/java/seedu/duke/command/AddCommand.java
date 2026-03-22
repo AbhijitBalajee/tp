@@ -19,10 +19,10 @@ public class AddCommand extends Command {
         logger.setUseParentHandlers(false);
     }
 
-    private String description;
-    private double amount;
-    private String category;
-    private LocalDate date;
+    private final String description;
+    private final double amount;
+    private final String category;
+    private final LocalDate date;
 
     /**
      * Constructs an AddCommand with the given expense details.
@@ -58,5 +58,10 @@ public class AddCommand extends Command {
         expenses.addExpense(expense);
         ui.showAddSuccess(expense);
         logger.info("Expense added successfully. Total expenses: " + expenses.size());
+    }
+
+    @Override
+    public boolean mutatesData() {
+        return true;
     }
 }

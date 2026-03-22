@@ -68,4 +68,9 @@ public class BudgetCommand extends Command {
             throw new SpendTrackException("Budget cannot exceed $1,000,000.00.");
         }
     }
+
+    @Override
+    public boolean mutatesData() {
+        return true;
+    }
 }

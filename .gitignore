@@ -20,3 +20,8 @@ bin/
 text-ui-test/EXPECTED-UNIX.TXT
 
 docs/reference/
+
+# SpendTrack data files
+/data/
+
+
