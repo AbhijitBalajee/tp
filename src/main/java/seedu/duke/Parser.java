@@ -10,6 +10,7 @@ import seedu.duke.command.AddCommand;
 import seedu.duke.command.BudgetCommand;
 import seedu.duke.command.Command;
 import seedu.duke.command.DeleteCommand;
+import seedu.duke.command.FilterCommand;
 import seedu.duke.command.FindCommand;
 import seedu.duke.command.HelpCommand;
 import seedu.duke.command.ListCommand;
@@ -62,6 +63,8 @@ public class Parser {
             } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
                 throw new SpendTrackException("delete requires a number. Usage: delete <index>");
             }
+        case "filter":
+            return parseFilterCommand(parts.length > 1 ? parts[1] : "");
         case "find":
             try {
                 return new FindCommand(Integer.parseInt(parts[1].trim()));
@@ -119,6 +122,30 @@ public class Parser {
         } catch (DateTimeParseException e) {
             throw new SpendTrackException("Invalid date format. Please use YYYY-MM-DD.");
         }
+    }
+
+    private static Command parseFilterCommand(String args) throws SpendTrackException {
+        LocalDate from = null;
+        LocalDate to = null;
+
+        String[] tokens = args.split(" ");
+        for (String token : tokens) {
+            token = token.trim();
+            if (token.startsWith("from/")) {
+                from = parseDate(token.substring(5).trim());
+            } else if (token.startsWith("to/")) {
+                to = parseDate(token.substring(3).trim());
+            }
+        }
+
+        if (from == null || to == null) {
+            throw new SpendTrackException("Usage: filter from/YYYY-MM-DD to/YYYY-MM-DD");
+        }
+        if (from.isAfter(to)) {
+            throw new SpendTrackException("Start date must be before end date.");
+        }
+
+        return new FilterCommand(from, to);
     }
 
     private static Command parseBudgetCommand(String args) throws SpendTrackException {

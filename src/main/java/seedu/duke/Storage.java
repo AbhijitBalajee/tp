@@ -92,7 +92,10 @@ public class Storage {
                 }
                 if (readingBudget) {
                     try {
-                        expenses.setBudget(Double.parseDouble(line));
+                        double budget = Double.parseDouble(line);
+                        if (budget > 0) {
+                            expenses.setBudget(budget);
+                        }
                     } catch (NumberFormatException e) {
                         System.out.println("Warning: could not parse budget value: " + line);
                     }

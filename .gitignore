@@ -23,5 +23,6 @@ docs/reference/
 
 # SpendTrack data files
 /data/
+text-ui-test/data
 
 

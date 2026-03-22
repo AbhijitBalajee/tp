@@ -1,5 +1,6 @@
 package seedu.duke;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Scanner;
@@ -234,6 +235,43 @@ public class Ui {
         System.out.printf(" Amount      : $%.2f%n", expense.getAmount());
         System.out.printf(" Category    : %s%n", expense.getCategory());
         System.out.printf(" Date        : %s%n", expense.getDate());
+        System.out.println(LINE);
+    }
+
+    /**
+     * Displays expenses filtered by date range.
+     *
+     * @param filtered the list of matching expenses
+     * @param from the start date of the filter range
+     * @param to the end date of the filter range
+     */
+    public void showFilteredExpenses(ArrayList<Expense> filtered, LocalDate from, LocalDate to) {
+        System.out.println(LINE);
+        System.out.println(" Expenses from " + from + " to " + to);
+        System.out.println(LINE);
+
+        if (filtered.isEmpty()) {
+            System.out.println(" No expenses found in the given date range.");
+            System.out.println(LINE);
+            return;
+        }
+
+        System.out.printf("  %-3s  %-14s %-20s %-12s %s%n",
+                "#", "Category", "Description", "Date", "Amount");
+        System.out.println(" ---  -------------  ------------------  ----------  --------");
+
+        for (int i = 0; i < filtered.size(); i++) {
+            Expense e = filtered.get(i);
+            System.out.printf("  %-3s  %-14s %-20s %-12s $%.2f%n",
+                    (i + 1) + ".",
+                    "[" + e.getCategory() + "]",
+                    e.getDescription(),
+                    e.getDate(),
+                    e.getAmount());
+        }
+
+        System.out.println(LINE);
+        System.out.println(" Total entries: " + filtered.size());
         System.out.println(LINE);
     }
 
