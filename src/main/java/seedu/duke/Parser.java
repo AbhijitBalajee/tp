@@ -1,7 +1,6 @@
 package seedu.duke;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -103,25 +102,35 @@ public class Parser {
         for (String token : tokens) {
             token = token.trim();
             if (token.startsWith("date/")) {
-                date = parseDate(token.substring(5).trim());
+                date = DateParser.parse(token.substring(5).trim());
             } else if (token.startsWith("d/")) {
                 description = token.substring(2).trim();
             } else if (token.startsWith("a/")) {
                 amount = Double.parseDouble(token.substring(2).trim());
             } else if (token.startsWith("c/")) {
-                category = token.substring(2).trim();
+                category = normalizeCategory(token.substring(2).trim());
             }
         }
 
         return new AddCommand(description, amount, category, date);
     }
 
-    private static LocalDate parseDate(String dateString) throws SpendTrackException {
-        try {
-            return LocalDate.parse(dateString);
-        } catch (DateTimeParseException e) {
-            throw new SpendTrackException("Invalid date format. Please use YYYY-MM-DD.");
+    private static String normalizeCategory(String category) {
+        if (category.isEmpty()) {
+            return "Uncategorised";
         }
+        String[] words = category.trim().split("\\s+");
+        StringBuilder normalized = new StringBuilder();
+        for (int i = 0; i < words.length; i++) {
+            if (i > 0) {
+                normalized.append(' ');
+            }
+            normalized.append(Character.toUpperCase(words[i].charAt(0)));
+            if (words[i].length() > 1) {
+                normalized.append(words[i].substring(1).toLowerCase());
+            }
+        }
+        return normalized.toString();
     }
 
     private static Command parseFilterCommand(String args) throws SpendTrackException {
@@ -132,9 +141,9 @@ public class Parser {
         for (String token : tokens) {
             token = token.trim();
             if (token.startsWith("from/")) {
-                from = parseDate(token.substring(5).trim());
+                from = DateParser.parse(token.substring(5).trim());
             } else if (token.startsWith("to/")) {
-                to = parseDate(token.substring(3).trim());
+                to = DateParser.parse(token.substring(3).trim());
             }
         }
 
