@@ -1,5 +1,7 @@
 package seedu.duke;
 
+import java.util.ArrayList;
+import java.util.Map;
 import java.util.Scanner;
 
 
@@ -191,6 +193,29 @@ public class Ui {
         System.out.println("  remaining                            -- show remaining balance");
         System.out.println("  help                                 -- show this help message");
         System.out.println("  bye                                  -- exit the program");
+        System.out.println(LINE);
+    }
+
+    /**
+     * Displays a spending summary grouped by category.
+     *
+     * @param sortedCategories the categories sorted by total descending
+     * @param grandTotal the total of all expenses
+     */
+    public void showSummary(ArrayList<Map.Entry<String, Double>> sortedCategories,
+            double grandTotal) {
+        System.out.println(LINE);
+        System.out.println(" ===== Spending Summary =====");
+
+        for (Map.Entry<String, Double> entry : sortedCategories) {
+            String category = entry.getKey();
+            double amount = entry.getValue();
+            int percentage = (int) Math.round(amount / grandTotal * 100);
+            System.out.printf(" %-16s: $%.2f  (%d%%)%n", category, amount, percentage);
+        }
+
+        System.out.println(" ----------------------------");
+        System.out.printf(" %-16s: $%.2f%n", "Total", grandTotal);
         System.out.println(LINE);
     }
 
