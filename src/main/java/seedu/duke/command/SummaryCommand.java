@@ -41,6 +41,8 @@ public class SummaryCommand extends Command {
         }
 
         Map<String, Double> categoryTotals = new LinkedHashMap<>();
+        Map<String, Integer> categoryCounts = new LinkedHashMap<>();
+        Map<String, Double> categoryMax = new LinkedHashMap<>();
         double grandTotal = 0.0;
 
         for (Expense expense : allExpenses) {
@@ -48,13 +50,17 @@ public class SummaryCommand extends Command {
             double amount = expense.getAmount();
             categoryTotals.put(category,
                     categoryTotals.getOrDefault(category, 0.0) + amount);
+            categoryCounts.put(category,
+                    categoryCounts.getOrDefault(category, 0) + 1);
+            categoryMax.put(category,
+                    Math.max(categoryMax.getOrDefault(category, 0.0), amount));
             grandTotal += amount;
         }
 
         ArrayList<Map.Entry<String, Double>> sorted = new ArrayList<>(categoryTotals.entrySet());
         sorted.sort((a, b) -> Double.compare(b.getValue(), a.getValue()));
 
-        ui.showSummary(sorted, grandTotal);
+        ui.showEnhancedSummary(sorted, categoryCounts, categoryMax, grandTotal);
         logger.info("Summary displayed with " + sorted.size() + " categories");
     }
 }

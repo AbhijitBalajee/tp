@@ -221,6 +221,30 @@ public class Ui {
         System.out.println(LINE);
     }
 
+    public void showEnhancedSummary(ArrayList<Map.Entry<String, Double>> sortedCategories,
+            Map<String, Integer> categoryCounts,
+            Map<String, Double> categoryMax,
+            double grandTotal) {
+        System.out.println(LINE);
+        System.out.println(" ===== Spending Summary =====");
+
+        for (Map.Entry<String, Double> entry : sortedCategories) {
+            String category = entry.getKey();
+            double amount = entry.getValue();
+            int count = categoryCounts.getOrDefault(category, 0);
+            double max = categoryMax.getOrDefault(category, 0.0);
+            double avg = (count > 0) ? amount / count : 0.0;
+            int percentage = (int) Math.round(amount / grandTotal * 100);
+            String txnLabel = (count == 1) ? "txn" : "txns";
+            System.out.printf(" %-16s: $%-8.2f (%d%%)  | %d %s  | avg $%.2f  | max $%.2f%n",
+                    category, amount, percentage, count, txnLabel, avg, max);
+        }
+
+        System.out.println(" ----------------------------");
+        System.out.printf(" %-16s: $%.2f%n", "Total", grandTotal);
+        System.out.println(LINE);
+    }
+
     /**
      * Displays full details of a single expense.
      *
