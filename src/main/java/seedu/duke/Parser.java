@@ -16,6 +16,7 @@ import seedu.duke.command.ListCommand;
 import seedu.duke.command.RemainingCommand;
 import seedu.duke.command.SummaryCommand;
 import seedu.duke.command.TotalCommand;
+import seedu.duke.command.EditCommand;
 
 /**
  * Parses user input into commands.
@@ -62,6 +63,8 @@ public class Parser {
             } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
                 throw new SpendTrackException("delete requires a number. Usage: delete <index>");
             }
+        case "edit":
+            return parseEditCommand(parts.length > 1 ? parts[1] : "");
         case "filter":
             return parseFilterCommand(parts.length > 1 ? parts[1] : "");
         case "find":
@@ -105,14 +108,99 @@ public class Parser {
                 date = DateParser.parse(token.substring(5).trim());
             } else if (token.startsWith("d/")) {
                 description = token.substring(2).trim();
+                if (description.isEmpty()) {
+                    throw new SpendTrackException("Description cannot be empty. "
+                            + "Please provide a valid description after d/");
+                }
             } else if (token.startsWith("a/")) {
-                amount = Double.parseDouble(token.substring(2).trim());
+                try {
+                    amount = Double.parseDouble(token.substring(2).trim());
+                } catch (NumberFormatException e) {
+                    throw new SpendTrackException("Amount must be a number. Usage: a/<amount>");
+                }
+                if (amount <= 0) {
+                    throw new SpendTrackException("Amount must be a positive number. Usage: a/<amount>");
+                }
             } else if (token.startsWith("c/")) {
                 category = normalizeCategory(token.substring(2).trim());
             }
         }
 
         return new AddCommand(description, amount, category, date);
+    }
+
+    private static Command parseEditCommand(String args) throws SpendTrackException {
+        String[] parts = args.trim().split(" ", 2);
+
+        int index;
+        try {
+            index = Integer.parseInt(parts[0].trim());
+        } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
+            throw new SpendTrackException("edit requires an index. "
+                    + "Usage: edit <index> [d/<desc>] [a/<amount>] [c/<category>] [date/<YYYY-MM-DD>]");
+        }
+
+        String remaining = parts.length > 1 ? parts[1].trim() : "";
+        String newDescription = null;
+        Double newAmount = null;
+        String newCategory = null;
+        LocalDate newDate = null;
+
+        // Duplicate tracking
+        boolean seenDescription = false;
+        boolean seenAmount = false;
+        boolean seenCategory = false;
+        boolean seenDate = false;
+
+        String[] tokens = remaining.split(TOKEN_SPLIT_REGEX);
+        for (String token : tokens) {
+            token = token.trim();
+            if (token.startsWith("date/")) {
+                if (seenDate) {
+                    throw new SpendTrackException("Duplicate 'date/' detected. "
+                            + "Please provide only one date.");
+                }
+                seenDate = true;
+                newDate = DateParser.parse(token.substring(5).trim());
+
+            } else if (token.startsWith("d/")) {
+                if (seenDescription) {
+                    throw new SpendTrackException("Duplicate 'd/' detected. "
+                            + "Please provide only one description.");
+                }
+                seenDescription = true;
+                newDescription = token.substring(2).trim();
+                if (newDescription.isEmpty()) {
+                    throw new SpendTrackException("Description cannot be empty. "
+                            + "Please provide a valid description after d/");
+                }
+
+            } else if (token.startsWith("a/")) {
+                if (seenAmount) {
+                    throw new SpendTrackException("Duplicate 'a/' detected. "
+                            + "Please provide only one amount.");
+                }
+                seenAmount = true;
+                try {
+                    newAmount = Double.parseDouble(token.substring(2).trim());
+                } catch (NumberFormatException e) {
+                    throw new SpendTrackException("Amount must be a number. Usage: a/<amount>");
+                }
+                if (newAmount <= 0) {
+                    throw new SpendTrackException("Amount must be a positive number. Usage: a/<amount>");
+                }
+
+            } else if (token.startsWith("c/")) {
+                if (seenCategory) {
+                    throw new SpendTrackException("Duplicate 'c/' detected. "
+                            + "Please provide only one category.");
+                }
+                seenCategory = true;
+                newCategory = normalizeCategory(token.substring(2).trim());
+            }
+        }
+
+        return new EditCommand(index, newDescription, newAmount, newCategory, newDate);
     }
 
     private static String normalizeCategory(String category) {

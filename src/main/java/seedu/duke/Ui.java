@@ -77,6 +77,23 @@ public class Ui {
     }
 
     /**
+     * Displays a success message after an expense is edited.
+     *
+     * @param index   the 1-based index of the edited expense
+     * @param old     the original expense before editing
+     * @param updated the updated expense after editing
+     */
+    public void showEditSuccess(int index, Expense old, Expense updated) {
+        assert old != null : "Old expense should not be null";
+        assert updated != null : "Updated expense should not be null";
+        System.out.println(LINE);
+        System.out.println(" Expense #" + index + " updated:");
+        System.out.println("   Before: " + old);
+        System.out.println("   After:  " + updated);
+        System.out.println(LINE);
+    }
+
+    /**
      * Displays all expenses in a formatted table.
      *
      * @param expenses the list of expenses to display
