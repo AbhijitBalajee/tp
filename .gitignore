@@ -17,7 +17,6 @@ bin/
 .vscode/
 
 /text-ui-test/ACTUAL.TXT
-text-ui-test/EXPECTED-UNIX.TXT
 
 docs/reference/
 
