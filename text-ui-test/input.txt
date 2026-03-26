@@ -1,7 +1,7 @@
-add d/Coffee a/4.50 c/Food
-add d/MRT top-up a/10.00 c/Transport
+add d/Coffee a/4.50 c/Food date/2026-03-26
+add d/MRT top-up a/10.00 c/Transport date/2026-03-26
 delete 1
-add d/Bus a/2.00 c/Transport
+add d/Bus a/2.00 c/Transport date/2026-03-26
 total
 list
 remaining
@@ -11,7 +11,7 @@ budget -1
 budget abc
 find 1
 find 99
-filter from/2026-03-22 to/2026-03-22
+filter from/2026-03-26 to/2026-03-26
 filter from/2026-01-01 to/2026-01-31
 filter from/2026-03-25 to/2026-03-01
 help
