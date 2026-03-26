@@ -34,6 +34,9 @@ public class SpendTrack {
         logger.info("SpendTrack application starting");
         storage.load(expenses);
         ui.showWelcome();
+        if (expenses.size() > 0) {
+            ui.showLastExpense(expenses.getExpense(expenses.size() - 1));
+        }
         boolean isRunning = true;
         while (isRunning) {
             String input = ui.readCommand();

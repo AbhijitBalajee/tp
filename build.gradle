@@ -43,9 +43,9 @@ checkstyle {
 
 run {
     standardInput = System.in
-    jvmArgs '-ea'
+    enableAssertions = true
 }
 
 tasks.withType(Test) {
-    jvmArgs '-ea'
+    enableAssertions = true
 }

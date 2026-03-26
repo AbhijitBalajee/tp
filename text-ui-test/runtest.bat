@@ -12,6 +12,7 @@ for /f "tokens=*" %%a in (
     set jarloc=%%a
 )
 
+if exist ..\..\data\spendtrack.txt del ..\..\data\spendtrack.txt
 java -jar %jarloc% < ..\..\text-ui-test\input.txt > ..\..\text-ui-test\ACTUAL.TXT
 
 cd ..\..\text-ui-test

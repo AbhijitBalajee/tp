@@ -12,6 +12,10 @@ import seedu.duke.Ui;
 public class TotalCommand extends Command {
     private static final Logger logger = Logger.getLogger(TotalCommand.class.getName());
 
+    static {
+        logger.setUseParentHandlers(false);
+    }
+
     @Override
     public void execute(ExpenseList expenses, Ui ui) {
         assert expenses != null : "ExpenseList should not be null";

@@ -91,6 +91,8 @@ ____________________________________________________________
   total                                                  -- show total
   summary (s)                                            -- category breakdown
   budget (b) <amount>                                    -- set budget
+  filter     from/<YYYY-MM-DD> to/<YYYY-MM-DD>          -- filter by date range
+  find       <index>                                     -- view expense details
   remaining                                              -- show remaining
   help (h)                                               -- show this help
   bye                                                    -- exit

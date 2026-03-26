@@ -192,6 +192,8 @@ public class Ui {
         System.out.println("  total                                                  -- show total");
         System.out.println("  summary (s)                                            -- category breakdown");
         System.out.println("  budget (b) <amount>                                    -- set budget");
+        System.out.println("  filter     from/<YYYY-MM-DD> to/<YYYY-MM-DD>          -- filter by date range");
+        System.out.println("  find       <index>                                     -- view expense details");
         System.out.println("  remaining                                              -- show remaining");
         System.out.println("  help (h)                                               -- show this help");
         System.out.println("  bye                                                    -- exit");
@@ -297,6 +299,20 @@ public class Ui {
         System.out.println(LINE);
         System.out.println(" Total entries: " + filtered.size());
         System.out.println(LINE);
+    }
+
+    /**
+     * Displays the most recently recorded expense as a startup reminder.
+     *
+     * @param expense the last expense in the list
+     */
+    public void showLastExpense(Expense expense) {
+        assert expense != null : "Expense passed to showLastExpense should not be null";
+        System.out.println(" Last recorded expense: "
+                + expense.getDescription()
+                + " | $" + String.format("%.2f", expense.getAmount())
+                + " | " + expense.getCategory()
+                + " | " + expense.getDate());
     }
 
     /**
