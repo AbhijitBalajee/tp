@@ -115,6 +115,43 @@ Bus fare|1.80|Transport|2026-03-22|false
 - Pipe (`|`) delimiter was chosen over CSV because expense descriptions may contain commas.
 - All file I/O is encapsulated inside `Storage` — no `FileWriter` or `BufferedReader` exists in command classes, keeping the separation of concerns clean.
 
+### Edit Expense Feature
+
+The edit expense feature allows users to update one or more fields of an existing expense by its 1-based index:
+```
+edit INDEX [d/DESCRIPTION] [a/AMOUNT] [c/CATEGORY] [date/YYYY-MM-DD]
+```
+
+Only the fields provided are updated — all other fields remain unchanged.
+
+#### How it works
+
+1. The user enters `edit 1 d/Latte a/6.00`.
+2. `SpendTrack.run()` passes the input to `Parser.parse()`.
+3. `Parser.parse()` identifies the command word `edit` and delegates to `Parser.parseEditCommand()`.
+4. `parseEditCommand()` extracts the index from the first token, then splits the remaining arguments using the same flag regex as `parseAddCommand()` to extract only the fields provided. Fields not provided are left as `null`.
+5. A new `EditCommand` is created with the index and the parsed fields (`null` for unchanged fields).
+6. `EditCommand.execute()` validates the index and fields, retrieves the existing `Expense` from `ExpenseList`, constructs an updated `Expense` by substituting `null` fields with the original expense's values, and replaces it via `ExpenseList.setExpense()`.
+7. `Ui.showEditSuccess()` displays the before and after state of the expense.
+
+The following sequence diagram illustrates the full flow of the edit command:
+
+![Sequence diagram for edit command](images/EditCommandSequence.png)
+
+#### Design considerations
+
+**Aspect: How to handle partial updates**
+
+- **Current approach:** Fields not provided by the user are passed as `null`. Inside `EditCommand.execute()`, `null` fields fall back to the original expense's values.
+  - Pros: Clean separation — `Parser` handles input extraction, `EditCommand` handles the update logic. The command is immutable once constructed.
+  - Cons: Using `null` as a sentinel requires null checks throughout `execute()`.
+
+- **Alternative:** Pass the original `Expense` into the command and only override provided fields.
+  - Pros: No null checks needed inside the command.
+  - Cons: Tighter coupling between `Parser` and `ExpenseList`, since the parser would need to look up the existing expense at parse time rather than at execution time.
+
+The current approach was chosen to keep `Parser` stateless and decoupled from `ExpenseList`.
+
 ### [Proposed] Date Tagging Extension
 
 In v2.0, the add command will support an optional `date/` parameter:
