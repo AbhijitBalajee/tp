@@ -123,18 +123,64 @@ public class Ui {
                     ? "Uncategorised" : e.getCategory();
             String description = (e.getDescription() == null || e.getDescription().isBlank())
                     ? "(no description)" : e.getDescription();
+            String recurringTag = e.isRecurring() ? " [R]" : "";
             String date = (e.getDate() != null) ? e.getDate().toString() : "-";
 
             System.out.printf("  %-3s  %-14s %-20s %-12s $%.2f%n",
                     (i + 1) + ".",
                     "[" + category + "]",
-                    description,
+                    description + recurringTag,
                     date,
                     e.getAmount());
         }
 
         System.out.println(LINE);
         System.out.println(" Total entries: " + expenses.size());
+        System.out.println(LINE);
+    }
+
+    /**
+     * Displays only recurring expenses.
+     *
+     * @param expenses the full expense list to filter from
+     */
+    public void showRecurringList(ExpenseList expenses) {
+        assert expenses != null : "ExpenseList should not be null";
+
+        System.out.println(LINE);
+        System.out.println(" Recurring Expenses");
+        System.out.println(LINE);
+
+        int count = 0;
+        System.out.printf("  %-3s  %-14s %-22s %-12s %s%n",
+                "#", "Category", "Description", "Date", "Amount");
+        System.out.println(" ---  -------------  --------------------  ----------  --------");
+
+        for (int i = 0; i < expenses.size(); i++) {
+            Expense e = expenses.getExpense(i);
+            if (!e.isRecurring()) {
+                continue;
+            }
+            count++;
+            String category = (e.getCategory() == null || e.getCategory().isBlank())
+                    ? "Uncategorised" : e.getCategory();
+            String description = (e.getDescription() == null || e.getDescription().isBlank())
+                    ? "(no description)" : e.getDescription();
+
+            System.out.printf("  %-3s  %-14s %-22s %-12s $%.2f%n",
+                    count + ".",
+                    "[" + category + "]",
+                    description + " [R]",
+                    e.getDate(),
+                    e.getAmount());
+        }
+
+        if (count == 0) {
+            System.out.println(" No recurring expenses found.");
+        }
+
+        System.out.println(LINE);
+        System.out.println(" Total recurring: " + count);
         System.out.println(LINE);
     }
 
@@ -186,6 +232,35 @@ public class Ui {
         System.out.println(LINE);
         System.out.println(" Budget has been reset successfully.");
         System.out.println(" No budget is currently set.");
+        System.out.println(LINE);
+    }
+  
+    /**
+     * Displays the budget history in reverse chronological order.
+     *
+     * @param history the list of budget history entries as "date|amount" strings
+     */
+    public void showBudgetHistory(ArrayList<String> history) {
+        assert history != null : "Budget history list should not be null";
+
+        System.out.println(LINE);
+        System.out.println(" ===== Budget History =====");
+
+        if (history.isEmpty()) {
+            System.out.println(" No budget history recorded.");
+            System.out.println(LINE);
+            return;
+        }
+
+        for (int i = history.size() - 1; i >= 0; i--) {
+            String entry = history.get(i);
+            String[] parts = entry.split("\\|");
+            if (parts.length == 2) {
+                System.out.printf(" %s : $%.2f%n", parts[0], Double.parseDouble(parts[1]));
+            }
+        }
+
+        System.out.println(" ==========================");
         System.out.println(LINE);
     }
 
