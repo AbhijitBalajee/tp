@@ -226,6 +226,35 @@ public class Ui {
     }
 
     /**
+     * Displays the budget history in reverse chronological order.
+     *
+     * @param history the list of budget history entries as "date|amount" strings
+     */
+    public void showBudgetHistory(ArrayList<String> history) {
+        assert history != null : "Budget history list should not be null";
+
+        System.out.println(LINE);
+        System.out.println(" ===== Budget History =====");
+
+        if (history.isEmpty()) {
+            System.out.println(" No budget history recorded.");
+            System.out.println(LINE);
+            return;
+        }
+
+        for (int i = history.size() - 1; i >= 0; i--) {
+            String entry = history.get(i);
+            String[] parts = entry.split("\\|");
+            if (parts.length == 2) {
+                System.out.printf(" %s : $%.2f%n", parts[0], Double.parseDouble(parts[1]));
+            }
+        }
+
+        System.out.println(" ==========================");
+        System.out.println(LINE);
+    }
+
+    /**
      * Displays the remaining balance against the set budget.
      *
      * @param budget     the monthly budget limit

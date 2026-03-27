@@ -3,6 +3,7 @@ package seedu.duke;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.time.LocalDate;
 
 /**
  * Manages the list of expenses.
@@ -16,6 +17,7 @@ public class ExpenseList {
 
     private ArrayList<Expense> expenses;
     private double budget;
+    private ArrayList<String> budgetHistory;
 
     /**
      * Constructs an empty ExpenseList with no budget set.
@@ -23,6 +25,7 @@ public class ExpenseList {
     public ExpenseList() {
         this.expenses = new ArrayList<>();
         this.budget = 0.0;
+        this.budgetHistory = new ArrayList<>();
     }
 
     /**
@@ -116,6 +119,7 @@ public class ExpenseList {
     public void setBudget(double budget) {
         assert budget > 0 : "Budget must be positive";
         this.budget = budget;
+        this.budgetHistory.add(LocalDate.now() + "|" + budget);
         logger.info("Budget set to: " + budget);
     }
 
@@ -135,5 +139,36 @@ public class ExpenseList {
      */
     public boolean hasBudget() {
         return budget > 0.0;
+    }
+
+    /**
+     * Returns the budget history list.
+     *
+     * @return list of budget history entries as "date|amount" strings
+     */
+    public ArrayList<String> getBudgetHistory() {
+        return budgetHistory;
+    }
+
+    /**
+     * Adds a raw budget history entry directly (used by Storage when loading).
+     *
+     * @param entry the history entry string in format "date|amount"
+     */
+    public void addBudgetHistory(String entry) {
+        assert entry != null && !entry.isBlank() : "Budget history entry should not be null or blank";
+        budgetHistory.add(entry);
+        logger.info("Budget history entry added: " + entry);
+    }
+
+    /**
+     * Sets the budget directly without recording history (used by Storage on load).
+     *
+     * @param budget the budget amount to restore
+     */
+    public void setBudgetDirectly(double budget) {
+        assert budget > 0 : "Budget must be positive";
+        this.budget = budget;
+        logger.info("Budget restored to: " + budget);
     }
 }
