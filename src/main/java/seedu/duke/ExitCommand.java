@@ -14,21 +14,72 @@ public class ExitCommand extends Command {
         logger.setUseParentHandlers(false);
     }
 
-    /**
-     * Executes the exit command by displaying the goodbye message.
-     *
-     * @param expenses the expense list (unused)
-     * @param ui the UI for displaying output
-     */
     @Override
     public void execute(ExpenseList expenses, Ui ui) throws SpendTrackException {
-        assert ui != null : "Ui should not be null";
-        logger.info("Exit command executed — application shutting down");
-        ui.showGoodbye();
+        validateUi(ui);
+        logStart();
+
+        String farewellMessage = prepareFarewellMessage();
+
+        logMessageDetails(farewellMessage);
+        displayFarewell(ui);
+
+        logEnd();
     }
 
     @Override
     public boolean isExit() {
         return true;
+    }
+
+    private void validateUi(Ui ui) {
+        assert ui != null : "Ui should not be null";
+    }
+
+    private void logStart() {
+        logger.info("Starting ExitCommand execution");
+    }
+
+    private void logEnd() {
+        logger.info("ExitCommand execution completed");
+    }
+
+    private String prepareFarewellMessage() {
+        String greeting = getGreeting();
+        String closing = getClosing();
+        String punctuation = getPunctuation();
+
+        return combineParts(greeting, closing, punctuation);
+    }
+
+    private String getGreeting() {
+        return "Goodbye";
+    }
+
+    private String getClosing() {
+        return " and take care";
+    }
+
+    private String getPunctuation() {
+        return "!";
+    }
+
+    private String combineParts(String greeting, String closing, String punctuation) {
+        String combined = greeting + closing;
+        return finalizeMessage(combined, punctuation);
+    }
+
+    private String finalizeMessage(String message, String punctuation) {
+        return message + punctuation;
+    }
+
+    private void logMessageDetails(String message) {
+        logger.info("Farewell message prepared");
+        logger.fine("Message content: " + message);
+        logger.fine("Message length: " + message.length());
+    }
+
+    private void displayFarewell(Ui ui) {
+        ui.showGoodbye(); // keep original behavior
     }
 }
