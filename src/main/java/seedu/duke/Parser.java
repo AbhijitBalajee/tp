@@ -17,6 +17,7 @@ import seedu.duke.command.RemainingCommand;
 import seedu.duke.command.SummaryCommand;
 import seedu.duke.command.TotalCommand;
 import seedu.duke.command.EditCommand;
+import seedu.duke.command.BudgetHistoryCommand;
 
 /**
  * Parses user input into commands.
@@ -245,6 +246,12 @@ public class Parser {
     }
 
     private static Command parseBudgetCommand(String args) throws SpendTrackException {
+        if (args.trim().equalsIgnoreCase("history")) {
+            return new BudgetHistoryCommand();
+        }
+        if (args.trim().isEmpty()) {
+            throw new SpendTrackException("budget requires a number. Usage: budget <amount>");
+        }
         try {
             double amount = Double.parseDouble(args.trim());
             return new BudgetCommand(amount);
