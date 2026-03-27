@@ -32,7 +32,7 @@ public class RemainingCommand extends Command {
         logger.info("Executing remaining command");
         if (!expenses.hasBudget()) {
             logger.warning("Remaining command failed: no budget set");
-            throw new SpendTrackException("No budget set. Use 'budget <amount>' to set one.");
+            throw new SpendTrackException("No budget set. Use 'budget <amount>' to set one first.");
         }
         double remaining = expenses.getBudget() - expenses.getTotal();
         logger.info("Remaining balance: " + remaining);
