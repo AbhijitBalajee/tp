@@ -136,7 +136,6 @@ public class Parser {
             }
         }
 
-        return new AddCommand(description, amount, category, date, isRecurring);
         if (description.isEmpty()) {
             throw new SpendTrackException("Description is required. Usage: add d/<desc> a/<amount> c/<category>");
         }
