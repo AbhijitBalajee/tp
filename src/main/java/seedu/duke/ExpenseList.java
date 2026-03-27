@@ -136,4 +136,12 @@ public class ExpenseList {
     public boolean hasBudget() {
         return budget > 0.0;
     }
+
+    /**
+     * Resets the monthly budget to zero.
+     */
+    public void resetBudget() {
+        this.budget = 0.0;
+        logger.info("Budget reset to 0.0");
+    }
 }

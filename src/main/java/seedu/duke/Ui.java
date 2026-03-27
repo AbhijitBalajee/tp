@@ -180,6 +180,16 @@ public class Ui {
     }
 
     /**
+     * Displays confirmation after budget is reset.
+     */
+    public void showBudgetReset() {
+        System.out.println(LINE);
+        System.out.println(" Budget has been reset successfully.");
+        System.out.println(" No budget is currently set.");
+        System.out.println(LINE);
+    }
+
+    /**
      * Displays the remaining balance against the set budget.
      *
      * @param budget     the monthly budget limit

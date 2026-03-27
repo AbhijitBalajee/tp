@@ -17,6 +17,7 @@ import seedu.duke.command.RemainingCommand;
 import seedu.duke.command.SummaryCommand;
 import seedu.duke.command.TotalCommand;
 import seedu.duke.command.EditCommand;
+import seedu.duke.command.BudgetResetCommand;
 
 /**
  * Parses user input into commands.
@@ -245,11 +246,19 @@ public class Parser {
     }
 
     private static Command parseBudgetCommand(String args) throws SpendTrackException {
+        if (args.trim().equalsIgnoreCase("reset")) {
+            return new BudgetResetCommand();
+        }
+        if (args.trim().isEmpty()) {
+            throw new SpendTrackException("budget requires a number or 'reset'. "
+                    + "Usage: budget <amount> | budget reset");
+        }
         try {
             double amount = Double.parseDouble(args.trim());
             return new BudgetCommand(amount);
         } catch (NumberFormatException e) {
-            throw new SpendTrackException("budget requires a number. Usage: budget <amount>");
+            throw new SpendTrackException("budget requires a number or 'reset'. "
+                    + "Usage: budget <amount> | budget reset");
         }
     }
 }
