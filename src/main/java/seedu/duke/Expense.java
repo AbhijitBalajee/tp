@@ -63,6 +63,22 @@ public class Expense {
         return date;
     }
 
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setAmount(double amount) {
+        this.amount = amount;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public void setDate(LocalDate date) {
+        this.date = date;
+    }
+
     /**
      * Returns a formatted string representation of this expense.
      *

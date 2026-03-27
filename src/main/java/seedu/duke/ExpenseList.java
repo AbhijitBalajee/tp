@@ -48,6 +48,19 @@ public class ExpenseList {
     }
 
     /**
+     * Replaces the expense at the given zero-based index.
+     *
+     * @param index   the zero-based index
+     * @param expense the new expense to set
+     */
+    public void setExpense(int index, Expense expense) {
+        assert index >= 0 && index < expenses.size() : "Set index out of bounds: " + index;
+        assert expense != null : "Replacement expense should not be null";
+        expenses.set(index, expense);
+        logger.info("Expense at index " + index + " replaced: " + expense);
+    }
+
+    /**
      * Returns the number of expenses in the list.
      *
      * @return the size of the list
