@@ -80,7 +80,7 @@ public class Parser {
             return new TotalCommand();
         case "list":
             if (parts.length > 1 && parts[1].trim().equalsIgnoreCase("recurring")) {
-            return new ListCommand();
+                return new ListCommand();
             }
             return new ListCommand();
         case "budget":
