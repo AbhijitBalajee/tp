@@ -26,6 +26,7 @@ public class EditCommand extends Command {
     private final Double newAmount;
     private final String newCategory;
     private final LocalDate newDate;
+    private final Boolean newRecurring;
 
     /**
      * Constructs an EditCommand.
@@ -37,12 +38,13 @@ public class EditCommand extends Command {
      * @param newDate        the new date, or null to keep existing
      */
     public EditCommand(int index, String newDescription, Double newAmount,
-                       String newCategory, LocalDate newDate) {
+                       String newCategory, LocalDate newDate, Boolean newRecurring) {
         this.index = index;
         this.newDescription = newDescription;
         this.newAmount = newAmount;
         this.newCategory = newCategory;
         this.newDate = newDate;
+        this.newRecurring = newRecurring;
     }
 
     /**
@@ -62,9 +64,11 @@ public class EditCommand extends Command {
                     + "There are " + expenses.size() + " expense(s).");
         }
 
-        if (newDescription == null && newAmount == null && newCategory == null && newDate == null) {
+        if (newDescription == null && newAmount == null
+                && newCategory == null && newDate == null && newRecurring == null) {
             throw new SpendTrackException("No fields provided to edit. "
-                    + "Usage: edit <index> [d/<desc>] [a/<amount>] [c/<category>] [date/<YYYY-MM-DD>]");
+                    + "Usage: edit <index> [d/<desc>] [a/<amount>] [c/<category>] "
+                    + "[date/<YYYY-MM-DD>] [recurring/true|false]");
         }
 
         if (newDescription != null && newDescription.isBlank()) {
@@ -80,8 +84,11 @@ public class EditCommand extends Command {
         double updatedAmount      = (newAmount != null) ? newAmount : old.getAmount();
         String updatedCategory    = (newCategory != null) ? newCategory : old.getCategory();
         LocalDate updatedDate     = (newDate != null) ? newDate : old.getDate();
+        boolean updatedRecurring = (newRecurring != null) ? newRecurring : old.isRecurring();
 
-        Expense updated = new Expense(updatedDescription, updatedAmount, updatedCategory, updatedDate);
+        Expense updated = new Expense(updatedDescription, updatedAmount,
+                updatedCategory, updatedDate, updatedRecurring);
+
         expenses.setExpense(index - 1, updated);
 
         logger.log(Level.INFO, "Expense at index {0} edited.", index);
