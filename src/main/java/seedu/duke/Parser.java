@@ -250,15 +250,13 @@ public class Parser {
             return new BudgetResetCommand();
         }
         if (args.trim().isEmpty()) {
-            throw new SpendTrackException("budget requires a number or 'reset'. "
-                    + "Usage: budget <amount> | budget reset");
+            throw new SpendTrackException("budget requires a number. Usage: budget <amount>");
         }
         try {
             double amount = Double.parseDouble(args.trim());
             return new BudgetCommand(amount);
         } catch (NumberFormatException e) {
-            throw new SpendTrackException("budget requires a number or 'reset'. "
-                    + "Usage: budget <amount> | budget reset");
+            throw new SpendTrackException("budget requires a number. Usage: budget <amount>");
         }
     }
 }
