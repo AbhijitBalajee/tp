@@ -2,7 +2,6 @@ package seedu.duke.command;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import seedu.duke.Expense;
 import seedu.duke.ExpenseList;
 import seedu.duke.SpendTrackException;
 import seedu.duke.Ui;
@@ -61,6 +60,16 @@ class EditCommandTest {
     }
 
     @Test
+    void execute_editAllFields_updatesAll() throws SpendTrackException {
+        LocalDate newDate = LocalDate.of(2026, 1, 1);
+        new EditCommand(1, "Tea", 2.50, "Drinks", newDate).execute(expenses, ui);
+        assertEquals("Tea", expenses.getExpense(0).getDescription());
+        assertEquals(2.50, expenses.getExpense(0).getAmount(), 0.001);
+        assertEquals("Drinks", expenses.getExpense(0).getCategory());
+        assertEquals(newDate, expenses.getExpense(0).getDate());
+    }
+
+    @Test
     void execute_editSmallestValidAmount_succeeds() throws SpendTrackException {
         new EditCommand(1, null, 0.01, null, null).execute(expenses, ui);
         assertEquals(0.01, expenses.getExpense(0).getAmount(), 0.001);
@@ -88,6 +97,18 @@ class EditCommandTest {
         assertEquals("Espresso", expenses.getExpense(0).getDescription());
         assertEquals(4.50, expenses.getExpense(0).getAmount(), 0.001);
         assertEquals("Food", expenses.getExpense(0).getCategory());
+    }
+
+    @Test
+    void execute_editSecondExpense_doesNotAffectFirst() throws SpendTrackException {
+        new EditCommand(2, "Train", null, null, null).execute(expenses, ui);
+        assertEquals("Coffee", expenses.getExpense(0).getDescription());
+    }
+
+    @Test
+    void execute_afterEdit_listSizeUnchanged() throws SpendTrackException {
+        new EditCommand(1, "Latte", null, null, null).execute(expenses, ui);
+        assertEquals(2, expenses.size());
     }
 
     // ── Invalid index ─────────────────────────────────────────────────────────
@@ -126,6 +147,12 @@ class EditCommandTest {
                 new EditCommand(1, "", null, null, null).execute(expenses, ui));
     }
 
+    @Test
+    void execute_blankDescription_throwsException() {
+        assertThrows(SpendTrackException.class, () ->
+                new EditCommand(1, "   ", null, null, null).execute(expenses, ui));
+    }
+
     // ── Invalid amount ────────────────────────────────────────────────────────
 
     @Test
@@ -138,12 +165,6 @@ class EditCommandTest {
     void execute_negativeAmount_throwsException() {
         assertThrows(SpendTrackException.class, () ->
                 new EditCommand(1, null, -5.00, null, null).execute(expenses, ui));
-    }
-
-    @Test
-    void execute_blankDescription_throwsException() {
-        assertThrows(SpendTrackException.class, () ->
-                new EditCommand(1, "   ", null, null, null).execute(expenses, ui));
     }
 
     @Test

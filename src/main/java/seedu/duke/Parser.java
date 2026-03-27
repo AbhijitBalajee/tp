@@ -136,8 +136,7 @@ public class Parser {
         try {
             index = Integer.parseInt(parts[0].trim());
         } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
-            throw new SpendTrackException("edit requires an index. "
-                    + "Usage: edit <index> [d/<desc>] [a/<amount>] [c/<category>] [date/<YYYY-MM-DD>]");
+            throw new SpendTrackException("Index must be a whole number.");
         }
 
         String remaining = parts.length > 1 ? parts[1].trim() : "";
@@ -187,7 +186,7 @@ public class Parser {
                     throw new SpendTrackException("Amount must be a number. Usage: a/<amount>");
                 }
                 if (newAmount <= 0) {
-                    throw new SpendTrackException("Amount must be a positive number. Usage: a/<amount>");
+                    throw new SpendTrackException("Amount must be greater than 0.");
                 }
 
             } else if (token.startsWith("c/")) {

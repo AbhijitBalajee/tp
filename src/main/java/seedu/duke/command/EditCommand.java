@@ -71,7 +71,7 @@ public class EditCommand extends Command {
             throw new SpendTrackException("Description cannot be empty.");
         }
         if (newAmount != null && newAmount <= 0) {
-            throw new SpendTrackException("Amount must be a positive number.");
+            throw new SpendTrackException("Amount must be greater than 0.");
         }
 
         Expense old = expenses.getExpense(index - 1);
