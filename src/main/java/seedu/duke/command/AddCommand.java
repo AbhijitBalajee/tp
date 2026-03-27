@@ -50,7 +50,7 @@ public class AddCommand extends Command {
     public void execute(ExpenseList expenses, Ui ui) throws SpendTrackException {
         assert expenses != null : "ExpenseList should not be null";
         assert ui != null : "Ui should not be null";
-        assert amount >= 0 : "Amount should not be negative";
+        assert amount > 0 : "Amount must be greater than 0";
 
         logger.info("Adding expense: " + description + ", amount: " + amount
                 + ", category: " + category + ", date: " + date);
