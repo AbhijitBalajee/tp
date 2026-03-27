@@ -11,9 +11,10 @@ public class Expense {
     private double amount;
     private String category;
     private LocalDate date;
+    private boolean isRecurring;
 
     /**
-     * Constructs an Expense with the given description, amount, category, and date.
+     * Constructs an Expense with the given details. Recurring defaults to false.
      *
      * @param description the description of the expense
      * @param amount the amount spent
@@ -25,59 +26,38 @@ public class Expense {
         this.amount = amount;
         this.category = category;
         this.date = date;
+        this.isRecurring = false;
     }
 
     /**
-     * Returns the description of this expense.
+     * Constructs an Expense with all fields including recurring flag.
      *
-     * @return the description
+     * @param description the description of the expense
+     * @param amount the amount spent
+     * @param category the category of the expense
+     * @param date the date of the expense
+     * @param isRecurring whether the expense is recurring
      */
-    public String getDescription() {
-        return description;
-    }
-
-    /**
-     * Returns the amount of this expense.
-     *
-     * @return the amount
-     */
-    public double getAmount() {
-        return amount;
-    }
-
-    /**
-     * Returns the category of this expense.
-     *
-     * @return the category
-     */
-    public String getCategory() {
-        return category;
-    }
-
-    /**
-     * Returns the date of this expense.
-     *
-     * @return the date
-     */
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public void setDescription(String description) {
+    public Expense(String description, double amount, String category,
+                   LocalDate date, boolean isRecurring) {
         this.description = description;
-    }
-
-    public void setAmount(double amount) {
         this.amount = amount;
-    }
-
-    public void setCategory(String category) {
         this.category = category;
+        this.date = date;
+        this.isRecurring = isRecurring;
     }
 
-    public void setDate(LocalDate date) {
-        this.date = date;
-    }
+    public String getDescription() { return description; }
+    public double getAmount() { return amount; }
+    public String getCategory() { return category; }
+    public LocalDate getDate() { return date; }
+    public boolean isRecurring() { return isRecurring; }
+
+    public void setDescription(String description) { this.description = description; }
+    public void setAmount(double amount) { this.amount = amount; }
+    public void setCategory(String category) { this.category = category; }
+    public void setDate(LocalDate date) { this.date = date; }
+    public void setRecurring(boolean isRecurring) { this.isRecurring = isRecurring; }
 
     /**
      * Returns a formatted string representation of this expense.
@@ -86,6 +66,8 @@ public class Expense {
      */
     @Override
     public String toString() {
-        return String.format("[%s] %s - $%.2f (%s)", category, description, amount, date);
+        String recurringTag = isRecurring ? " [R]" : "";
+        return String.format("[%s] %s - $%.2f (%s)%s",
+                category, description, amount, date, recurringTag);
     }
 }
