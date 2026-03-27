@@ -18,7 +18,6 @@ import seedu.duke.command.SummaryCommand;
 import seedu.duke.command.TotalCommand;
 import seedu.duke.command.EditCommand;
 import seedu.duke.command.BudgetHistoryCommand;
-import seedu.duke.command.BudgetResetCommand;
 
 /**
  * Parses user input into commands.
@@ -26,7 +25,7 @@ import seedu.duke.command.BudgetResetCommand;
 public class Parser {
 
     private static final Logger logger = Logger.getLogger(Parser.class.getName());
-    private static final String TOKEN_SPLIT_REGEX = " (?=(?:d|a|c|date)/)";
+    private static final String TOKEN_SPLIT_REGEX = " (?=(?:d|a|c|date|recurring)/)";
     private static final Map<String, String> ALIASES = new HashMap<>();
 
     static {
@@ -81,7 +80,7 @@ public class Parser {
             return new TotalCommand();
         case "list":
             if (parts.length > 1 && parts[1].trim().equalsIgnoreCase("recurring")) {
-               return new ListCommand(true);
+            return new ListCommand();
             }
             return new ListCommand();
         case "budget":
@@ -105,6 +104,7 @@ public class Parser {
         double amount = 0.0;
         String category = "Uncategorised";
         LocalDate date = LocalDate.now();
+        boolean isRecurring = false;
 
         String[] tokens = args.split(TOKEN_SPLIT_REGEX);
         for (String token : tokens) {
@@ -128,6 +128,12 @@ public class Parser {
                 }
             } else if (token.startsWith("c/")) {
                 category = normalizeCategory(token.substring(2).trim());
+            } else if (token.startsWith("recurring/")) {
+                String val = token.substring(10).trim().toLowerCase();
+                if (!val.equals("true") && !val.equals("false")) {
+                    throw new SpendTrackException("recurring/ must be 'true' or 'false'.");
+                }
+                isRecurring = val.equals("true");
             }
         }
 
@@ -138,7 +144,7 @@ public class Parser {
             throw new SpendTrackException("Amount is required and must be greater than 0. Usage: a/<amount>");
         }
 
-        return new AddCommand(description, amount, category, date);
+        return new AddCommand(description, amount, category, date, isRecurring);
     }
 
     private static Command parseEditCommand(String args) throws SpendTrackException {
@@ -156,12 +162,13 @@ public class Parser {
         Double newAmount = null;
         String newCategory = null;
         LocalDate newDate = null;
+        Boolean newRecurring = null;          
 
-        // Duplicate tracking
         boolean seenDescription = false;
         boolean seenAmount = false;
         boolean seenCategory = false;
         boolean seenDate = false;
+        boolean seenRecurring = false;        
 
         String[] tokens = remaining.split(TOKEN_SPLIT_REGEX);
         for (String token : tokens) {
@@ -208,10 +215,22 @@ public class Parser {
                 }
                 seenCategory = true;
                 newCategory = normalizeCategory(token.substring(2).trim());
+
+            } else if (token.startsWith("recurring/")) {   
+                if (seenRecurring) {
+                    throw new SpendTrackException("Duplicate 'recurring/' detected. "
+                            + "Please provide only one recurring value.");
+                }
+                seenRecurring = true;
+                String val = token.substring(10).trim().toLowerCase();
+                if (!val.equals("true") && !val.equals("false")) {
+                    throw new SpendTrackException("recurring/ must be 'true' or 'false'.");
+                }
+                newRecurring = val.equals("true");
             }
         }
 
-        return new EditCommand(index, newDescription, newAmount, newCategory, newDate);
+        return new EditCommand(index, newDescription, newAmount, newCategory, newDate, newRecurring); 
     }
 
     private static String normalizeCategory(String category) {
@@ -257,9 +276,6 @@ public class Parser {
     }
 
     private static Command parseBudgetCommand(String args) throws SpendTrackException {
-        if (args.trim().equalsIgnoreCase("reset")) {
-            return new BudgetResetCommand();
-        }
         if (args.trim().equalsIgnoreCase("history")) {
             return new BudgetHistoryCommand();
         }
