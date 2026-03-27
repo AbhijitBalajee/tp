@@ -18,7 +18,6 @@ import seedu.duke.command.SummaryCommand;
 import seedu.duke.command.TotalCommand;
 import seedu.duke.command.EditCommand;
 import seedu.duke.command.BudgetResetCommand;
-import seedu.duke.command.BudgetHistoryCommand;
 
 /**
  * Parses user input into commands.
@@ -80,9 +79,6 @@ public class Parser {
         case "total":
             return new TotalCommand();
         case "list":
-            if (parts.length > 1 && parts[1].trim().equalsIgnoreCase("recurring")) {
-                return new ListCommand(true);
-            }
             return new ListCommand();
         case "budget":
             return parseBudgetCommand(parts.length > 1 ? parts[1] : "");
@@ -259,9 +255,6 @@ public class Parser {
     private static Command parseBudgetCommand(String args) throws SpendTrackException {
         if (args.trim().equalsIgnoreCase("reset")) {
             return new BudgetResetCommand();
-        }
-        if (args.trim().equalsIgnoreCase("history")) {
-            return new BudgetHistoryCommand();
         }
         if (args.trim().isEmpty()) {
             throw new SpendTrackException("budget requires a number. Usage: budget <amount>");
