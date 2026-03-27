@@ -324,7 +324,6 @@ public class Ui {
         System.out.printf(" Amount      : $%.2f%n", expense.getAmount());
         System.out.printf(" Category    : %s%n", expense.getCategory());
         System.out.printf(" Date        : %s%n", expense.getDate());
-        System.out.printf(" Recurring   : %s%n", expense.isRecurring() ? "Yes [R]" : "No");
         System.out.println(LINE);
     }
 
