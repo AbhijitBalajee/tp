@@ -60,6 +60,61 @@ The following class diagram shows the relationships between the classes involved
 
 `Parser` creates `AddCommand` objects. `AddCommand` creates `Expense` objects and interacts with `ExpenseList` to store them. All concrete commands extend the abstract `Command` class, which defines the `execute()` method.
 
+### Storage Feature
+
+The storage feature allows SpendTrack to persist expense data and budget across sessions. Expenses are saved to `data/spendtrack.txt` automatically after every mutating command (`add`, `delete`, `edit`), and loaded back on startup.
+
+#### How it works
+
+**Saving:**
+
+1. After every mutating command executes, `SpendTrack` calls `Storage.save(expenseList)`.
+2. `Storage` opens `data/spendtrack.txt` using a `try-with-resources` block with a `FileWriter`.
+3. Each expense is written as a pipe-delimited line: `DESCRIPTION|AMOUNT|CATEGORY|DATE|RECURRING`.
+4. The budget is written at the end after a `---BUDGET---` separator line.
+5. If the `data/` directory does not exist, it is created automatically before writing.
+6. Any write failure prints a warning — the app does not crash.
+
+**Loading:**
+
+1. On startup, `SpendTrack` calls `Storage.load(expenseList)` before the main command loop.
+2. `Storage` reads `data/spendtrack.txt` line by line using a `BufferedReader`.
+3. Lines above `---BUDGET---` are parsed into `Expense` objects and added to the `ExpenseList`.
+4. The line below `---BUDGET---` is parsed as the saved budget amount.
+5. Malformed lines are skipped with a warning message.
+6. If the file does not exist, the app starts silently with an empty list.
+
+The following sequence diagram shows the startup load flow:
+
+![Sequence diagram for storage load](images/StorageLoadSequence.png)
+
+#### File format
+
+```
+DESCRIPTION|AMOUNT|CATEGORY|DATE|RECURRING
+Coffee|3.50|Food|2026-03-22|false
+Bus fare|1.80|Transport|2026-03-22|false
+---BUDGET---
+500.00
+```
+
+#### Design considerations
+
+**Aspect: Where to trigger saves**
+
+- **Current approach:** Every mutating command calls `Storage.save()` after executing.
+    - Pros: Data is never lost even if the app crashes mid-session.
+    - Cons: Slightly more I/O per command, but negligible for typical expense list sizes.
+
+- **Alternative:** Save only on `bye` command.
+    - Pros: Fewer writes.
+    - Cons: Data loss if the app is closed unexpectedly.
+
+**Aspect: File format**
+
+- Pipe (`|`) delimiter was chosen over CSV because expense descriptions may contain commas.
+- All file I/O is encapsulated inside `Storage` — no `FileWriter` or `BufferedReader` exists in command classes, keeping the separation of concerns clean.
+
 ### [Proposed] Date Tagging Extension
 
 In v2.0, the add command will support an optional `date/` parameter:
@@ -100,6 +155,9 @@ SpendTrack helps students track expenses faster than a typical GUI app. Users ca
 | v2.0 | student | view a category breakdown | see where I am overspending |
 | v2.0 | student | search expenses by keyword | find a specific purchase quickly |
 | v2.0 | student | save and load expenses from file | keep my data between sessions |
+| v2.0 | student | filter expenses by date range | analyse spending over specific periods |
+| v2.0 | student | view full details of a single expense by index | inspect it without scrolling the entire list |
+| v2.0 | forgetful user | see my last logged expense on startup | avoid logging duplicate entries |
 
 ## Non-Functional Requirements
 
@@ -136,6 +194,30 @@ SpendTrack helps students track expenses faster than a typical GUI app. Users ca
 3. Expected: confirmation showing the deleted expense.
 4. Type `delete 999` to test out-of-range index.
 5. Expected: error message showing the valid range.
+
+### Save and load
+
+1. Add a few expenses and set a budget.
+2. Type `bye` to exit.
+3. Relaunch the app: `java -jar spendtrack.jar`
+4. Expected: all expenses and budget restored. Last expense shown as a reminder on startup.
+5. Open `data/spendtrack.txt` to verify the file format.
+
+### Filtering by date range
+
+1. Add expenses with explicit dates: `add d/Coffee a/3.50 c/Food date/2026-03-01`
+2. Type `filter from/2026-03-01 to/2026-03-31`
+3. Expected: only expenses within that range shown.
+4. Type `filter from/2026-03-31 to/2026-03-01`
+5. Expected: error message — start date must be before end date.
+
+### Finding an expense by index
+
+1. Type `list` to see current expenses.
+2. Type `find 1` to view details of the first expense.
+3. Expected: detailed view with all fields.
+4. Type `find 999`
+5. Expected: out-of-range error message.
 
 ### Setting a budget
 
