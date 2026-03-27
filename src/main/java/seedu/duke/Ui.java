@@ -226,6 +226,16 @@ public class Ui {
     }
 
     /**
+     * Displays confirmation after budget is reset.
+     */
+    public void showBudgetReset() {
+        System.out.println(LINE);
+        System.out.println(" Budget has been reset successfully.");
+        System.out.println(" No budget is currently set.");
+        System.out.println(LINE);
+    }
+  
+    /**
      * Displays the budget history in reverse chronological order.
      *
      * @param history the list of budget history entries as "date|amount" strings

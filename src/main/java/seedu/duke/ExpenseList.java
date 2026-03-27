@@ -142,6 +142,14 @@ public class ExpenseList {
     }
 
     /**
+     * Resets the monthly budget to zero.
+     */
+    public void resetBudget() {
+        this.budget = 0.0;
+        logger.info("Budget reset to 0.0");
+    }
+  
+    /**
      * Returns the budget history list.
      *
      * @return list of budget history entries as "date|amount" strings
