@@ -137,6 +137,14 @@ public class Parser {
         }
 
         return new AddCommand(description, amount, category, date, isRecurring);
+        if (description.isEmpty()) {
+            throw new SpendTrackException("Description is required. Usage: add d/<desc> a/<amount> c/<category>");
+        }
+        if (amount == 0.0) {
+            throw new SpendTrackException("Amount is required and must be greater than 0. Usage: a/<amount>");
+        }
+
+        return new AddCommand(description, amount, category, date, isRecurring);
     }
 
     private static Command parseEditCommand(String args) throws SpendTrackException {
@@ -154,13 +162,13 @@ public class Parser {
         Double newAmount = null;
         String newCategory = null;
         LocalDate newDate = null;
-        Boolean newRecurring = null;          // ADD THIS
+        Boolean newRecurring = null;          
 
         boolean seenDescription = false;
         boolean seenAmount = false;
         boolean seenCategory = false;
         boolean seenDate = false;
-        boolean seenRecurring = false;        // ADD THIS
+        boolean seenRecurring = false;        
 
         String[] tokens = remaining.split(TOKEN_SPLIT_REGEX);
         for (String token : tokens) {
@@ -208,7 +216,7 @@ public class Parser {
                 seenCategory = true;
                 newCategory = normalizeCategory(token.substring(2).trim());
 
-            } else if (token.startsWith("recurring/")) {   // ADD THIS BLOCK
+            } else if (token.startsWith("recurring/")) {   
                 if (seenRecurring) {
                     throw new SpendTrackException("Duplicate 'recurring/' detected. "
                             + "Please provide only one recurring value.");
@@ -222,7 +230,7 @@ public class Parser {
             }
         }
 
-        return new EditCommand(index, newDescription, newAmount, newCategory, newDate, newRecurring); // FIXED
+        return new EditCommand(index, newDescription, newAmount, newCategory, newDate, newRecurring); 
     }
 
     private static String normalizeCategory(String category) {
@@ -268,6 +276,9 @@ public class Parser {
     }
 
     private static Command parseBudgetCommand(String args) throws SpendTrackException {
+        if (args.trim().isEmpty()) {
+            throw new SpendTrackException("budget requires a number. Usage: budget <amount>");
+        }
         try {
             double amount = Double.parseDouble(args.trim());
             return new BudgetCommand(amount);
