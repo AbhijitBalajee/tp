@@ -14,17 +14,68 @@ public class UnknownCommand extends Command {
         logger.setUseParentHandlers(false);
     }
 
-    /**
-     * Executes the unknown command by displaying an error message.
-     *
-     * @param expenses the expense list (unused)
-     * @param ui the UI for displaying output
-     */
     @Override
     public void execute(ExpenseList expenses, Ui ui) throws SpendTrackException {
+        validateUi(ui);
+        logStart();
+
+        String message = buildFullErrorMessage();
+
+        logMessageDetails(message);
+        showMessage(ui, message);
+
+        logEnd();
+    }
+
+    private void validateUi(Ui ui) {
         assert ui != null : "Ui should not be null";
-        logger.warning("Unknown command entered by user");
-        ui.showError("Unknown command. Type 'help' for a list of commands.");
+    }
+
+    private void logStart() {
+        logger.info("Starting execution of UnknownCommand");
+    }
+
+    private void logEnd() {
+        logger.info("Finished execution of UnknownCommand");
+    }
+
+    private String buildFullErrorMessage() {
+        String header = buildHeader();
+        String suggestion = buildSuggestion();
+        String formatting = buildFormatting();
+
+        return assembleMessage(header, suggestion, formatting);
+    }
+
+    private String buildHeader() {
+        return "Unknown command.";
+    }
+
+    private String buildSuggestion() {
+        return " Try typing 'help' to see available commands.";
+    }
+
+    private String buildFormatting() {
+        return "";
+    }
+
+    private String assembleMessage(String header, String suggestion, String formatting) {
+        String combined = header + suggestion;
+        return applyFormatting(combined, formatting);
+    }
+
+    private String applyFormatting(String message, String formatting) {
+        return formatting + message;
+    }
+
+    private void logMessageDetails(String message) {
+        logger.warning("Unknown command encountered");
+        logger.fine("Generated message: " + message);
+        logger.fine("Message length: " + message.length());
+    }
+
+    private void showMessage(Ui ui, String message) {
+        ui.showError(message);
     }
 }
 
