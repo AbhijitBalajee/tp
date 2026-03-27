@@ -126,7 +126,7 @@ public class Ui {
             String recurringTag = e.isRecurring() ? " [R]" : "";
             String date = (e.getDate() != null) ? e.getDate().toString() : "-";
 
-            System.out.printf("  %-3s  %-14s %-22s %-12s $%.2f%n",
+            System.out.printf("  %-3s  %-14s %-20s %-12s $%.2f%n",
                     (i + 1) + ".",
                     "[" + category + "]",
                     description + recurringTag,
