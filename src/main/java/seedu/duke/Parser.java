@@ -18,6 +18,7 @@ import seedu.duke.command.SummaryCommand;
 import seedu.duke.command.TotalCommand;
 import seedu.duke.command.EditCommand;
 import seedu.duke.command.BudgetResetCommand;
+import seedu.duke.command.BudgetHistoryCommand;
 
 /**
  * Parses user input into commands.
@@ -25,7 +26,7 @@ import seedu.duke.command.BudgetResetCommand;
 public class Parser {
 
     private static final Logger logger = Logger.getLogger(Parser.class.getName());
-    private static final String TOKEN_SPLIT_REGEX = " (?=(?:d|a|c|date)/)";
+    private static final String TOKEN_SPLIT_REGEX = " (?=(?:d|a|c|date|recurring)/)";
     private static final Map<String, String> ALIASES = new HashMap<>();
 
     static {
@@ -57,7 +58,7 @@ public class Parser {
 
         switch (commandWord) {
         case "add":
-            return parseAddCommand(parts.length > 1 ? parts[1] : "");
+            return parseAddCommand(parts.length > 1 ? parts[1] : "");     
         case "delete":
             try {
                 return new DeleteCommand(Integer.parseInt(parts[1].trim()));
@@ -79,6 +80,9 @@ public class Parser {
         case "total":
             return new TotalCommand();
         case "list":
+            if (parts.length > 1 && parts[1].trim().equalsIgnoreCase("recurring")) {
+                return new ListCommand(true);
+            }
             return new ListCommand();
         case "budget":
             return parseBudgetCommand(parts.length > 1 ? parts[1] : "");
