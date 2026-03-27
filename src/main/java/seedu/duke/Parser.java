@@ -126,6 +126,13 @@ public class Parser {
             }
         }
 
+        if (description.isEmpty()) {
+            throw new SpendTrackException("Description is required. Usage: add d/<desc> a/<amount> c/<category>");
+        }
+        if (amount == 0.0) {
+            throw new SpendTrackException("Amount is required and must be greater than 0. Usage: a/<amount>");
+        }
+
         return new AddCommand(description, amount, category, date);
     }
 
@@ -245,6 +252,9 @@ public class Parser {
     }
 
     private static Command parseBudgetCommand(String args) throws SpendTrackException {
+        if (args.trim().isEmpty()) {
+            throw new SpendTrackException("budget requires a number. Usage: budget <amount>");
+        }
         try {
             double amount = Double.parseDouble(args.trim());
             return new BudgetCommand(amount);
