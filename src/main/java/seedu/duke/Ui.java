@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.logging.Logger;
 
 
 /**
@@ -16,6 +17,12 @@ public class Ui {
 
     public Ui() {
         this.scanner = new Scanner(System.in);
+    }
+
+    private static final Logger logger = Logger.getLogger(Ui.class.getName());
+
+    static {
+        logger.setUseParentHandlers(false);
     }
 
     /**
@@ -111,9 +118,26 @@ public class Ui {
             return;
         }
 
-        System.out.printf("  %-3s  %-14s %-20s %-12s %s%n",
-                "#", "Category", "Description", "Date", "Amount");
-        System.out.println(" ---  -------------  ------------------  ----------  --------");
+        int catWidth = "Category".length();
+        int descWidth = "Description".length();
+
+        for (int i = 0; i < expenses.size(); i++) {
+            Expense e = expenses.getExpense(i);
+            String category = (e.getCategory() == null || e.getCategory().isBlank())
+                    ? "Uncategorised" : e.getCategory();
+            String description = (e.getDescription() == null || e.getDescription().isBlank())
+                    ? "(no description)" : e.getDescription();
+            String recurringTag = e.isRecurring() ? " [R]" : "";
+
+            catWidth = Math.max(catWidth, category.length() + 2);
+            descWidth = Math.max(descWidth, description.length() + recurringTag.length());
+        }
+
+        String headerFormat = "  %-3s  %-" + catWidth + "s  %-" + descWidth + "s  %-12s  %s%n";
+        String rowFormat    = "  %-3s  %-" + catWidth + "s  %-" + descWidth + "s  %-12s  $%.2f%n";
+
+        System.out.printf(headerFormat, "#", "Category", "Description", "Date", "Amount");
+        System.out.println(" " + "-".repeat(3 + 2 + catWidth + 2 + descWidth + 2 + 12 + 2 + 8));
 
         for (int i = 0; i < expenses.size(); i++) {
             Expense e = expenses.getExpense(i);
@@ -126,7 +150,7 @@ public class Ui {
             String recurringTag = e.isRecurring() ? " [R]" : "";
             String date = (e.getDate() != null) ? e.getDate().toString() : "-";
 
-            System.out.printf("  %-3s  %-14s %-20s %-12s $%.2f%n",
+            System.out.printf(rowFormat,
                     (i + 1) + ".",
                     "[" + category + "]",
                     description + recurringTag,
@@ -151,36 +175,57 @@ public class Ui {
         System.out.println(" Recurring Expenses");
         System.out.println(LINE);
 
-        int count = 0;
-        System.out.printf("  %-3s  %-14s %-22s %-12s %s%n",
-                "#", "Category", "Description", "Date", "Amount");
-        System.out.println(" ---  -------------  --------------------  ----------  --------");
-
+        ArrayList<Expense> recurring = new ArrayList<>();
         for (int i = 0; i < expenses.size(); i++) {
-            Expense e = expenses.getExpense(i);
-            if (!e.isRecurring()) {
-                continue;
+            if (expenses.getExpense(i).isRecurring()) {
+                recurring.add(expenses.getExpense(i));
             }
-            count++;
+        }
+
+        if (recurring.isEmpty()) {
+            System.out.println(" No recurring expenses found.");
+            System.out.println(LINE);
+            System.out.println(" Total recurring: 0");
+            System.out.println(LINE);
+            return;
+        }
+
+        int catWidth = "Category".length();
+        int descWidth = "Description".length();
+
+        for (Expense e : recurring) {
             String category = (e.getCategory() == null || e.getCategory().isBlank())
                     ? "Uncategorised" : e.getCategory();
             String description = (e.getDescription() == null || e.getDescription().isBlank())
                     ? "(no description)" : e.getDescription();
+            catWidth = Math.max(catWidth, category.length() + 2);
+            descWidth = Math.max(descWidth, description.length() + " [R]".length());
+        }
 
-            System.out.printf("  %-3s  %-14s %-22s %-12s $%.2f%n",
-                    count + ".",
+        String headerFormat = "  %-3s  %-" + catWidth + "s  %-" + descWidth + "s  %-12s  %s%n";
+        String rowFormat    = "  %-3s  %-" + catWidth + "s  %-" + descWidth + "s  %-12s  $%.2f%n";
+
+        System.out.printf(headerFormat, "#", "Category", "Description", "Date", "Amount");
+        System.out.println(" " + "-".repeat(3 + 2 + catWidth + 2 + descWidth + 2 + 12 + 2 + 8));
+
+        for (int i = 0; i < recurring.size(); i++) {
+            Expense e = recurring.get(i);
+            String category = (e.getCategory() == null || e.getCategory().isBlank())
+                    ? "Uncategorised" : e.getCategory();
+            String description = (e.getDescription() == null || e.getDescription().isBlank())
+                    ? "(no description)" : e.getDescription();
+            String date = (e.getDate() != null) ? e.getDate().toString() : "-";
+
+            System.out.printf(rowFormat,
+                    (i + 1) + ".",
                     "[" + category + "]",
                     description + " [R]",
-                    e.getDate(),
+                    date,
                     e.getAmount());
         }
 
-        if (count == 0) {
-            System.out.println(" No recurring expenses found.");
-        }
-
         System.out.println(LINE);
-        System.out.println(" Total recurring: " + count);
+        System.out.println(" Total recurring: " + recurring.size());
         System.out.println(LINE);
     }
 
@@ -256,7 +301,16 @@ public class Ui {
             String entry = history.get(i);
             String[] parts = entry.split("\\|");
             if (parts.length == 2) {
-                System.out.printf(" %s : $%.2f%n", parts[0], Double.parseDouble(parts[1]));
+                try {
+                    double amount = Double.parseDouble(parts[1]);
+                    if (amount <= 0) {
+                        logger.warning("Skipping invalid budget history entry: " + entry);
+                        continue;
+                    }
+                    System.out.printf(" %s : $%.2f%n", parts[0], amount);
+                } catch (NumberFormatException e) {
+                    logger.warning("Malformed budget history entry skipped: " + entry);
+                }
             }
         }
 
@@ -374,6 +428,8 @@ public class Ui {
      * @param to the end date of the filter range
      */
     public void showFilteredExpenses(ArrayList<Expense> filtered, LocalDate from, LocalDate to) {
+        assert filtered != null : "Filtered list should not be null";
+
         System.out.println(LINE);
         System.out.println(" Expenses from " + from + " to " + to);
         System.out.println(LINE);
@@ -384,17 +440,37 @@ public class Ui {
             return;
         }
 
-        System.out.printf("  %-3s  %-14s %-20s %-12s %s%n",
-                "#", "Category", "Description", "Date", "Amount");
-        System.out.println(" ---  -------------  ------------------  ----------  --------");
+        int catWidth = "Category".length();
+        int descWidth = "Description".length();
+
+        for (Expense e : filtered) {
+            String category = (e.getCategory() == null || e.getCategory().isBlank())
+                    ? "Uncategorised" : e.getCategory();
+            String description = (e.getDescription() == null || e.getDescription().isBlank())
+                    ? "(no description)" : e.getDescription();
+            catWidth = Math.max(catWidth, category.length() + 2);
+            descWidth = Math.max(descWidth, description.length());
+        }
+
+        String headerFormat = "  %-3s  %-" + catWidth + "s  %-" + descWidth + "s  %-12s  %s%n";
+        String rowFormat    = "  %-3s  %-" + catWidth + "s  %-" + descWidth + "s  %-12s  $%.2f%n";
+
+        System.out.printf(headerFormat, "#", "Category", "Description", "Date", "Amount");
+        System.out.println(" " + "-".repeat(3 + 2 + catWidth + 2 + descWidth + 2 + 12 + 2 + 8));
 
         for (int i = 0; i < filtered.size(); i++) {
             Expense e = filtered.get(i);
-            System.out.printf("  %-3s  %-14s %-20s %-12s $%.2f%n",
+            String category = (e.getCategory() == null || e.getCategory().isBlank())
+                    ? "Uncategorised" : e.getCategory();
+            String description = (e.getDescription() == null || e.getDescription().isBlank())
+                    ? "(no description)" : e.getDescription();
+            String date = (e.getDate() != null) ? e.getDate().toString() : "-";
+
+            System.out.printf(rowFormat,
                     (i + 1) + ".",
-                    "[" + e.getCategory() + "]",
-                    e.getDescription(),
-                    e.getDate(),
+                    "[" + category + "]",
+                    description,
+                    date,
                     e.getAmount());
         }
 

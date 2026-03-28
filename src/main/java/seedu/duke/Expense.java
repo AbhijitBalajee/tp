@@ -22,6 +22,10 @@ public class Expense {
      * @param date the date of the expense
      */
     public Expense(String description, double amount, String category, LocalDate date) {
+        assert description != null : "Description should not be null";
+        assert amount > 0 : "Amount must be greater than 0";
+        assert category != null : "Category should not be null";
+        assert date != null : "Date should not be null";
         this.description = description;
         this.amount = amount;
         this.category = category;
@@ -40,6 +44,10 @@ public class Expense {
      */
     public Expense(String description, double amount, String category,
                    LocalDate date, boolean isRecurring) {
+        assert description != null : "Description should not be null";
+        assert amount > 0 : "Amount must be greater than 0";
+        assert category != null : "Category should not be null";
+        assert date != null : "Date should not be null";
         this.description = description;
         this.amount = amount;
         this.category = category;
