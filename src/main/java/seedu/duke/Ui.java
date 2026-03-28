@@ -12,17 +12,16 @@ import java.util.logging.Logger;
  */
 public class Ui {
 
+    private static final Logger logger = Logger.getLogger(Ui.class.getName());
     private static final String LINE = "____________________________________________________________";
     private final Scanner scanner;
 
-    public Ui() {
-        this.scanner = new Scanner(System.in);
-    }
-
-    private static final Logger logger = Logger.getLogger(Ui.class.getName());
-
     static {
         logger.setUseParentHandlers(false);
+    }
+    
+    public Ui() {
+        this.scanner = new Scanner(System.in);
     }
 
     /**
