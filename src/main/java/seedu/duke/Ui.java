@@ -137,7 +137,12 @@ public class Ui {
         String rowFormat    = "  %-3s  %-" + catWidth + "s  %-" + descWidth + "s  %-12s  $%.2f%n";
 
         System.out.printf(headerFormat, "#", "Category", "Description", "Date", "Amount");
-        System.out.println(" " + "-".repeat(3 + 2 + catWidth + 2 + descWidth + 2 + 12 + 2 + 8));
+        System.out.printf("  %-3s  %-" + catWidth + "s  %-" + descWidth + "s  %-12s  %s%n",
+                "---",
+                "-".repeat(catWidth),
+                "-".repeat(descWidth),
+                "----------",
+                "--------");
 
         for (int i = 0; i < expenses.size(); i++) {
             Expense e = expenses.getExpense(i);
@@ -206,7 +211,12 @@ public class Ui {
         String rowFormat    = "  %-3s  %-" + catWidth + "s  %-" + descWidth + "s  %-12s  $%.2f%n";
 
         System.out.printf(headerFormat, "#", "Category", "Description", "Date", "Amount");
-        System.out.println(" " + "-".repeat(3 + 2 + catWidth + 2 + descWidth + 2 + 12 + 2 + 8));
+        System.out.printf("  %-3s  %-" + catWidth + "s  %-" + descWidth + "s  %-12s  %s%n",
+                "---",
+                "-".repeat(catWidth),
+                "-".repeat(descWidth),
+                "----------",
+                "--------");
 
         for (int i = 0; i < recurring.size(); i++) {
             Expense e = recurring.get(i);
@@ -456,7 +466,12 @@ public class Ui {
         String rowFormat    = "  %-3s  %-" + catWidth + "s  %-" + descWidth + "s  %-12s  $%.2f%n";
 
         System.out.printf(headerFormat, "#", "Category", "Description", "Date", "Amount");
-        System.out.println(" " + "-".repeat(3 + 2 + catWidth + 2 + descWidth + 2 + 12 + 2 + 8));
+        System.out.printf("  %-3s  %-" + catWidth + "s  %-" + descWidth + "s  %-12s  %s%n",
+                "---",
+                "-".repeat(catWidth),
+                "-".repeat(descWidth),
+                "----------",
+                "--------");
 
         for (int i = 0; i < filtered.size(); i++) {
             Expense e = filtered.get(i);
