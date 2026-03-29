@@ -6,35 +6,43 @@ skinparam sequenceMessageAlign center
 actor User
 participant ":SpendTrack" as ST
 participant "Parser" as P
+participant "DateParser" as DP
 participant ":AddCommand" as AC
 participant ":Expense" as E
 participant ":ExpenseList" as EL
 participant ":Ui" as UI
 
-User -> ST : "add d/Coffee a/3.50 c/Food"
+User -> ST : "add d/Coffee a/3.50 c/food date/22-03-2026"
 activate ST
 
 ST -> P : parse(input)
 activate P
+P -> P : resolve alias
 P -> P : parseAddCommand(args)
 note right of P
   Splits args by regex
-  " (?=[dac]/)"
-  to extract d/, a/, c/ tokens
+  to extract d/, a/, c/,
+  date/ tokens in any order
 end note
-P --> ST : :AddCommand("Coffee", 3.50, "Food")
+P -> P : normalizeCategory("food")
+note right of P : Returns "Food"
+P -> DP : parse("22-03-2026")
+activate DP
+DP --> P : LocalDate(2026-03-22)
+deactivate DP
+P --> ST : :AddCommand("Coffee", 3.50, "Food", 2026-03-22)
 deactivate P
 
 ST -> AC : execute(expenses, ui)
 activate AC
-AC -> E ** : new Expense("Coffee", 3.50, "Food")
+AC -> E ** : new Expense("Coffee", 3.50, "Food", 2026-03-22)
 AC -> EL : addExpense(expense)
 activate EL
 EL --> AC
 deactivate EL
 AC -> UI : showAddSuccess(expense)
 activate UI
-UI --> User : "Added: Coffee | $3.50 | Food"
+UI --> User : "Added: [Food] Coffee - $3.50 (2026-03-22)"
 deactivate UI
 deactivate AC
 

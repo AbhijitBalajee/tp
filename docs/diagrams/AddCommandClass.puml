@@ -5,19 +5,33 @@ skinparam classAttributeIconSize 0
 
 class Parser {
     - {static} TOKEN_SPLIT_REGEX : String
+    - {static} ALIASES : Map<String, String>
     + {static} parse(input : String) : Command
     - {static} parseAddCommand(args : String) : AddCommand
+    - {static} normalizeCategory(category : String) : String
+}
+
+class DateParser {
+    - {static} SG_DATE_FORMAT : DateTimeFormatter
+    + {static} parse(dateString : String) : LocalDate
 }
 
 abstract class Command {
     + {abstract} execute(expenses : ExpenseList, ui : Ui)
     + isExit() : boolean
+    + mutatesData() : boolean
 }
 
 class AddCommand {
     - description : String
     - amount : double
     - category : String
+    - date : LocalDate
+    + execute(expenses : ExpenseList, ui : Ui)
+    + mutatesData() : boolean
+}
+
+class SummaryCommand {
     + execute(expenses : ExpenseList, ui : Ui)
 }
 
@@ -25,25 +39,37 @@ class Expense {
     - description : String
     - amount : double
     - category : String
+    - date : LocalDate
     + getDescription() : String
     + getAmount() : double
     + getCategory() : String
+    + getDate() : LocalDate
+    + toString() : String
 }
 
 class ExpenseList {
     - expenses : ArrayList<Expense>
     + addExpense(e : Expense)
+    + getExpenses() : ArrayList<Expense>
+    + getTotal() : double
     + size() : int
 }
 
 class Ui {
     + showAddSuccess(e : Expense)
+    + showEnhancedSummary(...)
+    + showError(msg : String)
 }
 
 Command <|-- AddCommand
+Command <|-- SummaryCommand
 Parser ..> AddCommand : creates
+Parser ..> SummaryCommand : creates
+Parser ..> DateParser : uses
 AddCommand ..> Expense : creates
 AddCommand --> ExpenseList : adds to
 AddCommand --> Ui : displays via
+SummaryCommand --> ExpenseList : reads from
+SummaryCommand --> Ui : displays via
 ExpenseList o-- Expense : stores
 @enduml
