@@ -198,6 +198,10 @@ Alias resolution occurs in `Parser.parse()` before the main command switch:
 
 The alias map is defined as a static `HashMap<String, String>` initialised in a static block, making it easy to add new aliases as new commands are introduced.
 
+The following sequence diagram shows how the alias `s` is resolved to `summary`:
+
+![Sequence diagram for alias resolution](images/AliasSequence.png)
+
 ### Storage Feature
 
 The storage feature allows SpendTrack to persist expense data and budget across sessions. Expenses are saved to `data/spendtrack.txt` automatically after every mutating command (`add`, `delete`, `edit`), and loaded back on startup.
