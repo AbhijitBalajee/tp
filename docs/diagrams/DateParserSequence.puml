@@ -1,0 +1,30 @@
+@startuml
+!define BGCOLOR white
+skinparam backgroundColor BGCOLOR
+skinparam sequenceMessageAlign center
+
+participant "Parser" as P
+participant "DateParser" as DP
+
+P -> DP : parse(dateString)
+activate DP
+
+DP -> DP : trim and lowercase
+
+alt dateString is "today"
+    DP --> P : LocalDate.now()
+else dateString is "yesterday"
+    DP --> P : LocalDate.now().minusDays(1)
+else try ISO format (YYYY-MM-DD)
+    DP -> DP : LocalDate.parse(dateString)
+    DP --> P : parsed LocalDate
+else try SG format (DD-MM-YYYY)
+    DP -> DP : LocalDate.parse(dateString, "dd-MM-yyyy")
+    DP --> P : parsed LocalDate
+else all formats fail
+    DP --> P : throw SpendTrackException
+    note right : "Invalid date format.\nAccepted: YYYY-MM-DD,\nDD-MM-YYYY, 'today',\n'yesterday'."
+end
+
+deactivate DP
+@enduml
