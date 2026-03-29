@@ -15,4 +15,12 @@ filter from/2026-03-22 to/2026-03-22
 filter from/2026-01-01 to/2026-01-31
 filter from/2026-03-25 to/2026-03-01
 help
+add c/Food a/3.50 d/Coffee date/2026-03-15
+add d/Juice a/3.00 c/food date/2026-03-15
+add d/Special a/5.00 c/Events date/29-02-2024
+add d/Tea a/2.00 c/Food date/22-03-2026
+add d/Fail a/3.50 c/Food date/
+S
+A d/Candy a/1.00 c/Food date/2026-03-22
+L
 bye
