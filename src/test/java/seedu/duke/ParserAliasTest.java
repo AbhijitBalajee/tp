@@ -58,4 +58,22 @@ class ParserAliasTest {
         Command cmd = Parser.parse("summary");
         assertInstanceOf(SummaryCommand.class, cmd);
     }
+
+    @Test
+    void parse_uppercaseAliasA_returnsAddCommand() throws SpendTrackException {
+        Command cmd = Parser.parse("A d/Coffee a/3.50 c/Food");
+        assertInstanceOf(AddCommand.class, cmd);
+    }
+
+    @Test
+    void parse_uppercaseAliasL_returnsListCommand() throws SpendTrackException {
+        Command cmd = Parser.parse("L");
+        assertInstanceOf(ListCommand.class, cmd);
+    }
+
+    @Test
+    void parse_uppercaseFullCommand_returnsCorrectCommand() throws SpendTrackException {
+        Command cmd = Parser.parse("SUMMARY");
+        assertInstanceOf(SummaryCommand.class, cmd);
+    }
 }
