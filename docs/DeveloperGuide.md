@@ -23,7 +23,7 @@ The add mechanism follows the Command pattern used throughout SpendTrack. The fo
 1. The user enters `add d/Coffee a/3.50 c/food date/22-03-2026`.
 2. `SpendTrack.run()` passes the raw input to `Parser.parse()`.
 3. `Parser.parse()` lowercases the command word and checks the `ALIASES` map (e.g., `a` resolves to `add`). It then delegates to `Parser.parseAddCommand()`.
-4. `parseAddCommand()` uses a regex lookahead to split the arguments into tokens. Each token starts with a flag prefix (`d/`, `a/`, `c/`, or `date/`), allowing the user to enter them in any order.
+4. `parseAddCommand()` uses a regex lookahead to split the arguments into tokens. Each token starts with a flag prefix (`d/`, `a/`, `c/`, `date/`, or `recurring/`), allowing the user to enter them in any order.
 5. The `c/` value is passed through `normalizeCategory()`, which capitalises the first letter of each word.
 6. The `date/` value is passed to `DateParser.parse()`, which tries multiple date formats in sequence (see [Flexible Date Parsing](#flexible-date-parsing-dateparser) below).
 7. The extracted values are used to create a new `AddCommand` object.
@@ -91,11 +91,11 @@ The `DateParser` class provides flexible date input for the `add` command. It ac
 
 `DateParser.parse()` attempts each format in sequence, falling through to the next if parsing fails:
 
-1. Trim and lowercase the input string.
-2. Check for the keyword `today` — return `LocalDate.now()`.
-3. Check for the keyword `yesterday` — return `LocalDate.now().minusDays(1)`.
-4. Try parsing as ISO format (`YYYY-MM-DD`) using `LocalDate.parse()`.
-5. If that fails, try parsing as Singapore format (`DD-MM-YYYY`) using `DateTimeFormatter.ofPattern("dd-MM-yyyy")`.
+1. Trim the input and create a lowercased copy for keyword matching.
+2. Check the lowercased copy for the keyword `today` — return `LocalDate.now()`.
+3. Check the lowercased copy for the keyword `yesterday` — return `LocalDate.now().minusDays(1)`.
+4. Try parsing the original trimmed string as ISO format (`YYYY-MM-DD`) using `LocalDate.parse()`. The original (not lowercased) string is used here because ISO date strings are case-sensitive.
+5. If that fails, try parsing the original trimmed string as Singapore format (`DD-MM-YYYY`) using `DateTimeFormatter.ofPattern("dd-MM-yyyy")`.
 6. If all formats fail, throw a `SpendTrackException` with a message listing the accepted formats.
 
 The following sequence diagram shows the internal parsing flow:

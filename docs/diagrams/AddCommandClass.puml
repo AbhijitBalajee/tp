@@ -27,6 +27,7 @@ class AddCommand {
     - amount : double
     - category : String
     - date : LocalDate
+    - isRecurring : boolean
     + execute(expenses : ExpenseList, ui : Ui)
     + mutatesData() : boolean
 }
@@ -40,10 +41,12 @@ class Expense {
     - amount : double
     - category : String
     - date : LocalDate
+    - isRecurring : boolean
     + getDescription() : String
     + getAmount() : double
     + getCategory() : String
     + getDate() : LocalDate
+    + isRecurring() : boolean
     + toString() : String
 }
 
