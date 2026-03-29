@@ -72,4 +72,23 @@ class DateTaggingTest {
         assertThrows(SpendTrackException.class, () ->
                 Parser.parse("add d/Lunch a/10.00 c/Food date/not-a-date"));
     }
+
+    @Test
+    void parser_addFlagsInDifferentOrder_parsesCorrectly() throws SpendTrackException {
+        Command cmd = Parser.parse("add c/Food a/3.50 d/Coffee");
+        cmd.execute(expenses, ui);
+        Expense stored = expenses.getExpense(0);
+        assertEquals("Coffee", stored.getDescription());
+        assertEquals(3.50, stored.getAmount());
+        assertEquals("Food", stored.getCategory());
+    }
+
+    @Test
+    void parser_addDateFlagFirst_parsesCorrectly() throws SpendTrackException {
+        Command cmd = Parser.parse("add date/2026-03-15 d/Lunch a/10.00 c/Food");
+        cmd.execute(expenses, ui);
+        Expense stored = expenses.getExpense(0);
+        assertEquals("Lunch", stored.getDescription());
+        assertEquals(LocalDate.of(2026, 3, 15), stored.getDate());
+    }
 }

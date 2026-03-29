@@ -76,4 +76,31 @@ class FlexibleDateTest {
         assertThrows(SpendTrackException.class, () ->
                 Parser.parse("add d/Coffee a/3.50 c/Food date/32-13-2026"));
     }
+
+    @Test
+    void parser_dateEmptyString_throwsException() {
+        assertThrows(SpendTrackException.class, () ->
+                Parser.parse("add d/Coffee a/3.50 c/Food date/"));
+    }
+
+    @Test
+    void parser_dateLeapYear_parsesCorrectly() throws SpendTrackException {
+        Command cmd = Parser.parse("add d/Coffee a/3.50 c/Food date/29-02-2024");
+        cmd.execute(expenses, ui);
+        assertEquals(LocalDate.of(2024, 2, 29), expenses.getExpense(0).getDate());
+    }
+
+    @Test
+    void parser_dateNonLeapYear_adjustsToLastValidDay() throws SpendTrackException {
+        Command cmd = Parser.parse("add d/Coffee a/3.50 c/Food date/29-02-2025");
+        cmd.execute(expenses, ui);
+        assertEquals(LocalDate.of(2025, 2, 28), expenses.getExpense(0).getDate());
+    }
+
+    @Test
+    void parser_dateMonthEnd_parsesCorrectly() throws SpendTrackException {
+        Command cmd = Parser.parse("add d/Coffee a/3.50 c/Food date/31-01-2026");
+        cmd.execute(expenses, ui);
+        assertEquals(LocalDate.of(2026, 1, 31), expenses.getExpense(0).getDate());
+    }
 }
