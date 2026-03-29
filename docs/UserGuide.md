@@ -78,6 +78,15 @@ ____________________________________________________________
 ____________________________________________________________
 ```
 
+Each row shows:
+- **Category name** and **total spent** in that category
+- **Percentage** of overall spending
+- **txns** — number of transactions (i.e. expenses) in that category
+- **avg** — average amount per transaction
+- **max** — largest single expense in that category
+
+Notes:
+- Categories are sorted from highest to lowest total.
 - If there are no expenses, shows: `No expenses recorded yet.`
 
 ### Command aliases
