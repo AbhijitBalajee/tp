@@ -2,6 +2,7 @@
 !define BGCOLOR white
 skinparam backgroundColor BGCOLOR
 skinparam classAttributeIconSize 0
+hide circle
 
 class SpendTrack {
     - storage: Storage
