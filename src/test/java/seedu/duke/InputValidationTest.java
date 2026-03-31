@@ -1,9 +1,15 @@
 package seedu.duke;
 
 import org.junit.jupiter.api.Test;
+import seedu.duke.command.DeleteCommand;
+import seedu.duke.ExitCommand;
+import seedu.duke.command.FilterCommand;
+import seedu.duke.command.FindCommand;
+import seedu.duke.command.ListCommand;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class InputValidationTest {
 
@@ -154,4 +160,110 @@ public class InputValidationTest {
         assertDoesNotThrow(() ->
                 Parser.parse("   "));
     }
+
+    // @@author Ariff1422
+
+    // ── Filter command validation ─────────────────────────────────────────────
+
+    @Test
+    void parse_filterValid_returnsFilterCommand() throws SpendTrackException {
+        assertTrue(Parser.parse("filter from/2026-01-01 to/2026-03-31") instanceof FilterCommand);
+    }
+
+    @Test
+    void parse_filterSameDates_returnsFilterCommand() throws SpendTrackException {
+        assertTrue(Parser.parse("filter from/2026-03-22 to/2026-03-22") instanceof FilterCommand);
+    }
+
+    @Test
+    void parse_filterFromAfterTo_throwsException() {
+        assertThrows(SpendTrackException.class,
+                () -> Parser.parse("filter from/2026-12-31 to/2026-01-01"));
+    }
+
+    @Test
+    void parse_filterMissingBothArgs_throwsException() {
+        assertThrows(SpendTrackException.class, () -> Parser.parse("filter"));
+    }
+
+    @Test
+    void parse_filterOnlyFrom_throwsException() {
+        assertThrows(SpendTrackException.class,
+                () -> Parser.parse("filter from/2026-01-01"));
+    }
+
+    @Test
+    void parse_filterOnlyTo_throwsException() {
+        assertThrows(SpendTrackException.class,
+                () -> Parser.parse("filter to/2026-03-31"));
+    }
+
+    @Test
+    void parse_filterInvalidDateFormat_throwsException() {
+        assertThrows(SpendTrackException.class,
+                () -> Parser.parse("filter from/notadate to/alsonotadate"));
+    }
+
+    // ── Find command validation ───────────────────────────────────────────────
+
+    @Test
+    void parse_findValid_returnsFindCommand() throws SpendTrackException {
+        assertTrue(Parser.parse("find 1") instanceof FindCommand);
+    }
+
+    @Test
+    void parse_findMissingIndex_throwsException() {
+        assertThrows(SpendTrackException.class, () -> Parser.parse("find"));
+    }
+
+    @Test
+    void parse_findNonNumeric_throwsException() {
+        assertThrows(SpendTrackException.class, () -> Parser.parse("find coffee"));
+    }
+
+    @Test
+    void parse_findFloat_throwsException() {
+        assertThrows(SpendTrackException.class, () -> Parser.parse("find 2.5"));
+    }
+
+    // ── List command validation ───────────────────────────────────────────────
+
+    @Test
+    void parse_listPlain_returnsListCommand() throws SpendTrackException {
+        assertTrue(Parser.parse("list") instanceof ListCommand);
+    }
+
+    @Test
+    void parse_listRecurring_returnsListCommand() throws SpendTrackException {
+        assertTrue(Parser.parse("list recurring") instanceof ListCommand);
+    }
+
+    @Test
+    void parse_listAliasL_returnsListCommand() throws SpendTrackException {
+        assertTrue(Parser.parse("l") instanceof ListCommand);
+    }
+
+    // ── Alias resolution ─────────────────────────────────────────────────────
+
+    @Test
+    void parse_aliasD_returnsDeleteCommand() throws SpendTrackException {
+        assertTrue(Parser.parse("d 2") instanceof DeleteCommand);
+    }
+
+    @Test
+    void parse_bye_returnsExitCommand() throws SpendTrackException {
+        assertTrue(Parser.parse("bye") instanceof ExitCommand);
+    }
+
+    @Test
+    void parse_bye_isExitTrue() throws SpendTrackException {
+        assertTrue(Parser.parse("bye").isExit());
+    }
+
+    @Test
+    void parse_unknownCommand_doesNotThrow() {
+        assertDoesNotThrow(() -> Parser.parse("foobar"));
+    }
+
+    // @@author
 }
