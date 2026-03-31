@@ -5,20 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import seedu.duke.command.AddCommand;
-import seedu.duke.command.BudgetCommand;
-import seedu.duke.command.Command;
-import seedu.duke.command.DeleteCommand;
-import seedu.duke.command.FilterCommand;
-import seedu.duke.command.FindCommand;
-import seedu.duke.command.HelpCommand;
-import seedu.duke.command.ListCommand;
+import seedu.duke.command.*;
 import seedu.duke.command.RemainingCommand;
-import seedu.duke.command.SummaryCommand;
-import seedu.duke.command.TotalCommand;
-import seedu.duke.command.EditCommand;
-import seedu.duke.command.BudgetResetCommand;
-import seedu.duke.command.BudgetHistoryCommand;
 
 /**
  * Parses user input into commands.
@@ -90,6 +78,8 @@ public class Parser {
             return new RemainingCommand();
         case "summary":
             return new SummaryCommand();
+        case "search":
+            return new SearchCommand(parts.length > 1 ? parts[1] : "");    
         case "help":
             return new HelpCommand();
         case "bye":
