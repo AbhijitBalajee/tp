@@ -2,7 +2,6 @@ package seedu.duke;
 
 import org.junit.jupiter.api.Test;
 import seedu.duke.command.DeleteCommand;
-import seedu.duke.ExitCommand;
 import seedu.duke.command.FilterCommand;
 import seedu.duke.command.FindCommand;
 import seedu.duke.command.ListCommand;
