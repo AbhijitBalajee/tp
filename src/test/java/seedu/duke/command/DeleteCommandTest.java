@@ -11,6 +11,7 @@ import seedu.duke.Ui;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+// @@author Ariff1422
 class DeleteCommandTest {
 
     private ExpenseList expenses;
@@ -54,3 +55,4 @@ class DeleteCommandTest {
         assertThrows(SpendTrackException.class, () -> new DeleteCommand(0).execute(expenses, ui));
     }
 }
+// @@author
