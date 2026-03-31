@@ -6,6 +6,67 @@ No external libraries or reused code beyond the Java standard library.
 
 ## Design & Implementation
 
+### Architecture
+
+SpendTrack follows a simple command-driven architecture. The main loop in `SpendTrack.run()` repeatedly reads input, parses it into a `Command`, executes the command, and optionally saves the result to disk.
+
+The key components are:
+
+| Component | Responsibility |
+|-----------|---------------|
+| `SpendTrack` | Main loop: read → parse → execute → save → repeat |
+| `Parser` | Converts raw input string into a `Command` object |
+| `Command` (abstract) | Defines the `execute()`, `isExit()`, and `mutatesData()` contract |
+| `ExpenseList` | In-memory store of all expenses and budget |
+| `Storage` | Persists `ExpenseList` to and from disk |
+| `Ui` | All user-facing input and output |
+
+The following sequence diagram shows the full runtime flow of SpendTrack, from launch through the command loop:
+
+![Architecture sequence diagram](images/ArchitectureSequence.png)
+
+Every command follows the same pattern: `Parser.parse()` creates a command object, `command.execute()` reads or mutates `ExpenseList` and calls `Ui` to display results, and if `command.mutatesData()` returns `true`, `Storage.save()` is called automatically. This means no command class ever handles I/O or file persistence directly.
+
+### Delete Expense Feature
+
+The delete feature removes an expense from the list by its 1-based index:
+
+```
+delete INDEX
+```
+
+#### How it works
+
+1. The user enters `delete 2`.
+2. `Parser.parse()` attempts to parse the second token as an integer. If it is missing or non-numeric, a `SpendTrackException` is thrown immediately.
+3. A `DeleteCommand(2)` is created and returned.
+4. `DeleteCommand.execute()` checks that the index is within bounds (1 to `expenseList.size()` inclusive). If not, a `SpendTrackException` is thrown with the valid range.
+5. The expense at `index - 1` (zero-based) is removed from `ExpenseList` via `deleteExpense()`.
+6. `Ui.showDeleteSuccess()` displays the deleted expense to confirm the action.
+7. Because `mutatesData()` returns `true`, `SpendTrack` calls `Storage.save()` after execution.
+
+The following sequence diagram shows the full delete flow:
+
+![Sequence diagram for delete command](images/DeleteCommandSequence.png)
+
+#### Design considerations
+
+**Aspect: 1-based vs 0-based indexing**
+
+- **Current approach:** User-facing indices are 1-based. `DeleteCommand` converts to 0-based internally by subtracting 1 before calling `ExpenseList.deleteExpense()`.
+    - Pros: Matches the numbering shown in `list` output, which is more natural for non-technical users.
+    - Cons: Requires a consistent conversion at every index-based command (`delete`, `find`, `edit`).
+
+- **Alternative:** Use 0-based indices throughout.
+    - Pros: No conversion needed.
+    - Cons: Confusing for users who see item `1.` in the list but must type `delete 0`.
+
+1-based indexing was chosen for usability. The conversion is trivial and centralised within each command's `execute()` method.
+
+**Aspect: Where to validate the index**
+
+Index range validation happens in `DeleteCommand.execute()`, not in `Parser`. The parser only checks that the input is a valid integer. This is because the list size is not known at parse time — `ExpenseList` is only available during execution.
+
 ### Add Expense Feature
 
 The add expense feature allows users to record a new expense with a description, amount, category, and optional date using the command:
@@ -222,7 +283,7 @@ The storage feature allows SpendTrack to persist expense data and budget across 
 5. Malformed lines are skipped with a warning message.
 6. If the file does not exist, the app starts silently with an empty list.
 
-The following sequence diagram shows the startup load flow:
+The following sequence diagram shows the startup load flow, including the startup reminder:
 
 ![Sequence diagram for storage load](images/StorageLoadSequence.png)
 
@@ -252,6 +313,65 @@ Bus fare|1.80|Transport|2026-03-22|false
 
 - Pipe (`|`) delimiter was chosen over CSV because expense descriptions may contain commas.
 - All file I/O is encapsulated inside `Storage` — no `FileWriter` or `BufferedReader` exists in command classes, keeping the separation of concerns clean.
+
+#### Class structure
+
+The following class diagram shows the relationships between `Storage`, `ExpenseList`, `Expense`, and `SpendTrack`:
+
+![Class diagram for storage feature](images/StorageClassDiagram.png)
+
+`SpendTrack` owns one `Storage` instance and one `ExpenseList`. On startup, `Storage.load()` populates the `ExpenseList` with `Expense` objects parsed from disk. After every mutating command, `SpendTrack` calls `Storage.save()` to persist the current state. All file I/O is contained within `Storage`, keeping command classes and `ExpenseList` free of I/O concerns.
+
+### Filter and Find Features
+
+#### Filter expenses by date range
+
+The `filter` command allows users to view expenses within an inclusive date range:
+
+```
+filter from/DATE to/DATE
+```
+
+**How it works:**
+
+1. The user enters `filter from/2026-03-01 to/2026-03-31`.
+2. `Parser.parse()` delegates to `Parser.parseFilterCommand()`.
+3. `parseFilterCommand()` extracts the `from/` and `to/` values and passes each to `DateParser.parse()`.
+4. If either date is missing, or `from` is after `to`, a `SpendTrackException` is thrown.
+5. A `FilterCommand(from, to)` is created and returned.
+6. `FilterCommand.execute()` iterates over all expenses and collects those whose date falls within the range (inclusive).
+7. `Ui.showFilteredExpenses()` displays the results in the same table format as `list`.
+8. The original `ExpenseList` is not modified — filtering is display-only.
+
+#### Find expense by index
+
+The `find` command displays the full details of a single expense:
+
+```
+find INDEX
+```
+
+**How it works:**
+
+1. The user enters `find 2`.
+2. `Parser.parse()` parses the index as an integer and creates a `FindCommand(2)`.
+3. `FindCommand.execute()` checks that the list is non-empty and the index is within bounds (1-based).
+4. The expense at `index - 1` is retrieved from `ExpenseList`.
+5. `Ui.showExpenseDetail()` displays a labelled detail view with all fields.
+
+The following sequence diagram shows the execution flow for both `filter` and `find`:
+
+![Sequence diagram for filter and find commands](images/FilterFindSequence.png)
+
+#### Design considerations
+
+**Aspect: Filter does not mutate the list**
+
+`FilterCommand` builds a separate `ArrayList<Expense>` of matching expenses and passes it to `Ui.showFilteredExpenses()`. The underlying `ExpenseList` is never modified. This ensures that filtering is a safe, read-only operation that cannot accidentally corrupt data.
+
+**Aspect: Index validation in FindCommand**
+
+`FindCommand` validates the index at execute time rather than parse time. This follows the same pattern as `DeleteCommand` — the parser only checks that the index is a valid integer, while the command checks that it is within the current list bounds. This is necessary because the list size is not known at parse time.
 
 ### Edit Expense Feature
 

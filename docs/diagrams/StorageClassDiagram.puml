@@ -1,0 +1,49 @@
+@startuml
+!define BGCOLOR white
+skinparam backgroundColor BGCOLOR
+skinparam classAttributeIconSize 0
+
+class SpendTrack {
+    - storage: Storage
+    - expenseList: ExpenseList
+    - ui: Ui
+    + run()
+}
+
+class Storage {
+    - filePath: String
+    + save(expenses: ExpenseList)
+    + load(expenses: ExpenseList)
+    - parseLine(line: String, expenses: ExpenseList)
+}
+
+class ExpenseList {
+    - expenses: ArrayList<Expense>
+    - budget: double
+    - budgetHistory: ArrayList<String>
+    + addExpense(expense: Expense)
+    + deleteExpense(index: int): Expense
+    + getExpense(index: int): Expense
+    + setExpense(index: int, expense: Expense)
+    + setBudgetDirectly(budget: double)
+    + addBudgetHistory(entry: String)
+    + getTotal(): double
+}
+
+class Expense {
+    - description: String
+    - amount: double
+    - category: String
+    - date: LocalDate
+    - isRecurring: boolean
+    + getDescription(): String
+    + getAmount(): double
+    + getCategory(): String
+    + getDate(): LocalDate
+}
+
+SpendTrack "1" --> "1" Storage : uses
+SpendTrack "1" --> "1" ExpenseList : owns
+Storage ..> ExpenseList : loads into / saves from
+ExpenseList "1" *-- "0..*" Expense : contains
+@enduml
