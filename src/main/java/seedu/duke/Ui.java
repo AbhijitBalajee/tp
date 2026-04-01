@@ -361,6 +361,7 @@ public class Ui {
         System.out.println("  filter     from/<YYYY-MM-DD> to/<YYYY-MM-DD>          -- filter by date range");
         System.out.println("  find       <index>                                     -- view expense details");
         System.out.println("  remaining                                              -- show remaining");
+        System.out.println("  last <n>                                             -- show last n expenses");
         System.out.println("  help (h)                                               -- show this help");
         System.out.println("  bye                                                    -- exit");
         System.out.println(LINE);
