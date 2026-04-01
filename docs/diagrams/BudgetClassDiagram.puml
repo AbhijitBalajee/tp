@@ -1,0 +1,56 @@
+@startuml
+!define BGCOLOR white
+skinparam backgroundColor BGCOLOR
+skinparam classAttributeIconSize 0
+hide circle
+
+abstract class Command {
+    + execute(expenses, ui)
+    + isExit(): boolean
+    + mutatesData(): boolean
+}
+
+class BudgetCommand {
+    - budgetAmount: double
+    - MAX_BUDGET: double
+    + execute(expenses, ui)
+    - validateBudget(amount)
+}
+
+class BudgetResetCommand {
+    + execute(expenses, ui)
+}
+
+class BudgetHistoryCommand {
+    + execute(expenses, ui)
+}
+
+class ExpenseList {
+    - budget: double
+    - budgetHistory: ArrayList<String>
+    + setBudget(budget: double)
+    + resetBudget()
+    + getBudget(): double
+    + hasBudget(): boolean
+    + getBudgetHistory(): ArrayList<String>
+    + addBudgetHistory(entry: String)
+}
+
+class Ui {
+    + showBudgetSet(budget, totalSpent)
+    + showBudgetExceeded(budget, totalSpent)
+    + showBudgetReset()
+    + showBudgetHistory(history)
+}
+
+Command <|-- BudgetCommand
+Command <|-- BudgetResetCommand
+Command <|-- BudgetHistoryCommand
+
+BudgetCommand --> ExpenseList : sets budget
+BudgetCommand --> Ui : shows confirmation
+BudgetResetCommand --> ExpenseList : resets budget
+BudgetResetCommand --> Ui : shows reset message
+BudgetHistoryCommand --> ExpenseList : reads history
+BudgetHistoryCommand --> Ui : shows history
+@enduml
