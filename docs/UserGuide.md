@@ -56,6 +56,30 @@ ____________________________________________________________
 ____________________________________________________________
 ```
 
+### Viewing total expenses: `total`
+
+Displays the total sum of all recorded expenses.
+
+Format: `total`
+
+Example: `total`
+
+Expected output:
+```
+____________________________________________________________
+ Total expenses: $32.30
+____________________________________________________________
+```
+
+If no expenses have been added:
+```
+____________________________________________________________
+ Total expenses: $0.00
+____________________________________________________________
+```
+
+---
+
 ### Viewing category summary: `summary`
 
 Displays a spending breakdown grouped by category, sorted from highest to lowest spend. Shows total, percentage, transaction count, average, and maximum for each category.
