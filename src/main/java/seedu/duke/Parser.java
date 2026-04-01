@@ -19,6 +19,7 @@ import seedu.duke.command.TotalCommand;
 import seedu.duke.command.EditCommand;
 import seedu.duke.command.BudgetResetCommand;
 import seedu.duke.command.BudgetHistoryCommand;
+import seedu.duke.command.GoalCommand;
 
 /**
  * Parses user input into commands.
@@ -88,6 +89,8 @@ public class Parser {
             return parseBudgetCommand(parts.length > 1 ? parts[1] : "");
         case "remaining":
             return new RemainingCommand();
+        case "goal":
+            return parseGoalCommand(parts.length > 1 ? parts[1] : "");
         case "summary":
             return new SummaryCommand();
         case "help":
@@ -291,6 +294,26 @@ public class Parser {
             return new BudgetCommand(amount);
         } catch (NumberFormatException e) {
             throw new SpendTrackException("budget requires a number. Usage: budget <amount>");
+        }
+    }
+
+    private static Command parseGoalCommand(String args) throws SpendTrackException {
+        String trimmed = args.trim();
+        if (trimmed.equalsIgnoreCase("status")) {
+            return new GoalCommand();
+        }
+        if (!trimmed.startsWith("g/")) {
+            throw new SpendTrackException("Usage: goal g/<amount> or goal status");
+        }
+        String valueStr = trimmed.substring(2).trim();
+        try {
+            double amount = Double.parseDouble(valueStr);
+            if (amount <= 0) {
+                throw new SpendTrackException("Goal amount must be greater than 0.");
+            }
+            return new GoalCommand(amount);
+        } catch (NumberFormatException e) {
+            throw new SpendTrackException("Goal amount must be a number. Usage: goal g/<amount>");
         }
     }
 }

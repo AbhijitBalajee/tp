@@ -16,6 +16,7 @@ public class Storage {
     private static final String EXPENSES_MARKER = "---EXPENSES---";
     private static final String BUDGET_MARKER = "---BUDGET---";
     private static final String BUDGET_HISTORY_MARKER = "---BUDGET-HISTORY---";
+    private static final String GOAL_MARKER = "---GOAL---";
 
     static {
         logger.setUseParentHandlers(false);
@@ -61,6 +62,8 @@ public class Storage {
             for (String entry : expenses.getBudgetHistory()) {
                 fw.write(entry + "\n");
             }
+            fw.write(GOAL_MARKER + "\n");
+            fw.write(expenses.getGoal() + "\n");
             logger.info("Saved " + expenses.size() + " expenses to " + filePath);
         } catch (IOException e) {
             System.out.println("Warning: could not save data. " + e.getMessage());
@@ -87,21 +90,43 @@ public class Storage {
         try (Scanner sc = new Scanner(file)) {
             boolean readingBudget = false;
             boolean readingHistory = false;
+            boolean readingGoal = false;
             while (sc.hasNextLine()) {
                 String line = sc.nextLine().trim();
                 if (line.equals(EXPENSES_MARKER)) {
                     readingBudget = false;
                     readingHistory = false;
+                    readingGoal = false;
                     continue;
                 }
                 if (line.equals(BUDGET_MARKER)) {
                     readingBudget = true;
                     readingHistory = false;
+                    readingGoal = false;
                     continue;
                 }
                 if (line.equals(BUDGET_HISTORY_MARKER)) {
                     readingBudget = false;
                     readingHistory = true;
+                    readingGoal = false;
+                    continue;
+                }
+                if (line.equals(GOAL_MARKER)) {
+                    readingBudget = false;
+                    readingHistory = false;
+                    readingGoal = true;
+                    continue;
+                }
+                if (readingGoal) {
+                    try {
+                        double goal = Double.parseDouble(line);
+                        if (goal > 0) {
+                            expenses.setGoal(goal);
+                        }
+                    } catch (NumberFormatException e) {
+                        System.out.println("Warning: could not parse goal value: " + line);
+                    }
+                    readingGoal = false;
                     continue;
                 }
                 if (readingBudget) {
