@@ -106,6 +106,102 @@ Aliases work exactly like the full command. For example, `a d/Coffee a/3.50 c/Fo
 
 Commands are case-insensitive: `ADD`, `Add`, and `add` all work.
 
+### Saving and loading data: auto-save
+
+SpendTrack automatically saves your expenses and budget to `data/spendtrack.txt` after every `add`, `delete`, and `edit`. The file is created automatically if it does not exist.
+
+On startup, SpendTrack loads your saved data before accepting commands. If the save file is missing, the app starts with an empty list silently. Malformed lines in the save file are skipped with a warning — the rest of your data is still loaded.
+
+You do not need to run any save or load command. It happens automatically.
+
+**Startup reminder**
+
+If you have existing expenses, SpendTrack shows your most recently added expense when it starts:
+
+```
+____________________________________________________________
+ Welcome to SpendTrack!
+ ...
+____________________________________________________________
+ Last recorded expense: Coffee | $3.50 | Food | 2026-03-22
+```
+
+This helps you avoid accidentally logging the same expense twice.
+
+---
+
+### Filtering expenses by date range: `filter`
+
+Shows only expenses whose date falls within the given range (inclusive).
+
+Format: `filter from/DATE to/DATE`
+
+- `DATE` accepts the same formats as the `add` command: `YYYY-MM-DD`, `DD-MM-YYYY`, `today`, `yesterday`.
+- The `from` date must not be after the `to` date.
+- Filtering does not modify the expense list.
+
+Examples:
+
+- `filter from/2026-03-01 to/2026-03-31` — shows all expenses in March 2026
+- `filter from/today to/today` — shows only today's expenses
+- `filter from/2026-03-15 to/2026-03-22` — shows expenses between 15 and 22 March
+
+Expected output:
+```
+____________________________________________________________
+ Expenses from 2026-03-15 to 2026-03-22
+____________________________________________________________
+  #    Category     Description  Date          Amount
+  ---  -----------  -----------  ----------    --------
+  1.   [Food]       Coffee       2026-03-15    $3.50
+  2.   [Transport]  Bus          2026-03-22    $1.80
+____________________________________________________________
+ Total entries: 2
+____________________________________________________________
+```
+
+If no expenses fall in the range:
+```
+ No expenses found in the given date range.
+```
+
+Error cases:
+- `filter from/2026-03-31 to/2026-03-01` → `Start date must be before end date.`
+- Missing `from/` or `to/` → `Usage: filter from/YYYY-MM-DD to/YYYY-MM-DD`
+
+---
+
+### Viewing a single expense: `find`
+
+Displays the full details of one expense by its index in the list.
+
+Format: `find INDEX`
+
+- `INDEX` is 1-based (same numbering as `list`).
+- Use `list` first to find the index of the expense you want.
+
+Examples:
+
+- `find 3` — shows full details of expense #3
+
+Expected output:
+```
+____________________________________________________________
+ ===== Expense #3 =====
+ Description : Grab to airport
+ Amount      : $24.50
+ Category    : Transport
+ Date        : 2026-03-15
+____________________________________________________________
+```
+
+Error cases:
+- `find 0` or `find 99` (out of range) → `Index X is out of range. There are Y expense(s).`
+- `find abc` → `Index must be a whole number. Usage: find <index>`
+- `find` on empty list → `No expenses recorded yet.`
+
+---
+
 ## FAQ
 
 **Q**: How do I transfer my data to another computer?
@@ -125,5 +221,13 @@ Commands are case-insensitive: `ADD`, `Add`, and `add` all work.
 | Action | Format | Alias |
 |--------|--------|-------|
 | Add expense | `add d/DESC a/AMT c/CAT [date/DATE]` | `a` |
+| Delete expense | `delete INDEX` | `d` |
+| List expenses | `list` | `l` |
+| Filter by date | `filter from/DATE to/DATE` | — |
+| Find by index | `find INDEX` | — |
 | Summary | `summary` | `s` |
+| Total | `total` | — |
+| Budget | `budget AMOUNT` | `b` |
+| Remaining | `remaining` | — |
 | Help | `help` | `h` |
+| Exit | `bye` | — |
