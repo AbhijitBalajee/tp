@@ -351,6 +351,7 @@ public class Ui {
     public void showHelp() {
         System.out.println(LINE);
         System.out.println(" Available commands (alias in brackets):");
+
         System.out.println("  add (a)    d/<desc> a/<amt> c/<cat> [date/<YYYY-MM-DD>] -- add expense");
         System.out.println("  delete (d) <index>                                     -- delete expense");
         System.out.println("  list (l)                                               -- list all");
@@ -363,8 +364,8 @@ public class Ui {
         System.out.println("  help (h)                                               -- show this help");
         System.out.println("  bye                                                    -- exit");
         System.out.println(LINE);
-    }
 
+    }
     /**
      * Displays a spending summary grouped by category.
      *
