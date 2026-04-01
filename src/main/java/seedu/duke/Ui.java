@@ -402,9 +402,8 @@ public class Ui {
         System.out.println("bye:\n"
                     + "  Exit application\n"
                     + "  Usage: bye\n");
-        
-    }
 
+    }
     /**
      * Displays a spending summary grouped by category.
      *
