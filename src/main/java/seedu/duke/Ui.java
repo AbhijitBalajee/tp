@@ -507,6 +507,19 @@ public class Ui {
                 + " | " + expense.getDate());
     }
 
+    // @@author pranavjana
+    /**
+     * Displays a general message to the user.
+     *
+     * @param message the message to display
+     */
+    public void showMessage(String message) {
+        System.out.println(LINE);
+        System.out.println(" " + message);
+        System.out.println(LINE);
+    }
+    // @@author
+
     /**
      * Displays a warning when spending is at or above 90% of the budget.
      *
