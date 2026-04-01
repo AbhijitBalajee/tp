@@ -19,6 +19,7 @@ import seedu.duke.command.TotalCommand;
 import seedu.duke.command.EditCommand;
 import seedu.duke.command.BudgetResetCommand;
 import seedu.duke.command.BudgetHistoryCommand;
+import seedu.duke.command.ClearCommand;
 
 /**
  * Parses user input into commands.
@@ -88,6 +89,8 @@ public class Parser {
             return parseBudgetCommand(parts.length > 1 ? parts[1] : "");
         case "remaining":
             return new RemainingCommand();
+        case "clear":
+            return new ClearCommand();
         case "summary":
             return new SummaryCommand();
         case "help":

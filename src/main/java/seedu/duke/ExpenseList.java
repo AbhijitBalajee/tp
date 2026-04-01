@@ -86,6 +86,15 @@ public class ExpenseList {
     }
 
     /**
+     * Removes all expenses from the list.
+     */
+    public void clearAll() {
+        assert expenses != null : "Internal expense list should not be null";
+        expenses.clear();
+        logger.info("All expenses cleared.");
+    }
+
+    /**
      * Returns the full list of expenses.
      *
      * @return the list of expenses

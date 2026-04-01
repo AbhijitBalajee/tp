@@ -508,6 +508,17 @@ public class Ui {
     }
 
     /**
+     * Displays a general message to the user.
+     *
+     * @param message the message to display
+     */
+    public void showMessage(String message) {
+        System.out.println(LINE);
+        System.out.println(" " + message);
+        System.out.println(LINE);
+    }
+
+    /**
      * Displays an error message to the user.
      *
      * @param message the error message to display
