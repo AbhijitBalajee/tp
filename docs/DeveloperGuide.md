@@ -377,17 +377,17 @@ The following sequence diagram shows the execution flow for both `filter` and `f
 
 The edit expense feature allows users to update one or more fields of an existing expense by its 1-based index:
 ```
-edit INDEX [d/DESCRIPTION] [a/AMOUNT] [c/CATEGORY] [date/YYYY-MM-DD]
+edit INDEX [d/DESCRIPTION] [a/AMOUNT] [c/CATEGORY] [date/YYYY-MM-DD] [recurring/true|false]
 ```
 
 Only the fields provided are updated — all other fields remain unchanged.
 
 #### How it works
 
-1. The user enters `edit 1 d/Latte a/6.00`.
+1. The user enters `edit 1 d/Latte a/6.00 recurring/true`.
 2. `SpendTrack.run()` passes the input to `Parser.parse()`.
 3. `Parser.parse()` identifies the command word `edit` and delegates to `Parser.parseEditCommand()`.
-4. `parseEditCommand()` extracts the index from the first token, then splits the remaining arguments using the same flag regex as `parseAddCommand()` to extract only the fields provided. Fields not provided are left as `null`.
+4. `parseEditCommand()` extracts the index from the first token, then splits the remaining arguments using the same flag regex as `parseAddCommand()` to extract only the fields provided. Fields not provided are left as `null`. Duplicate flags throw a `SpendTrackException`.
 5. A new `EditCommand` is created with the index and the parsed fields (`null` for unchanged fields).
 6. `EditCommand.execute()` validates the index and fields, retrieves the existing `Expense` from `ExpenseList`, constructs an updated `Expense` by substituting `null` fields with the original expense's values, and replaces it via `ExpenseList.setExpense()`.
 7. `Ui.showEditSuccess()` displays the before and after state of the expense.
@@ -409,6 +409,183 @@ The following sequence diagram illustrates the full flow of the edit command:
   - Cons: Tighter coupling between `Parser` and `ExpenseList`, since the parser would need to look up the existing expense at parse time rather than at execution time.
 
 The current approach was chosen to keep `Parser` stateless and decoupled from `ExpenseList`.
+
+**Aspect: Duplicate flag detection**
+
+`parseEditCommand()` tracks which flags have been seen using boolean variables (`seenDescription`, `seenAmount`, etc.). If the same flag appears twice in a single edit command, a `SpendTrackException` is thrown immediately. This prevents ambiguous updates like `edit 1 d/Latte d/Coffee` where the intended value is unclear.
+
+**Aspect: Recurring flag as an editable field**
+
+The `recurring/` flag is editable via `edit INDEX recurring/false` to allow users to un-mark an expense. This follows the same `null`-sentinel pattern as other fields — if `recurring/` is not provided, the existing value is preserved. Only `true` or `false` are accepted; any other value throws a `SpendTrackException`.
+
+### List Expenses Feature
+
+The list feature displays all recorded expenses in a formatted table:
+```
+list
+list recurring
+```
+
+The `list recurring` sub-command filters to show only expenses marked as recurring.
+
+#### How it works
+
+1. The user enters `list` or `list recurring`.
+2. `Parser.parse()` checks if a second token `recurring` is present.
+3. A `ListCommand(false)` or `ListCommand(true)` is created accordingly.
+4. `ListCommand.execute()` delegates to either `Ui.showExpenseList()` or `Ui.showRecurringList()`.
+5. Both methods calculate column widths dynamically by iterating over all expenses first, then print the table with the correct widths.
+
+The following sequence diagram shows the list command execution flow:
+
+![Sequence diagram for list command](images/ListCommandSequence.png)
+
+#### Design considerations
+
+**Aspect: Dynamic vs fixed column widths**
+
+- **Current approach:** Column widths are calculated at display time by iterating over all expenses first.
+  - Pros: Table always aligns correctly regardless of category or description length. `[Entertainment]` and `[Food]` both fit cleanly without overflow.
+  - Cons: Requires two passes over the list — one to calculate widths, one to print rows.
+
+- **Alternative:** Fixed column widths.
+  - Pros: Simpler code, single pass.
+  - Cons: Long categories like `[Entertainment]` overflow and misalign subsequent columns.
+
+Dynamic widths were chosen because alignment correctness matters more than the minor cost of a second pass.
+
+**Aspect: Recurring filter as sub-command vs separate command**
+
+- **Current approach:** `list recurring` is handled as a sub-command of `list` using a boolean flag in `ListCommand`.
+  - Pros: Intuitive — both are variants of listing. Single command class handles both cases.
+  - Cons: Slight coupling between the list and recurring concerns.
+
+- **Alternative:** A separate `ListRecurringCommand` class.
+  - Pros: Cleaner separation of concerns.
+  - Cons: Duplicates most of the list logic for a minor variation.
+
+The sub-command approach was chosen for simplicity since the only difference is a filter applied before display.
+
+---
+
+### Budget Feature
+
+The budget feature allows users to set a monthly spending limit, reset it, and view its history:
+```
+budget AMOUNT
+budget reset
+budget history
+```
+
+#### How it works — Set budget
+
+1. The user enters `budget 500`.
+2. `Parser.parseBudgetCommand()` checks for the keywords `reset` and `history` first, then parses the remaining argument as a double.
+3. `BudgetCommand.execute()` calls `validateBudget()` — amount must be greater than 0 and not exceed $1,000,000. A `SpendTrackException` is thrown if invalid.
+4. `ExpenseList.setBudget()` stores the amount and appends a `date|amount` entry to the budget history list.
+5. `Ui.showBudgetSet()` displays the budget, current total spent, and remaining balance.
+6. If total spent already exceeds the new budget, `Ui.showBudgetExceeded()` displays a warning.
+
+#### How it works — Reset budget
+
+1. The user enters `budget reset`.
+2. `Parser.parseBudgetCommand()` matches the keyword `reset` and returns a `BudgetResetCommand`.
+3. `BudgetResetCommand.execute()` checks that a budget is currently set — throws `SpendTrackException` if not.
+4. `ExpenseList.resetBudget()` sets the budget field back to 0.0.
+5. `Ui.showBudgetReset()` confirms the reset.
+
+#### How it works — Budget history
+
+1. The user enters `budget history`.
+2. `Parser.parseBudgetCommand()` matches the keyword `history` and returns a `BudgetHistoryCommand`.
+3. `BudgetHistoryCommand.execute()` retrieves the history list from `ExpenseList.getBudgetHistory()`.
+4. `Ui.showBudgetHistory()` displays entries in reverse chronological order, skipping any malformed or zero-amount entries.
+
+The following sequence diagram shows all three budget sub-command flows:
+
+![Sequence diagram for budget command](images/BudgetCommandSequence.png)
+
+The following class diagram shows the relationships between the budget-related classes:
+
+![Class diagram for budget feature](images/BudgetClassDiagram.png)
+
+#### Design considerations
+
+**Aspect: Where to store budget history**
+
+- **Current approach:** History stored as `ArrayList<String>` of `date|amount` strings inside `ExpenseList`.
+  - Pros: Simple format, easy to serialise to the save file as plain text. No additional class needed.
+  - Cons: History entries are raw strings — parsing is required at display time in `Ui`.
+
+- **Alternative:** A dedicated `BudgetRecord` class with `LocalDate date` and `double amount` fields.
+  - Pros: Type-safe. No string parsing at display time.
+  - Cons: Adds an extra class and requires custom serialisation logic for `Storage`.
+
+The current approach was chosen for simplicity. Refactoring to a `BudgetRecord` class is a natural next step if history features expand in later iterations.
+
+**Aspect: Routing set/reset/history through one parser method**
+
+All three budget sub-commands are routed through `parseBudgetCommand()`. The method checks for the keywords `reset` and `history` first using `equalsIgnoreCase()`, then falls through to numeric parsing. This means a single `budget` switch case handles all three variants cleanly without needing three separate switch cases.
+
+---
+
+### Input Validation Hardening
+
+As part of v2.0, all commands were audited to ensure no user input can cause an unhandled Java exception. The goal was consistent, clear error messages at every entry point.
+
+#### Changes made
+
+| Command | Validation added |
+|---------|-----------------|
+| `add` | Missing `d/` throws error; missing `a/` throws error; zero/negative amount throws error; non-numeric amount throws error |
+| `delete` | Non-integer index throws error; missing index throws error |
+| `edit` | Non-integer index; empty/blank description; zero/negative amount; no fields provided; duplicate flags all throw errors |
+| `budget` | Empty input throws error; non-numeric amount throws error |
+
+#### Design considerations
+
+**Aspect: Parse-time vs execute-time validation**
+
+Validation is split across two layers intentionally:
+
+- `Parser` validates **format** — is the input a valid number? Is the description non-empty? This is checked at parse time because it requires no knowledge of the current application state.
+- Commands validate **value and range** — is the index within bounds? Is the amount positive? This is checked at execute time because it requires access to `ExpenseList`.
+
+This defence-in-depth approach means that even if one layer is bypassed during future refactoring, the other still catches invalid data.
+
+---
+
+### Recurring Expenses Feature
+
+The recurring feature allows users to mark expenses as recurring and filter for them:
+```
+add ... recurring/true
+list recurring
+edit INDEX recurring/false
+```
+
+#### How it works
+
+1. The user adds `recurring/true` to any `add` command.
+2. `Parser.parseAddCommand()` extracts the `recurring/` token using the same flag regex as other tokens, and validates it is either `true` or `false` — throws `SpendTrackException` otherwise.
+3. `AddCommand` passes the flag to the `Expense` constructor. If omitted, `isRecurring` defaults to `false`.
+4. `list` shows `[R]` next to recurring expenses in the description column.
+5. `list recurring` passes `true` to `ListCommand`, which calls `Ui.showRecurringList()` to filter and display only recurring expenses.
+6. `edit INDEX recurring/false` un-marks an expense using `EditCommand` with the `newRecurring` field set to `false`.
+
+The following sequence diagram shows the recurring expense flow from add through to list:
+
+![Sequence diagram for recurring expense](images/RecurringExpenseSequence.png)
+
+#### Design considerations
+
+**Aspect: Where to store the recurring flag**
+
+The flag is stored directly on `Expense` as a `boolean isRecurring` field. This keeps it co-located with the other expense data and naturally flows through to `Storage` serialisation as a fifth pipe-delimited field (`DESCRIPTION|AMOUNT|CATEGORY|DATE|RECURRING`). No separate recurring list is maintained — `list recurring` filters on the fly at display time, ensuring the list is always consistent with the current state of expenses.
+
+**Aspect: Validating the recurring/ value**
+
+Only `true` or `false` are accepted — any other value throws a `SpendTrackException`. This is validated in `Parser` at parse time since it requires no state knowledge, consistent with the validation approach used for other flag values.
 
 
 ## Product scope
@@ -442,6 +619,11 @@ SpendTrack helps students track expenses faster than a typical GUI app. Users ca
 | v2.0 | student | filter expenses by date range | analyse spending over specific periods |
 | v2.0 | student | view full details of a single expense by index | inspect it without scrolling the entire list |
 | v2.0 | forgetful user | see my last logged expense on startup | avoid logging duplicate entries |
+| v2.0 | student | list only recurring expenses | identify habitual spending patterns |
+| v2.0 | student | mark an expense as recurring | track regular purchases |
+| v2.0 | student | edit any field of an existing expense | correct mistakes without deleting and re-adding |
+| v2.0 | student | set and reset a monthly budget | control my spending flexibly |
+| v2.0 | student | view budget history | track how my budget has changed over time |
 
 ## Non-Functional Requirements
 
@@ -528,3 +710,30 @@ SpendTrack helps students track expenses faster than a typical GUI app. Users ca
 3. Type `remaining` to verify the remaining balance.
 4. Type `budget -10` to test negative amount.
 5. Expected: error message.
+
+### Listing expenses
+
+1. Add a few expenses then type `list`.
+2. Expected: formatted table with dynamic column widths.
+3. Type `add d/Netflix a/18.00 c/Entertainment recurring/true`.
+4. Type `list recurring`.
+5. Expected: only Netflix shown with `[R]` tag.
+
+### Editing an expense
+
+1. Type `list` to see current expenses.
+2. Type `edit 1 d/Latte a/6.00` to edit description and amount.
+3. Expected: before and after shown.
+4. Type `edit 1 recurring/true` to mark as recurring.
+5. Type `edit 999 d/Test` to test out-of-range.
+6. Expected: error message.
+
+### Budget reset and history
+
+1. Type `budget 500` then `budget 300` to set two budgets.
+2. Type `budget history` to view history.
+3. Expected: entries in reverse chronological order.
+4. Type `budget reset` to clear the budget.
+5. Type `budget reset` again.
+6. Expected: error — no budget to reset.
+

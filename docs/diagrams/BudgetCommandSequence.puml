@@ -1,0 +1,85 @@
+@startuml
+!define BGCOLOR white
+skinparam backgroundColor BGCOLOR
+skinparam sequenceMessageAlign center
+
+actor User
+participant ":SpendTrack" as ST
+participant "Parser" as P
+participant ":BudgetCommand" as BC
+participant ":BudgetResetCommand" as BRC
+participant ":BudgetHistoryCommand" as BHC
+participant ":ExpenseList" as EL
+participant ":Ui" as UI
+
+== Set budget ==
+User -> ST : "budget 500"
+activate ST
+ST -> P : parse("budget 500")
+activate P
+P -> P : parseBudgetCommand("500")
+P --> ST : :BudgetCommand(500.0)
+deactivate P
+ST -> BC : execute(expenseList, ui)
+activate BC
+BC -> BC : validateBudget(500.0)
+BC -> EL : setBudget(500.0)
+activate EL
+EL -> EL : budgetHistory.add(date|500.0)
+EL --> BC
+deactivate EL
+BC -> EL : getTotal()
+activate EL
+EL --> BC : totalSpent
+deactivate EL
+BC -> UI : showBudgetSet(500.0, totalSpent)
+activate UI
+UI --> User : budget confirmation
+deactivate UI
+deactivate BC
+deactivate ST
+
+== Reset budget ==
+User -> ST : "budget reset"
+activate ST
+ST -> P : parse("budget reset")
+activate P
+P --> ST : :BudgetResetCommand
+deactivate P
+ST -> BRC : execute(expenseList, ui)
+activate BRC
+BRC -> EL : hasBudget()
+activate EL
+EL --> BRC : true
+deactivate EL
+BRC -> EL : resetBudget()
+activate EL
+EL --> BRC
+deactivate EL
+BRC -> UI : showBudgetReset()
+activate UI
+UI --> User : reset confirmation
+deactivate UI
+deactivate BRC
+deactivate ST
+
+== View budget history ==
+User -> ST : "budget history"
+activate ST
+ST -> P : parse("budget history")
+activate P
+P --> ST : :BudgetHistoryCommand
+deactivate P
+ST -> BHC : execute(expenseList, ui)
+activate BHC
+BHC -> EL : getBudgetHistory()
+activate EL
+EL --> BHC : history list
+deactivate EL
+BHC -> UI : showBudgetHistory(history)
+activate UI
+UI --> User : history table
+deactivate UI
+deactivate BHC
+deactivate ST
+@enduml
