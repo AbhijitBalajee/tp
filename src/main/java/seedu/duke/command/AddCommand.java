@@ -3,6 +3,7 @@ package seedu.duke.command;
 import java.time.LocalDate;
 import java.util.logging.Logger;
 
+import seedu.duke.BudgetChecker;
 import seedu.duke.Expense;
 import seedu.duke.ExpenseList;
 import seedu.duke.SpendTrackException;
@@ -78,6 +79,7 @@ public class AddCommand extends Command {
         Expense expense = new Expense(description, amount, category, date, isRecurring);
         expenses.addExpense(expense);
         ui.showAddSuccess(expense);
+        BudgetChecker.check(expenses, ui);
         logger.info("Expense added successfully. Total expenses: " + expenses.size());
     }
 

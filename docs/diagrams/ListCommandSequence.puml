@@ -1,0 +1,54 @@
+@startuml
+!define BGCOLOR white
+skinparam backgroundColor BGCOLOR
+skinparam sequenceMessageAlign center
+
+actor User
+participant ":SpendTrack" as ST
+participant "Parser" as P
+participant ":ListCommand" as LC
+participant ":Ui" as UI
+participant ":ExpenseList" as EL
+
+User -> ST : "list" or "list recurring"
+activate ST
+ST -> P : parse(input)
+activate P
+P -> P : check for "recurring" token
+P --> ST : ListCommand(recurringOnly)
+deactivate P
+
+ST -> LC : execute(expenseList, ui)
+activate LC
+
+alt recurringOnly == false
+    LC -> UI : showExpenseList(expenses)
+    activate UI
+    UI -> EL : getExpense(i) for each i
+    activate EL
+    EL --> UI : expense
+    deactivate EL
+    note right of UI
+        Calculates dynamic column
+        widths before printing rows
+    end note
+    UI --> User : formatted expense table
+    deactivate UI
+else recurringOnly == true
+    LC -> UI : showRecurringList(expenses)
+    activate UI
+    UI -> EL : getExpense(i) for each i
+    activate EL
+    EL --> UI : expense
+    deactivate EL
+    note right of UI
+        Filters to isRecurring == true
+        then prints with dynamic widths
+    end note
+    UI --> User : recurring expense table
+    deactivate UI
+end
+
+deactivate LC
+deactivate ST
+@enduml

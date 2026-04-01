@@ -508,6 +508,28 @@ public class Ui {
     }
 
     /**
+     * Displays a warning when spending is at or above 90% of the budget.
+     *
+     * @param totalSpent the current total spent
+     * @param budget the monthly budget limit
+     */
+    public void showBudgetWarning(double totalSpent, double budget) {
+        System.out.printf(" [WARNING] You are close to your monthly budget! ($%.2f / $%.2f used)%n",
+                totalSpent, budget);
+    }
+
+    /**
+     * Displays an alert when spending has exceeded the budget.
+     *
+     * @param totalSpent the current total spent
+     * @param budget the monthly budget limit
+     */
+    public void showBudgetAlert(double totalSpent, double budget) {
+        System.out.printf(" [ALERT] You have exceeded your monthly budget! ($%.2f spent, budget is $%.2f)%n",
+                totalSpent, budget);
+    }
+
+    /**
      * Displays an error message to the user.
      *
      * @param message the error message to display
