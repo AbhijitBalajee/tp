@@ -1,3 +1,4 @@
+// @@author Ariff1422
 package seedu.duke.command;
 
 import java.util.logging.Logger;
@@ -56,3 +57,4 @@ public class FindCommand extends Command {
         ui.showExpenseDetail(index, expense);
     }
 }
+// @@author

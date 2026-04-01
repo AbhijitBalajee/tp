@@ -182,6 +182,20 @@ public class ExpenseList {
         logger.info("Budget restored to: " + budget);
     }
 
+    /**
+     * Replaces the current expenses and budget with the given snapshot data.
+     * Used by UndoManager to restore a previous state.
+     *
+     * @param restoredExpenses the list of expenses to restore
+     * @param restoredBudget the budget amount to restore
+     */
+    public void restoreFrom(ArrayList<Expense> restoredExpenses, double restoredBudget) {
+        assert restoredExpenses != null : "Restored expenses should not be null";
+        this.expenses = new ArrayList<>(restoredExpenses);
+        this.budget = restoredBudget;
+        logger.info("Expenses restored: " + expenses.size() + " entries, budget=" + budget);
+    }
+
     // @@author pranavjana
     /**
      * Sets the savings goal amount.
