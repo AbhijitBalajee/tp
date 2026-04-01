@@ -202,6 +202,190 @@ Error cases:
 
 ---
 
+### Listing all expenses: `list`
+
+Displays all recorded expenses in a formatted table with dynamic column widths.
+
+Format: `list`
+
+Alias: `l`
+
+Example: `list` or `l`
+
+Expected output:
+```
+____________________________________________________________
+ Your Expenses
+____________________________________________________________
+  #    Category     Description  Date          Amount
+  ---  -----------  -----------  ----------    --------
+  1.   [Food]       Coffee       2026-03-22    $3.50
+  2.   [Transport]  Bus          2026-03-22    $1.80
+____________________________________________________________
+ Total entries: 2
+____________________________________________________________
+```
+
+If no expenses have been added:
+```
+ No expenses recorded yet.
+```
+
+---
+
+### Listing recurring expenses: `list recurring`
+
+Displays only expenses marked as recurring.
+
+Format: `list recurring`
+
+Expected output:
+```
+____________________________________________________________
+ Recurring Expenses
+____________________________________________________________
+  #    Category         Description    Date          Amount
+  ---  ---------------  -------------  ----------    --------
+  1.   [Entertainment]  Netflix [R]    2026-03-22    $18.00
+____________________________________________________________
+ Total recurring: 1
+____________________________________________________________
+```
+
+If no recurring expenses exist:
+```
+ No recurring expenses found.
+```
+
+---
+
+### Adding a recurring expense
+
+To mark an expense as recurring, add `recurring/true` to the `add` command.
+
+Format: `add d/DESCRIPTION a/AMOUNT c/CATEGORY [date/DATE] [recurring/true|false]`
+
+- `recurring/` accepts only `true` or `false`. Any other value shows an error.
+- If omitted, defaults to `false`.
+- Recurring expenses are shown with `[R]` in the list.
+
+Examples:
+- `add d/Netflix a/18.00 c/Entertainment recurring/true`
+- `add d/Coffee a/3.50 c/Food` — non-recurring by default
+
+---
+
+### Editing an expense: `edit`
+
+Updates one or more fields of an existing expense by its 1-based index. Only the fields you provide are changed — all other fields remain unchanged.
+
+Format: `edit INDEX [d/DESCRIPTION] [a/AMOUNT] [c/CATEGORY] [date/DATE] [recurring/true|false]`
+
+- `INDEX` is 1-based (same numbering as `list`).
+- At least one field must be provided.
+- Duplicate flags (e.g. `d/Latte d/Coffee`) are not allowed.
+
+Examples:
+- `edit 1 d/Latte` — updates description only
+- `edit 2 a/6.00 c/Drinks` — updates amount and category
+- `edit 1 recurring/false` — un-marks a recurring expense
+- `edit 3 d/Netflix a/18.00 c/Entertainment date/2026-03-01 recurring/true` — updates all fields
+
+Expected output:
+```
+____________________________________________________________
+ Expense #1 updated:
+   Before: [Food] Coffee - $3.50 (2026-03-22)
+   After:  [Food] Latte - $3.50 (2026-03-22)
+____________________________________________________________
+```
+
+Error cases:
+- `edit 999 d/Test` — index out of range → error message with valid range
+- `edit 1` — no fields provided → `No fields provided to edit. Usage: edit <index> [d/<desc>] [a/<amount>] [c/<category>] [date/<YYYY-MM-DD>] [recurring/true|false]`
+- `edit 1 a/-5` — negative amount → `Amount must be greater than 0.`
+- `edit 1 d/` — empty description → `Description cannot be empty.`
+- `edit abc d/Latte` — non-integer index → `Index must be a whole number.`
+
+---
+
+### Setting a monthly budget: `budget`
+
+Sets your monthly spending limit.
+
+Format: `budget AMOUNT`
+
+- `AMOUNT` must be greater than 0 and not exceed $1,000,000.
+
+Alias: `b`
+
+Examples:
+- `budget 500` — sets a $500 monthly budget
+- `b 300` — using alias
+
+Expected output:
+```
+____________________________________________________________
+ Monthly budget set to: $500.00
+ Current total spent:   $12.00
+ Remaining budget:      $488.00
+____________________________________________________________
+```
+
+If your total spending already exceeds the new budget:
+```
+____________________________________________________________
+ WARNING: You have exceeded your budget by $50.00!
+____________________________________________________________
+```
+
+Error cases:
+- `budget -10` → `Budget must be greater than $0.00.`
+- `budget abc` → `budget requires a number. Usage: budget <amount>`
+- `budget` → `budget requires a number. Usage: budget <amount>`
+
+---
+
+### Resetting the budget: `budget reset`
+
+Clears the currently set budget.
+
+Format: `budget reset`
+
+Expected output:
+```
+____________________________________________________________
+ Budget has been reset successfully.
+ No budget is currently set.
+____________________________________________________________
+```
+
+Error cases:
+- `budget reset` when no budget is set → `No budget to reset.`
+
+---
+
+### Viewing budget history: `budget history`
+
+Displays all previously set budgets in reverse chronological order (most recent first).
+
+Format: `budget history`
+
+Expected output:
+```
+____________________________________________________________
+ ===== Budget History =====
+ 2026-03-27 : $300.00
+ 2026-03-22 : $500.00
+ ==========================
+____________________________________________________________
+```
+
+If no budget has ever been set:
+```
+ No budget history recorded.
+```
+
 ## FAQ
 
 **Q**: How do I transfer my data to another computer?
@@ -220,14 +404,18 @@ Error cases:
 
 | Action | Format | Alias |
 |--------|--------|-------|
-| Add expense | `add d/DESC a/AMT c/CAT [date/DATE]` | `a` |
+| Add expense | `add d/DESC a/AMT c/CAT [date/DATE] [recurring/true\|false]` | `a` |
 | Delete expense | `delete INDEX` | `d` |
+| Edit expense | `edit INDEX [d/DESC] [a/AMT] [c/CAT] [date/DATE] [recurring/true\|false]` | — |
 | List expenses | `list` | `l` |
+| List recurring | `list recurring` | — |
 | Filter by date | `filter from/DATE to/DATE` | — |
 | Find by index | `find INDEX` | — |
 | Summary | `summary` | `s` |
 | Total | `total` | — |
-| Budget | `budget AMOUNT` | `b` |
+| Set budget | `budget AMOUNT` | `b` |
+| Reset budget | `budget reset` | — |
+| Budget history | `budget history` | — |
 | Remaining | `remaining` | — |
 | Help | `help` | `h` |
 | Exit | `bye` | — |
