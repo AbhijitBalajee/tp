@@ -1,0 +1,77 @@
+@startuml
+!define BGCOLOR white
+skinparam backgroundColor BGCOLOR
+skinparam sequenceMessageAlign center
+
+actor User
+participant ":SpendTrack" as ST
+participant "Parser" as P
+participant ":GoalCommand" as GC
+participant ":ExpenseList" as EL
+participant ":Ui" as UI
+
+== Setting a goal ==
+
+User -> ST : "goal g/200"
+activate ST
+
+ST -> P : parse("goal g/200")
+activate P
+P -> P : parseGoalCommand("g/200")
+note right of P
+  Validates amount > 0.
+  Throws SpendTrackException
+  if invalid.
+end note
+P --> ST : :GoalCommand(200.0)
+deactivate P
+
+ST -> GC : execute(expenses, ui)
+activate GC
+GC -> EL : setGoal(200.0)
+activate EL
+EL --> GC
+deactivate EL
+GC --> User : "Savings goal set to: $200.00"
+deactivate GC
+
+ST -> ST : storage.save(expenses)
+deactivate ST
+
+== Viewing goal status ==
+
+User -> ST : "goal status"
+activate ST
+
+ST -> P : parse("goal status")
+activate P
+P --> ST : :GoalCommand (status)
+deactivate P
+
+ST -> GC : execute(expenses, ui)
+activate GC
+
+GC -> EL : hasGoal()
+activate EL
+EL --> GC : true
+deactivate EL
+
+GC -> EL : getGoal()
+activate EL
+EL --> GC : 200.0
+deactivate EL
+
+GC -> EL : getTotal()
+activate EL
+EL --> GC : 87.30
+deactivate EL
+
+alt spent <= goal
+    GC --> User : "Saved: $112.70 (56% of goal reached)"
+else spent > goal
+    GC --> User : "Goal not reached. Over by $X.XX."
+end
+
+deactivate GC
+deactivate ST
+@enduml

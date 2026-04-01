@@ -587,6 +587,270 @@ The flag is stored directly on `Expense` as a `boolean isRecurring` field. This 
 
 Only `true` or `false` are accepted — any other value throws a `SpendTrackException`. This is validated in `Parser` at parse time since it requires no state knowledge, consistent with the validation approach used for other flag values.
 
+---
+
+### Total Expenses Feature
+
+The total feature displays the sum of all expense amounts:
+
+```
+total
+```
+
+#### How it works
+
+1. The user enters `total`.
+2. `Parser.parse()` creates a `TotalCommand`.
+3. `TotalCommand.execute()` calls `ExpenseList.getTotal()`, which iterates over all expenses and sums their amounts.
+4. `Ui.showTotal()` displays the formatted total to the user.
+5. `mutatesData()` returns `false`, so no save is triggered.
+
+#### Design considerations
+
+**Aspect: Where to compute the total**
+
+- **Current approach:** `ExpenseList.getTotal()` computes the total on demand by iterating over the list each time it is called.
+    - Pros: Always accurate — no risk of the cached total diverging from the actual list after add, delete, or edit operations. Simple to implement and maintain.
+    - Cons: O(n) per call. For very large lists, this could be slow.
+
+- **Alternative:** Maintain a running total field in `ExpenseList`, updated on every add/delete/edit.
+    - Pros: O(1) lookup.
+    - Cons: Must be updated in every mutating method. Risk of inconsistency if a mutating path forgets to update the total. More error-prone during refactoring.
+
+The on-demand approach was chosen because expense lists in a student budget tracker are small (typically under 1000 entries), making the O(n) cost negligible. Correctness is more important than micro-optimisation here.
+
+---
+
+### Budget Alert Feature
+
+The budget alert feature automatically warns users when their spending approaches or exceeds their monthly budget. The check runs after every `add` command — no separate command is needed.
+
+```
+add d/Dinner a/50 c/Food
+→ [WARNING] You are close to your monthly budget! ($95.00 / $100.00 used)
+```
+
+#### How it works
+
+1. After `AddCommand.execute()` adds the expense and displays the success message, it calls `BudgetChecker.check(expenses, ui)`.
+2. `BudgetChecker.check()` is a static utility method. It first checks if a budget has been set via `ExpenseList.hasBudget()`. If not, it returns silently.
+3. It retrieves the total spent via `ExpenseList.getTotal()` and the budget via `ExpenseList.getBudget()`.
+4. It computes the usage ratio (`totalSpent / budget`).
+5. If `totalSpent > budget`, it calls `Ui.showBudgetAlert()` to display an exceeded alert.
+6. Otherwise, if the usage ratio is at or above 0.9 (90%), it calls `Ui.showBudgetWarning()` to display a warning.
+7. If spending is under 90%, no message is shown.
+
+The following sequence diagram shows the budget alert flow after an add command:
+
+![Sequence diagram for budget alert](images/BudgetAlertSequence.png)
+
+#### Design considerations
+
+**Aspect: Where to place the budget check logic**
+
+- **Current approach:** A separate static `BudgetChecker` utility class called from `AddCommand.execute()`.
+    - Pros: Follows the Single Responsibility Principle — `AddCommand` handles adding, `BudgetChecker` handles the budget check. Easy to test independently. Can be reused by other commands in the future if needed.
+    - Cons: Adds an extra class for a relatively simple check.
+
+- **Alternative:** Inline the check directly in `AddCommand.execute()`.
+    - Pros: Fewer classes. All add logic in one place.
+    - Cons: Violates SRP. Makes `AddCommand` harder to test in isolation.
+
+The separate class was chosen because it keeps `AddCommand` focused on its primary responsibility and makes the budget check independently testable.
+
+**Aspect: Threshold value**
+
+The 90% warning threshold is defined as a named constant (`WARNING_THRESHOLD = 0.9`) in `BudgetChecker` to avoid magic numbers. The exact boundary at 100% uses `totalSpent > budget` (strict greater than) so that spending exactly at budget shows a warning rather than an alert — the user has not yet exceeded their limit.
+
+---
+
+### Clear All Expenses Feature
+
+The clear feature removes all expenses from the list after a confirmation prompt:
+
+```
+clear
+```
+
+#### How it works
+
+1. The user enters `clear`.
+2. `Parser.parse()` creates a `ClearCommand`.
+3. `ClearCommand.execute()` first checks if the expense list is empty. If so, it shows `No expenses to clear.` and returns without prompting.
+4. If the list is non-empty, it shows a confirmation prompt via `Ui.showMessage()` asking `Are you sure...? (yes/no):`.
+5. It reads the user's response via `Ui.readCommand()`.
+6. If the response is `yes` (case-insensitive), it calls `ExpenseList.clearAll()` which clears the internal `ArrayList`, then shows a success message with the count of removed expenses.
+7. Any other input cancels the operation with `Clear cancelled.`
+8. Because `mutatesData()` returns `true`, `Storage.save()` is called after execution.
+
+The following sequence diagram shows the clear command flow:
+
+![Sequence diagram for clear command](images/ClearCommandSequence.png)
+
+#### Design considerations
+
+**Aspect: Confirmation before destructive action**
+
+- **Current approach:** Require the user to type `yes` to confirm. Any other input cancels.
+    - Pros: Prevents accidental data loss. The user must explicitly opt in. Case-insensitive matching (`YES`, `Yes`, `yes` all work) is forgiving.
+    - Cons: Adds an extra step for the user.
+
+- **Alternative:** Clear immediately without confirmation.
+    - Pros: Faster for the user.
+    - Cons: A single typo could delete all data with no recovery (unless undo is available).
+
+Confirmation was chosen because clearing all expenses is irreversible and high-risk. The minor inconvenience of typing `yes` is worth the safety.
+
+**Aspect: Empty list handling**
+
+If the list is already empty, `ClearCommand` shows `No expenses to clear.` without prompting. This avoids confusing the user with a confirmation prompt when there is nothing to clear.
+
+---
+
+### Undo Feature
+
+The undo feature restores the expense list to its state before the last mutating command:
+
+```
+undo
+```
+
+#### How it works
+
+1. `SpendTrack` owns an `UndoManager` instance, created on startup.
+2. Before every mutating command executes (except `undo` itself), `SpendTrack` calls `UndoManager.saveSnapshot(expenses)`.
+3. `saveSnapshot()` creates a deep copy of all `Expense` objects in the list and stores the current budget value. This ensures the snapshot is independent of future mutations.
+4. When the user enters `undo`, `Parser` creates an `UndoCommand` with a reference to the `UndoManager`.
+5. `UndoCommand.execute()` calls `UndoManager.undo(expenses)`.
+6. `undo()` checks if a snapshot exists. If not, it returns `false` and the command prints `Nothing to undo.`
+7. If a snapshot exists, it calls `ExpenseList.restoreFrom()` which replaces the internal expense list and budget with the snapshot data. The snapshot is then consumed (set to `null`), preventing a second undo.
+8. Because `mutatesData()` returns `true`, `Storage.save()` persists the restored state.
+
+The following sequence diagram shows the undo flow:
+
+![Sequence diagram for undo command](images/UndoSequence.png)
+
+The following class diagram shows the relationships between the undo-related classes:
+
+![Class diagram for undo feature](images/UndoClassDiagram.png)
+
+#### Design considerations
+
+**Aspect: Snapshot depth**
+
+- **Current approach:** Single-level undo. Only one snapshot is stored at a time. A second consecutive `undo` prints `Nothing to undo.`
+    - Pros: Simple implementation. Low memory usage. Predictable behaviour — the user always knows exactly one step can be undone.
+    - Cons: Cannot undo multiple steps.
+
+- **Alternative:** Multi-level undo using a stack of snapshots.
+    - Pros: More flexible — users can undo several steps.
+    - Cons: Higher memory usage (each snapshot is a full deep copy). More complex to implement and test. Risk of unbounded memory growth.
+
+Single-level undo was chosen because it covers the most common use case (undoing a mistake immediately after making it) without the complexity of multi-level undo.
+
+**Aspect: Deep copy vs shallow copy**
+
+`UndoManager.deepCopyExpenses()` creates new `Expense` objects for each entry in the list. This is necessary because `Expense` fields are mutable (via setters used by `EditCommand`). A shallow copy would share object references, causing the snapshot to be corrupted when the original expenses are modified.
+
+**Aspect: Excluding undo from the snapshot**
+
+`SpendTrack` explicitly skips `saveSnapshot()` when the command is an `UndoCommand` (checked via `instanceof`). Without this, undoing would save the current (post-undo) state as the new snapshot, making it impossible to redo or detect "nothing to undo".
+
+---
+
+### Export CSV Feature
+
+The export feature writes all expenses to a CSV file:
+
+```
+export csv
+```
+
+#### How it works
+
+1. The user enters `export csv`.
+2. `Parser.parse()` checks for the `csv` sub-command. If missing, a `SpendTrackException` is thrown with usage instructions.
+3. An `ExportCommand` is created and returned.
+4. `ExportCommand.execute()` checks if the expense list is empty. If so, it shows `No expenses to export.` and returns without creating a file.
+5. `ensureDirectoryExists()` creates the `data/` directory if it does not exist.
+6. A `FileWriter` is opened using `try-with-resources` for `data/spendtrack_export.csv`.
+7. The CSV header row (`Description,Amount,Category,Date,Recurring`) is written first.
+8. For each expense, `formatCsvRow()` formats the row. If the description contains a comma or double quote, it is wrapped in double quotes with internal quotes escaped (`"` → `""`).
+9. On success, a confirmation message is shown. On `IOException`, a warning is printed and the app continues.
+
+The following sequence diagram shows the export flow:
+
+![Sequence diagram for export command](images/ExportCommandSequence.png)
+
+#### Design considerations
+
+**Aspect: CSV quoting strategy**
+
+- **Current approach:** Only descriptions containing commas or double quotes are quoted. All other fields are written as-is.
+    - Pros: Produces cleaner CSV output for the common case. Follows RFC 4180 conventions.
+    - Cons: If a category ever contains a comma (unlikely with current normalisation), it would break the CSV.
+
+- **Alternative:** Always quote all string fields.
+    - Pros: Guaranteed safe regardless of content.
+    - Cons: Noisier output — every row has unnecessary quotes.
+
+The selective quoting approach was chosen because category normalisation prevents commas in categories, and amounts/dates/booleans never contain commas.
+
+**Aspect: Testability**
+
+`ExportCommand` accepts a custom file path via a second constructor, allowing tests to write to a temporary file rather than the production path. The `formatCsvRow()` method is package-private (`static`) so tests can verify CSV formatting independently of file I/O.
+
+---
+
+### Savings Goal Feature
+
+The savings goal feature lets users set a monthly savings target and track progress:
+
+```
+goal g/AMOUNT
+goal status
+```
+
+#### How it works
+
+**Setting a goal:**
+
+1. The user enters `goal g/200`.
+2. `Parser.parseGoalCommand()` extracts the `g/` value, validates it is a positive number, and creates a `GoalCommand(200.0)`.
+3. `GoalCommand.execute()` calls `ExpenseList.setGoal(200.0)` to store the goal.
+4. A confirmation message is printed.
+5. Because `mutatesData()` returns `true`, `Storage.save()` persists the goal.
+
+**Viewing status:**
+
+1. The user enters `goal status`.
+2. `Parser.parseGoalCommand()` matches the keyword `status` and creates a `GoalCommand()` (status mode).
+3. `GoalCommand.execute()` checks `ExpenseList.hasGoal()`. If no goal is set, it prints `No savings goal set.` and returns.
+4. Otherwise, it retrieves the goal and total spent, computes `saved = goal - spent`.
+5. If `saved >= 0`, it displays the saved amount and percentage. If `saved < 0`, it shows `Goal not reached. Over by $X.XX.`
+6. `mutatesData()` returns `false` for status queries, so no save is triggered.
+
+The following sequence diagram shows both the set and status flows:
+
+![Sequence diagram for goal command](images/GoalCommandSequence.png)
+
+#### Design considerations
+
+**Aspect: Single command class for set and status**
+
+- **Current approach:** `GoalCommand` handles both `goal g/AMOUNT` (set) and `goal status` (view) using a boolean `isStatusRequest` flag.
+    - Pros: Keeps related functionality together. The `goal` command namespace is intuitive — `goal g/200` to set, `goal status` to view.
+    - Cons: One class handles two concerns.
+
+- **Alternative:** Separate `SetGoalCommand` and `GoalStatusCommand`.
+    - Pros: Cleaner SRP.
+    - Cons: Two classes for a simple feature. The `mutatesData()` distinction is already handled by the boolean flag.
+
+The single-class approach was chosen for simplicity, following the same pattern as `BudgetCommand` which handles `budget AMOUNT`, `budget reset`, and `budget history` through parser routing.
+
+**Aspect: Persistence**
+
+The goal is stored as a `double goal` field in `ExpenseList` and persisted via `Storage` using a `---GOAL---` marker in the save file, following the same pattern as budget and budget history. This keeps all state in one place and requires no additional file.
 
 ## Product scope
 
@@ -624,6 +888,11 @@ SpendTrack helps students track expenses faster than a typical GUI app. Users ca
 | v2.0 | student | edit any field of an existing expense | correct mistakes without deleting and re-adding |
 | v2.0 | student | set and reset a monthly budget | control my spending flexibly |
 | v2.0 | student | view budget history | track how my budget has changed over time |
+| v2.0 | student | be warned when approaching my budget | avoid overspending before it is too late |
+| v2.0 | student | clear all expenses at once | start fresh for a new month |
+| v2.0 | student | undo my last action | recover from mistakes quickly |
+| v2.0 | student | export expenses to CSV | open them in Excel or Google Sheets |
+| v2.0 | student | set a savings goal and track progress | stay motivated to save money |
 
 ## Non-Functional Requirements
 
