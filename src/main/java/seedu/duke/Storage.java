@@ -130,9 +130,9 @@ public class Storage {
                         System.out.println("Warning: could not parse goal value: " + line);
                     }
                     readingGoal = false;
-                // @@author
                     continue;
                 }
+                // @@author
                 if (readingBudget) {
                     try {
                         double budget = Double.parseDouble(line);
