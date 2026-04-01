@@ -18,14 +18,16 @@ public class ExpenseList {
     private ArrayList<Expense> expenses;
     private double budget;
     private ArrayList<String> budgetHistory;
+    private double goal;
 
     /**
-     * Constructs an empty ExpenseList with no budget set.
+     * Constructs an empty ExpenseList with no budget or goal set.
      */
     public ExpenseList() {
         this.expenses = new ArrayList<>();
         this.budget = 0.0;
         this.budgetHistory = new ArrayList<>();
+        this.goal = 0.0;
     }
 
     /**
@@ -204,4 +206,35 @@ public class ExpenseList {
         this.budget = restoredBudget;
         logger.info("Expenses restored: " + expenses.size() + " entries, budget=" + budget);
     }
+
+    // @@author pranavjana
+    /**
+     * Sets the savings goal amount.
+     *
+     * @param goal the savings goal (must be positive)
+     */
+    public void setGoal(double goal) {
+        assert goal > 0 : "Goal must be positive";
+        this.goal = goal;
+        logger.info("Savings goal set to: " + goal);
+    }
+
+    /**
+     * Returns the current savings goal.
+     *
+     * @return the goal amount, or 0.0 if not set
+     */
+    public double getGoal() {
+        return goal;
+    }
+
+    /**
+     * Returns true if a savings goal has been set.
+     *
+     * @return true if goal is greater than 0
+     */
+    public boolean hasGoal() {
+        return goal > 0.0;
+    }
+    // @@author
 }
