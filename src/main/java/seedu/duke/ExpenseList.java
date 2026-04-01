@@ -18,14 +18,16 @@ public class ExpenseList {
     private ArrayList<Expense> expenses;
     private double budget;
     private ArrayList<String> budgetHistory;
+    private double goal;
 
     /**
-     * Constructs an empty ExpenseList with no budget set.
+     * Constructs an empty ExpenseList with no budget or goal set.
      */
     public ExpenseList() {
         this.expenses = new ArrayList<>();
         this.budget = 0.0;
         this.budgetHistory = new ArrayList<>();
+        this.goal = 0.0;
     }
 
     /**
@@ -84,6 +86,17 @@ public class ExpenseList {
         logger.info("Expense deleted: " + removed);
         return removed;
     }
+
+    // @@author pranavjana
+    /**
+     * Removes all expenses from the list.
+     */
+    public void clearAll() {
+        assert expenses != null : "Internal expense list should not be null";
+        expenses.clear();
+        logger.info("All expenses cleared.");
+    }
+    // @@author
 
     /**
      * Returns the full list of expenses.
@@ -179,4 +192,49 @@ public class ExpenseList {
         this.budget = budget;
         logger.info("Budget restored to: " + budget);
     }
+
+    /**
+     * Replaces the current expenses and budget with the given snapshot data.
+     * Used by UndoManager to restore a previous state.
+     *
+     * @param restoredExpenses the list of expenses to restore
+     * @param restoredBudget the budget amount to restore
+     */
+    public void restoreFrom(ArrayList<Expense> restoredExpenses, double restoredBudget) {
+        assert restoredExpenses != null : "Restored expenses should not be null";
+        this.expenses = new ArrayList<>(restoredExpenses);
+        this.budget = restoredBudget;
+        logger.info("Expenses restored: " + expenses.size() + " entries, budget=" + budget);
+    }
+
+    // @@author pranavjana
+    /**
+     * Sets the savings goal amount.
+     *
+     * @param goal the savings goal (must be positive)
+     */
+    public void setGoal(double goal) {
+        assert goal > 0 : "Goal must be positive";
+        this.goal = goal;
+        logger.info("Savings goal set to: " + goal);
+    }
+
+    /**
+     * Returns the current savings goal.
+     *
+     * @return the goal amount, or 0.0 if not set
+     */
+    public double getGoal() {
+        return goal;
+    }
+
+    /**
+     * Returns true if a savings goal has been set.
+     *
+     * @return true if goal is greater than 0
+     */
+    public boolean hasGoal() {
+        return goal > 0.0;
+    }
+    // @@author
 }

@@ -1,3 +1,4 @@
+// @@author Ariff1422
 package seedu.duke.command;
 
 import java.util.logging.Logger;
@@ -57,3 +58,4 @@ public class DeleteCommand extends Command {
         return true;
     }
 }
+// @@author
