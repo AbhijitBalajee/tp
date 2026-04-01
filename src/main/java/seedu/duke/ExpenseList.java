@@ -87,6 +87,17 @@ public class ExpenseList {
         return removed;
     }
 
+    // @@author pranavjana
+    /**
+     * Removes all expenses from the list.
+     */
+    public void clearAll() {
+        assert expenses != null : "Internal expense list should not be null";
+        expenses.clear();
+        logger.info("All expenses cleared.");
+    }
+    // @@author
+
     /**
      * Returns the full list of expenses.
      *
