@@ -19,6 +19,7 @@ import seedu.duke.command.TotalCommand;
 import seedu.duke.command.EditCommand;
 import seedu.duke.command.BudgetResetCommand;
 import seedu.duke.command.BudgetHistoryCommand;
+import seedu.duke.command.ExportCommand;
 
 /**
  * Parses user input into commands.
@@ -88,6 +89,11 @@ public class Parser {
             return parseBudgetCommand(parts.length > 1 ? parts[1] : "");
         case "remaining":
             return new RemainingCommand();
+        case "export":
+            if (parts.length > 1 && parts[1].trim().equalsIgnoreCase("csv")) {
+                return new ExportCommand();
+            }
+            throw new SpendTrackException("Usage: export csv");
         case "summary":
             return new SummaryCommand();
         case "help":
