@@ -19,6 +19,7 @@ import seedu.duke.command.TotalCommand;
 import seedu.duke.command.EditCommand;
 import seedu.duke.command.BudgetResetCommand;
 import seedu.duke.command.BudgetHistoryCommand;
+import seedu.duke.command.UndoCommand;
 
 /**
  * Parses user input into commands.
@@ -41,12 +42,25 @@ public class Parser {
 
     /**
      * Parses the user input and returns the corresponding command.
+     * Uses a null UndoManager, so undo command is unavailable.
      *
      * @param input the raw user input string
      * @return the parsed Command
      * @throws SpendTrackException if input is invalid
      */
     public static Command parse(String input) throws SpendTrackException {
+        return parse(input, null);
+    }
+
+    /**
+     * Parses the user input and returns the corresponding command.
+     *
+     * @param input the raw user input string
+     * @param undoManager the undo manager for creating undo commands
+     * @return the parsed Command
+     * @throws SpendTrackException if input is invalid
+     */
+    public static Command parse(String input, UndoManager undoManager) throws SpendTrackException {
         assert input != null : "Input to parser should not be null";
 
         String trimmed = input.trim();
@@ -88,6 +102,11 @@ public class Parser {
             return parseBudgetCommand(parts.length > 1 ? parts[1] : "");
         case "remaining":
             return new RemainingCommand();
+        case "undo":
+            if (undoManager == null) {
+                throw new SpendTrackException("Undo is not available.");
+            }
+            return new UndoCommand(undoManager);
         case "summary":
             return new SummaryCommand();
         case "help":
