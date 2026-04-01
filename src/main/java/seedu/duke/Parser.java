@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
-
+import seedu.duke.command.SortCommand;
 import seedu.duke.command.AddCommand;
 import seedu.duke.command.BudgetCommand;
 import seedu.duke.command.Command;
@@ -109,6 +109,8 @@ public class Parser {
             return new UndoCommand(undoManager);
         case "summary":
             return new SummaryCommand();
+        case "sort":
+            return new SortCommand();
         case "help":
             return new HelpCommand();
         case "bye":
