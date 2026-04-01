@@ -45,48 +45,48 @@ public class Parser {
         logger.info("Parsing command: " + commandWord);
 
         switch (commandWord) {
-            case "add":
-                return parseAddCommand(parts.length > 1 ? parts[1] : "");
-            case "delete":
-                try {
-                    return new DeleteCommand(Integer.parseInt(parts[1].trim()));
-                } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
-                    throw new SpendTrackException("delete requires a number. Usage: delete <index>");
-                }
-            case "edit":
-                return parseEditCommand(parts.length > 1 ? parts[1] : "");
-            case "filter":
-                return parseFilterCommand(parts.length > 1 ? parts[1] : "");
-            case "find":
-                try {
-                    return new FindCommand(Integer.parseInt(parts[1].trim()));
-                } catch (NumberFormatException e) {
-                    throw new SpendTrackException("Index must be a whole number. Usage: find <index>");
-                } catch (ArrayIndexOutOfBoundsException e) {
-                    throw new SpendTrackException("find requires an index. Usage: find <index>");
-                }
-            case "total":
-                return new TotalCommand();
-            case "list":
-                if (parts.length > 1 && parts[1].trim().equalsIgnoreCase("recurring")) {
-                    return new ListCommand(true);
-                }
-                return new ListCommand();
-            case "budget":
-                return parseBudgetCommand(parts.length > 1 ? parts[1] : "");
-            case "remaining":
-                return new RemainingCommand();
-            case "summary":
-                return new SummaryCommand();
-            case "search":
-                return new SearchCommand(parts.length > 1 ? parts[1] : "");
-            case "help":
-                return new HelpCommand();
-            case "bye":
-                return new ExitCommand();
-            default:
-                logger.warning("Unknown command: " + commandWord);
-                return new UnknownCommand();
+        case "add":
+            return parseAddCommand(parts.length > 1 ? parts[1] : "");
+        case "delete":
+            try {
+                return new DeleteCommand(Integer.parseInt(parts[1].trim()));
+            } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
+                throw new SpendTrackException("delete requires a number. Usage: delete <index>");
+            }
+        case "edit":
+            return parseEditCommand(parts.length > 1 ? parts[1] : "");
+        case "filter":
+            return parseFilterCommand(parts.length > 1 ? parts[1] : "");
+        case "find":
+            try {
+                return new FindCommand(Integer.parseInt(parts[1].trim()));
+            } catch (NumberFormatException e) {
+                throw new SpendTrackException("Index must be a whole number. Usage: find <index>");
+            } catch (ArrayIndexOutOfBoundsException e) {
+                throw new SpendTrackException("find requires an index. Usage: find <index>");
+            }
+        case "total":
+            return new TotalCommand();
+        case "list":
+            if (parts.length > 1 && parts[1].trim().equalsIgnoreCase("recurring")) {
+                return new ListCommand(true);
+            }
+            return new ListCommand();
+        case "budget":
+            return parseBudgetCommand(parts.length > 1 ? parts[1] : "");
+        case "remaining":
+            return new RemainingCommand();
+        case "summary":
+            return new SummaryCommand();
+        case "search":
+            return new SearchCommand(parts.length > 1 ? parts[1] : "");
+        case "help":
+            return new HelpCommand();
+        case "bye":
+            return new ExitCommand();
+        default:
+            logger.warning("Unknown command: " + commandWord);
+            return new UnknownCommand();
         }
     }
 
