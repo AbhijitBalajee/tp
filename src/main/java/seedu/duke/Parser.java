@@ -20,6 +20,7 @@ import seedu.duke.command.EditCommand;
 import seedu.duke.command.BudgetResetCommand;
 import seedu.duke.command.BudgetHistoryCommand;
 import seedu.duke.command.ClearCommand;
+import seedu.duke.command.ExportCommand;
 import seedu.duke.command.UndoCommand;
 
 /**
@@ -106,6 +107,11 @@ public class Parser {
         // @@author pranavjana
         case "clear":
             return new ClearCommand();
+        case "export":
+            if (parts.length > 1 && parts[1].trim().equalsIgnoreCase("csv")) {
+                return new ExportCommand();
+            }
+            throw new SpendTrackException("Usage: export csv");
         // @@author
         case "undo":
             if (undoManager == null) {
