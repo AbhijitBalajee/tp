@@ -1,0 +1,77 @@
+@startuml
+!define BGCOLOR white
+skinparam backgroundColor BGCOLOR
+skinparam sequenceMessageAlign center
+
+actor User
+participant ":SpendTrack" as ST
+participant "Parser" as P
+participant ":UndoManager" as UM
+participant ":AddCommand" as AC
+participant ":UndoCommand" as UC
+participant ":ExpenseList" as EL
+participant ":Ui" as UI
+
+== User adds an expense ==
+
+User -> ST : "add d/Mistake a/999 c/Oops"
+activate ST
+ST -> P : parse(input, undoManager)
+activate P
+P --> ST : :AddCommand
+deactivate P
+
+ST -> ST : command.mutatesData()?
+note right of ST : returns true
+
+ST -> UM : saveSnapshot(expenses)
+activate UM
+UM -> UM : deepCopyExpenses()
+note right of UM
+  Creates new Expense objects
+  so snapshot is independent
+  of future mutations
+end note
+UM --> ST
+deactivate UM
+
+ST -> AC : execute(expenses, ui)
+activate AC
+AC -> EL : addExpense(expense)
+AC -> UI : showAddSuccess(expense)
+activate UI
+UI --> User : "New expense added: ..."
+deactivate UI
+deactivate AC
+
+ST -> ST : storage.save(expenses)
+deactivate ST
+
+== User undoes the add ==
+
+User -> ST : "undo"
+activate ST
+ST -> P : parse("undo", undoManager)
+activate P
+P --> ST : :UndoCommand
+deactivate P
+
+ST -> UC : execute(expenses, ui)
+activate UC
+UC -> UM : undo(expenses)
+activate UM
+UM -> EL : restoreFrom(snapshot, snapshotBudget)
+activate EL
+EL --> UM
+deactivate EL
+UM --> UC : true
+deactivate UM
+UC -> UI : print "Last command undone successfully."
+activate UI
+UI --> User : "Last command undone successfully."
+deactivate UI
+deactivate UC
+
+ST -> ST : storage.save(expenses)
+deactivate ST
+@enduml

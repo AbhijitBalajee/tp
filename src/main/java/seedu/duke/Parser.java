@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
-
+import seedu.duke.command.SortCommand;
 import seedu.duke.command.AddCommand;
 import seedu.duke.command.DeleteCommand;
 import seedu.duke.command.EditCommand;
@@ -22,6 +22,10 @@ import seedu.duke.command.HelpCommand;
 import seedu.duke.command.Command;
 
 
+import seedu.duke.command.GoalCommand;
+import seedu.duke.command.ClearCommand;
+import seedu.duke.command.ExportCommand;
+import seedu.duke.command.UndoCommand;
 
 /**
  * Parses user input into commands.
@@ -44,12 +48,25 @@ public class Parser {
 
     /**
      * Parses the user input and returns the corresponding command.
+     * Uses a null UndoManager, so undo command is unavailable.
      *
      * @param input the raw user input string
      * @return the parsed Command
      * @throws SpendTrackException if input is invalid
      */
     public static Command parse(String input) throws SpendTrackException {
+        return parse(input, null);
+    }
+
+    /**
+     * Parses the user input and returns the corresponding command.
+     *
+     * @param input the raw user input string
+     * @param undoManager the undo manager for creating undo commands
+     * @return the parsed Command
+     * @throws SpendTrackException if input is invalid
+     */
+    public static Command parse(String input, UndoManager undoManager) throws SpendTrackException {
         assert input != null : "Input to parser should not be null";
 
         String trimmed = input.trim();
@@ -91,10 +108,28 @@ public class Parser {
             return parseBudgetCommand(parts.length > 1 ? parts[1] : "");
         case "remaining":
             return new RemainingCommand();
+        // @@author pranavjana
+        case "goal":
+            return parseGoalCommand(parts.length > 1 ? parts[1] : "");
+        case "clear":
+            return new ClearCommand();
+        case "export":
+            if (parts.length > 1 && parts[1].trim().equalsIgnoreCase("csv")) {
+                return new ExportCommand();
+            }
+            throw new SpendTrackException("Usage: export csv");
+        // @@author
+        case "undo":
+            if (undoManager == null) {
+                throw new SpendTrackException("Undo is not available.");
+            }
+            return new UndoCommand(undoManager);
         case "summary":
             return new SummaryCommand();
         case "search":
             return new SearchCommand(parts.length > 1 ? parts[1] : "");
+        case "sort":
+            return new SortCommand();
         case "help":
             return new HelpCommand();
         case "bye":
@@ -296,6 +331,27 @@ public class Parser {
             return new BudgetCommand(amount);
         } catch (NumberFormatException e) {
             throw new SpendTrackException("budget requires a number. Usage: budget <amount>");
+        }
+    }
+
+    // @@author pranavjana
+    private static Command parseGoalCommand(String args) throws SpendTrackException {
+        String trimmed = args.trim();
+        if (trimmed.equalsIgnoreCase("status")) {
+            return new GoalCommand();
+        }
+        if (!trimmed.startsWith("g/")) {
+            throw new SpendTrackException("Usage: goal g/<amount> or goal status");
+        }
+        String valueStr = trimmed.substring(2).trim();
+        try {
+            double amount = Double.parseDouble(valueStr);
+            if (amount <= 0) {
+                throw new SpendTrackException("Goal amount must be greater than 0.");
+            }
+            return new GoalCommand(amount);
+        } catch (NumberFormatException e) {
+            throw new SpendTrackException("Goal amount must be a number. Usage: goal g/<amount>");
         }
     }
 }

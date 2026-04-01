@@ -351,6 +351,7 @@ public class Ui {
     public void showHelp() {
         System.out.println(LINE);
         System.out.println(" Available commands (alias in brackets):");
+
         System.out.println("  add (a)    d/<desc> a/<amt> c/<cat> [date/<YYYY-MM-DD>] -- add expense");
         System.out.println("  delete (d) <index>                                     -- delete expense");
         System.out.println("  list (l)                                               -- list all");
@@ -363,8 +364,8 @@ public class Ui {
         System.out.println("  help (h)                                               -- show this help");
         System.out.println("  bye                                                    -- exit");
         System.out.println(LINE);
-    }
 
+    }
     /**
      * Displays a spending summary grouped by category.
      *
@@ -506,6 +507,43 @@ public class Ui {
                 + " | " + expense.getCategory()
                 + " | " + expense.getDate());
     }
+
+    // @@author pranavjana
+    /**
+     * Displays a general message to the user.
+     *
+     * @param message the message to display
+     */
+    public void showMessage(String message) {
+        System.out.println(LINE);
+        System.out.println(" " + message);
+        System.out.println(LINE);
+    }
+    // @@author
+
+    // @@author pranavjana
+    /**
+     * Displays a warning when spending is at or above 90% of the budget.
+     *
+     * @param totalSpent the current total spent
+     * @param budget the monthly budget limit
+     */
+    public void showBudgetWarning(double totalSpent, double budget) {
+        System.out.printf(" [WARNING] You are close to your monthly budget! ($%.2f / $%.2f used)%n",
+                totalSpent, budget);
+    }
+
+    /**
+     * Displays an alert when spending has exceeded the budget.
+     *
+     * @param totalSpent the current total spent
+     * @param budget the monthly budget limit
+     */
+    public void showBudgetAlert(double totalSpent, double budget) {
+        System.out.printf(" [ALERT] You have exceeded your monthly budget! ($%.2f spent, budget is $%.2f)%n",
+                totalSpent, budget);
+    }
+    // @@author
 
     /**
      * Displays an error message to the user.

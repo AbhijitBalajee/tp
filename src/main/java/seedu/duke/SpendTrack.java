@@ -20,11 +20,13 @@ public class SpendTrack {
     private final Ui ui;
     private final ExpenseList expenses;
     private final Storage storage;
+    private final UndoManager undoManager;
 
     public SpendTrack() {
         ui = new Ui();
         expenses = new ExpenseList();
         storage = new Storage(DATA_FILE_PATH);
+        undoManager = new UndoManager();
     }
 
     /**
@@ -41,7 +43,13 @@ public class SpendTrack {
         while (isRunning) {
             String input = ui.readCommand();
             try {
-                Command command = Parser.parse(input);
+                // @@author pranavjana
+                Command command = Parser.parse(input, undoManager);
+                if (command.mutatesData() && !(command instanceof
+                        seedu.duke.command.UndoCommand)) {
+                    undoManager.saveSnapshot(expenses);
+                }
+                // @@author
                 command.execute(expenses, ui);
                 if (command.mutatesData()) {
                     storage.save(expenses);

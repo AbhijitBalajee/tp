@@ -6,6 +6,67 @@ No external libraries or reused code beyond the Java standard library.
 
 ## Design & Implementation
 
+### Architecture
+
+SpendTrack follows a simple command-driven architecture. The main loop in `SpendTrack.run()` repeatedly reads input, parses it into a `Command`, executes the command, and optionally saves the result to disk.
+
+The key components are:
+
+| Component | Responsibility |
+|-----------|---------------|
+| `SpendTrack` | Main loop: read → parse → execute → save → repeat |
+| `Parser` | Converts raw input string into a `Command` object |
+| `Command` (abstract) | Defines the `execute()`, `isExit()`, and `mutatesData()` contract |
+| `ExpenseList` | In-memory store of all expenses and budget |
+| `Storage` | Persists `ExpenseList` to and from disk |
+| `Ui` | All user-facing input and output |
+
+The following sequence diagram shows the full runtime flow of SpendTrack, from launch through the command loop:
+
+![Architecture sequence diagram](images/ArchitectureSequence.png)
+
+Every command follows the same pattern: `Parser.parse()` creates a command object, `command.execute()` reads or mutates `ExpenseList` and calls `Ui` to display results, and if `command.mutatesData()` returns `true`, `Storage.save()` is called automatically. This means no command class ever handles I/O or file persistence directly.
+
+### Delete Expense Feature
+
+The delete feature removes an expense from the list by its 1-based index:
+
+```
+delete INDEX
+```
+
+#### How it works
+
+1. The user enters `delete 2`.
+2. `Parser.parse()` attempts to parse the second token as an integer. If it is missing or non-numeric, a `SpendTrackException` is thrown immediately.
+3. A `DeleteCommand(2)` is created and returned.
+4. `DeleteCommand.execute()` checks that the index is within bounds (1 to `expenseList.size()` inclusive). If not, a `SpendTrackException` is thrown with the valid range.
+5. The expense at `index - 1` (zero-based) is removed from `ExpenseList` via `deleteExpense()`.
+6. `Ui.showDeleteSuccess()` displays the deleted expense to confirm the action.
+7. Because `mutatesData()` returns `true`, `SpendTrack` calls `Storage.save()` after execution.
+
+The following sequence diagram shows the full delete flow:
+
+![Sequence diagram for delete command](images/DeleteCommandSequence.png)
+
+#### Design considerations
+
+**Aspect: 1-based vs 0-based indexing**
+
+- **Current approach:** User-facing indices are 1-based. `DeleteCommand` converts to 0-based internally by subtracting 1 before calling `ExpenseList.deleteExpense()`.
+    - Pros: Matches the numbering shown in `list` output, which is more natural for non-technical users.
+    - Cons: Requires a consistent conversion at every index-based command (`delete`, `find`, `edit`).
+
+- **Alternative:** Use 0-based indices throughout.
+    - Pros: No conversion needed.
+    - Cons: Confusing for users who see item `1.` in the list but must type `delete 0`.
+
+1-based indexing was chosen for usability. The conversion is trivial and centralised within each command's `execute()` method.
+
+**Aspect: Where to validate the index**
+
+Index range validation happens in `DeleteCommand.execute()`, not in `Parser`. The parser only checks that the input is a valid integer. This is because the list size is not known at parse time — `ExpenseList` is only available during execution.
+
 ### Add Expense Feature
 
 The add expense feature allows users to record a new expense with a description, amount, category, and optional date using the command:
@@ -222,7 +283,7 @@ The storage feature allows SpendTrack to persist expense data and budget across 
 5. Malformed lines are skipped with a warning message.
 6. If the file does not exist, the app starts silently with an empty list.
 
-The following sequence diagram shows the startup load flow:
+The following sequence diagram shows the startup load flow, including the startup reminder:
 
 ![Sequence diagram for storage load](images/StorageLoadSequence.png)
 
@@ -253,21 +314,80 @@ Bus fare|1.80|Transport|2026-03-22|false
 - Pipe (`|`) delimiter was chosen over CSV because expense descriptions may contain commas.
 - All file I/O is encapsulated inside `Storage` — no `FileWriter` or `BufferedReader` exists in command classes, keeping the separation of concerns clean.
 
+#### Class structure
+
+The following class diagram shows the relationships between `Storage`, `ExpenseList`, `Expense`, and `SpendTrack`:
+
+![Class diagram for storage feature](images/StorageClassDiagram.png)
+
+`SpendTrack` owns one `Storage` instance and one `ExpenseList`. On startup, `Storage.load()` populates the `ExpenseList` with `Expense` objects parsed from disk. After every mutating command, `SpendTrack` calls `Storage.save()` to persist the current state. All file I/O is contained within `Storage`, keeping command classes and `ExpenseList` free of I/O concerns.
+
+### Filter and Find Features
+
+#### Filter expenses by date range
+
+The `filter` command allows users to view expenses within an inclusive date range:
+
+```
+filter from/DATE to/DATE
+```
+
+**How it works:**
+
+1. The user enters `filter from/2026-03-01 to/2026-03-31`.
+2. `Parser.parse()` delegates to `Parser.parseFilterCommand()`.
+3. `parseFilterCommand()` extracts the `from/` and `to/` values and passes each to `DateParser.parse()`.
+4. If either date is missing, or `from` is after `to`, a `SpendTrackException` is thrown.
+5. A `FilterCommand(from, to)` is created and returned.
+6. `FilterCommand.execute()` iterates over all expenses and collects those whose date falls within the range (inclusive).
+7. `Ui.showFilteredExpenses()` displays the results in the same table format as `list`.
+8. The original `ExpenseList` is not modified — filtering is display-only.
+
+#### Find expense by index
+
+The `find` command displays the full details of a single expense:
+
+```
+find INDEX
+```
+
+**How it works:**
+
+1. The user enters `find 2`.
+2. `Parser.parse()` parses the index as an integer and creates a `FindCommand(2)`.
+3. `FindCommand.execute()` checks that the list is non-empty and the index is within bounds (1-based).
+4. The expense at `index - 1` is retrieved from `ExpenseList`.
+5. `Ui.showExpenseDetail()` displays a labelled detail view with all fields.
+
+The following sequence diagram shows the execution flow for both `filter` and `find`:
+
+![Sequence diagram for filter and find commands](images/FilterFindSequence.png)
+
+#### Design considerations
+
+**Aspect: Filter does not mutate the list**
+
+`FilterCommand` builds a separate `ArrayList<Expense>` of matching expenses and passes it to `Ui.showFilteredExpenses()`. The underlying `ExpenseList` is never modified. This ensures that filtering is a safe, read-only operation that cannot accidentally corrupt data.
+
+**Aspect: Index validation in FindCommand**
+
+`FindCommand` validates the index at execute time rather than parse time. This follows the same pattern as `DeleteCommand` — the parser only checks that the index is a valid integer, while the command checks that it is within the current list bounds. This is necessary because the list size is not known at parse time.
+
 ### Edit Expense Feature
 
 The edit expense feature allows users to update one or more fields of an existing expense by its 1-based index:
 ```
-edit INDEX [d/DESCRIPTION] [a/AMOUNT] [c/CATEGORY] [date/YYYY-MM-DD]
+edit INDEX [d/DESCRIPTION] [a/AMOUNT] [c/CATEGORY] [date/YYYY-MM-DD] [recurring/true|false]
 ```
 
 Only the fields provided are updated — all other fields remain unchanged.
 
 #### How it works
 
-1. The user enters `edit 1 d/Latte a/6.00`.
+1. The user enters `edit 1 d/Latte a/6.00 recurring/true`.
 2. `SpendTrack.run()` passes the input to `Parser.parse()`.
 3. `Parser.parse()` identifies the command word `edit` and delegates to `Parser.parseEditCommand()`.
-4. `parseEditCommand()` extracts the index from the first token, then splits the remaining arguments using the same flag regex as `parseAddCommand()` to extract only the fields provided. Fields not provided are left as `null`.
+4. `parseEditCommand()` extracts the index from the first token, then splits the remaining arguments using the same flag regex as `parseAddCommand()` to extract only the fields provided. Fields not provided are left as `null`. Duplicate flags throw a `SpendTrackException`.
 5. A new `EditCommand` is created with the index and the parsed fields (`null` for unchanged fields).
 6. `EditCommand.execute()` validates the index and fields, retrieves the existing `Expense` from `ExpenseList`, constructs an updated `Expense` by substituting `null` fields with the original expense's values, and replaces it via `ExpenseList.setExpense()`.
 7. `Ui.showEditSuccess()` displays the before and after state of the expense.
@@ -290,6 +410,447 @@ The following sequence diagram illustrates the full flow of the edit command:
 
 The current approach was chosen to keep `Parser` stateless and decoupled from `ExpenseList`.
 
+**Aspect: Duplicate flag detection**
+
+`parseEditCommand()` tracks which flags have been seen using boolean variables (`seenDescription`, `seenAmount`, etc.). If the same flag appears twice in a single edit command, a `SpendTrackException` is thrown immediately. This prevents ambiguous updates like `edit 1 d/Latte d/Coffee` where the intended value is unclear.
+
+**Aspect: Recurring flag as an editable field**
+
+The `recurring/` flag is editable via `edit INDEX recurring/false` to allow users to un-mark an expense. This follows the same `null`-sentinel pattern as other fields — if `recurring/` is not provided, the existing value is preserved. Only `true` or `false` are accepted; any other value throws a `SpendTrackException`.
+
+### List Expenses Feature
+
+The list feature displays all recorded expenses in a formatted table:
+```
+list
+list recurring
+```
+
+The `list recurring` sub-command filters to show only expenses marked as recurring.
+
+#### How it works
+
+1. The user enters `list` or `list recurring`.
+2. `Parser.parse()` checks if a second token `recurring` is present.
+3. A `ListCommand(false)` or `ListCommand(true)` is created accordingly.
+4. `ListCommand.execute()` delegates to either `Ui.showExpenseList()` or `Ui.showRecurringList()`.
+5. Both methods calculate column widths dynamically by iterating over all expenses first, then print the table with the correct widths.
+
+The following sequence diagram shows the list command execution flow:
+
+![Sequence diagram for list command](images/ListCommandSequence.png)
+
+#### Design considerations
+
+**Aspect: Dynamic vs fixed column widths**
+
+- **Current approach:** Column widths are calculated at display time by iterating over all expenses first.
+  - Pros: Table always aligns correctly regardless of category or description length. `[Entertainment]` and `[Food]` both fit cleanly without overflow.
+  - Cons: Requires two passes over the list — one to calculate widths, one to print rows.
+
+- **Alternative:** Fixed column widths.
+  - Pros: Simpler code, single pass.
+  - Cons: Long categories like `[Entertainment]` overflow and misalign subsequent columns.
+
+Dynamic widths were chosen because alignment correctness matters more than the minor cost of a second pass.
+
+**Aspect: Recurring filter as sub-command vs separate command**
+
+- **Current approach:** `list recurring` is handled as a sub-command of `list` using a boolean flag in `ListCommand`.
+  - Pros: Intuitive — both are variants of listing. Single command class handles both cases.
+  - Cons: Slight coupling between the list and recurring concerns.
+
+- **Alternative:** A separate `ListRecurringCommand` class.
+  - Pros: Cleaner separation of concerns.
+  - Cons: Duplicates most of the list logic for a minor variation.
+
+The sub-command approach was chosen for simplicity since the only difference is a filter applied before display.
+
+---
+
+### Budget Feature
+
+The budget feature allows users to set a monthly spending limit, reset it, and view its history:
+```
+budget AMOUNT
+budget reset
+budget history
+```
+
+#### How it works — Set budget
+
+1. The user enters `budget 500`.
+2. `Parser.parseBudgetCommand()` checks for the keywords `reset` and `history` first, then parses the remaining argument as a double.
+3. `BudgetCommand.execute()` calls `validateBudget()` — amount must be greater than 0 and not exceed $1,000,000. A `SpendTrackException` is thrown if invalid.
+4. `ExpenseList.setBudget()` stores the amount and appends a `date|amount` entry to the budget history list.
+5. `Ui.showBudgetSet()` displays the budget, current total spent, and remaining balance.
+6. If total spent already exceeds the new budget, `Ui.showBudgetExceeded()` displays a warning.
+
+#### How it works — Reset budget
+
+1. The user enters `budget reset`.
+2. `Parser.parseBudgetCommand()` matches the keyword `reset` and returns a `BudgetResetCommand`.
+3. `BudgetResetCommand.execute()` checks that a budget is currently set — throws `SpendTrackException` if not.
+4. `ExpenseList.resetBudget()` sets the budget field back to 0.0.
+5. `Ui.showBudgetReset()` confirms the reset.
+
+#### How it works — Budget history
+
+1. The user enters `budget history`.
+2. `Parser.parseBudgetCommand()` matches the keyword `history` and returns a `BudgetHistoryCommand`.
+3. `BudgetHistoryCommand.execute()` retrieves the history list from `ExpenseList.getBudgetHistory()`.
+4. `Ui.showBudgetHistory()` displays entries in reverse chronological order, skipping any malformed or zero-amount entries.
+
+The following sequence diagram shows all three budget sub-command flows:
+
+![Sequence diagram for budget command](images/BudgetCommandSequence.png)
+
+The following class diagram shows the relationships between the budget-related classes:
+
+![Class diagram for budget feature](images/BudgetClassDiagram.png)
+
+#### Design considerations
+
+**Aspect: Where to store budget history**
+
+- **Current approach:** History stored as `ArrayList<String>` of `date|amount` strings inside `ExpenseList`.
+  - Pros: Simple format, easy to serialise to the save file as plain text. No additional class needed.
+  - Cons: History entries are raw strings — parsing is required at display time in `Ui`.
+
+- **Alternative:** A dedicated `BudgetRecord` class with `LocalDate date` and `double amount` fields.
+  - Pros: Type-safe. No string parsing at display time.
+  - Cons: Adds an extra class and requires custom serialisation logic for `Storage`.
+
+The current approach was chosen for simplicity. Refactoring to a `BudgetRecord` class is a natural next step if history features expand in later iterations.
+
+**Aspect: Routing set/reset/history through one parser method**
+
+All three budget sub-commands are routed through `parseBudgetCommand()`. The method checks for the keywords `reset` and `history` first using `equalsIgnoreCase()`, then falls through to numeric parsing. This means a single `budget` switch case handles all three variants cleanly without needing three separate switch cases.
+
+---
+
+### Input Validation Hardening
+
+As part of v2.0, all commands were audited to ensure no user input can cause an unhandled Java exception. The goal was consistent, clear error messages at every entry point.
+
+#### Changes made
+
+| Command | Validation added |
+|---------|-----------------|
+| `add` | Missing `d/` throws error; missing `a/` throws error; zero/negative amount throws error; non-numeric amount throws error |
+| `delete` | Non-integer index throws error; missing index throws error |
+| `edit` | Non-integer index; empty/blank description; zero/negative amount; no fields provided; duplicate flags all throw errors |
+| `budget` | Empty input throws error; non-numeric amount throws error |
+
+#### Design considerations
+
+**Aspect: Parse-time vs execute-time validation**
+
+Validation is split across two layers intentionally:
+
+- `Parser` validates **format** — is the input a valid number? Is the description non-empty? This is checked at parse time because it requires no knowledge of the current application state.
+- Commands validate **value and range** — is the index within bounds? Is the amount positive? This is checked at execute time because it requires access to `ExpenseList`.
+
+This defence-in-depth approach means that even if one layer is bypassed during future refactoring, the other still catches invalid data.
+
+---
+
+### Recurring Expenses Feature
+
+The recurring feature allows users to mark expenses as recurring and filter for them:
+```
+add ... recurring/true
+list recurring
+edit INDEX recurring/false
+```
+
+#### How it works
+
+1. The user adds `recurring/true` to any `add` command.
+2. `Parser.parseAddCommand()` extracts the `recurring/` token using the same flag regex as other tokens, and validates it is either `true` or `false` — throws `SpendTrackException` otherwise.
+3. `AddCommand` passes the flag to the `Expense` constructor. If omitted, `isRecurring` defaults to `false`.
+4. `list` shows `[R]` next to recurring expenses in the description column.
+5. `list recurring` passes `true` to `ListCommand`, which calls `Ui.showRecurringList()` to filter and display only recurring expenses.
+6. `edit INDEX recurring/false` un-marks an expense using `EditCommand` with the `newRecurring` field set to `false`.
+
+The following sequence diagram shows the recurring expense flow from add through to list:
+
+![Sequence diagram for recurring expense](images/RecurringExpenseSequence.png)
+
+#### Design considerations
+
+**Aspect: Where to store the recurring flag**
+
+The flag is stored directly on `Expense` as a `boolean isRecurring` field. This keeps it co-located with the other expense data and naturally flows through to `Storage` serialisation as a fifth pipe-delimited field (`DESCRIPTION|AMOUNT|CATEGORY|DATE|RECURRING`). No separate recurring list is maintained — `list recurring` filters on the fly at display time, ensuring the list is always consistent with the current state of expenses.
+
+**Aspect: Validating the recurring/ value**
+
+Only `true` or `false` are accepted — any other value throws a `SpendTrackException`. This is validated in `Parser` at parse time since it requires no state knowledge, consistent with the validation approach used for other flag values.
+
+---
+
+### Total Expenses Feature
+
+The total feature displays the sum of all expense amounts:
+
+```
+total
+```
+
+#### How it works
+
+1. The user enters `total`.
+2. `Parser.parse()` creates a `TotalCommand`.
+3. `TotalCommand.execute()` calls `ExpenseList.getTotal()`, which iterates over all expenses and sums their amounts.
+4. `Ui.showTotal()` displays the formatted total to the user.
+5. `mutatesData()` returns `false`, so no save is triggered.
+
+#### Design considerations
+
+**Aspect: Where to compute the total**
+
+- **Current approach:** `ExpenseList.getTotal()` computes the total on demand by iterating over the list each time it is called.
+    - Pros: Always accurate — no risk of the cached total diverging from the actual list after add, delete, or edit operations. Simple to implement and maintain.
+    - Cons: O(n) per call. For very large lists, this could be slow.
+
+- **Alternative:** Maintain a running total field in `ExpenseList`, updated on every add/delete/edit.
+    - Pros: O(1) lookup.
+    - Cons: Must be updated in every mutating method. Risk of inconsistency if a mutating path forgets to update the total. More error-prone during refactoring.
+
+The on-demand approach was chosen because expense lists in a student budget tracker are small (typically under 1000 entries), making the O(n) cost negligible. Correctness is more important than micro-optimisation here.
+
+---
+
+### Budget Alert Feature
+
+The budget alert feature automatically warns users when their spending approaches or exceeds their monthly budget. The check runs after every `add` command — no separate command is needed.
+
+```
+add d/Dinner a/50 c/Food
+→ [WARNING] You are close to your monthly budget! ($95.00 / $100.00 used)
+```
+
+#### How it works
+
+1. After `AddCommand.execute()` adds the expense and displays the success message, it calls `BudgetChecker.check(expenses, ui)`.
+2. `BudgetChecker.check()` is a static utility method. It first checks if a budget has been set via `ExpenseList.hasBudget()`. If not, it returns silently.
+3. It retrieves the total spent via `ExpenseList.getTotal()` and the budget via `ExpenseList.getBudget()`.
+4. It computes the usage ratio (`totalSpent / budget`).
+5. If `totalSpent > budget`, it calls `Ui.showBudgetAlert()` to display an exceeded alert.
+6. Otherwise, if the usage ratio is at or above 0.9 (90%), it calls `Ui.showBudgetWarning()` to display a warning.
+7. If spending is under 90%, no message is shown.
+
+The following sequence diagram shows the budget alert flow after an add command:
+
+![Sequence diagram for budget alert](images/BudgetAlertSequence.png)
+
+#### Design considerations
+
+**Aspect: Where to place the budget check logic**
+
+- **Current approach:** A separate static `BudgetChecker` utility class called from `AddCommand.execute()`.
+    - Pros: Follows the Single Responsibility Principle — `AddCommand` handles adding, `BudgetChecker` handles the budget check. Easy to test independently. Can be reused by other commands in the future if needed.
+    - Cons: Adds an extra class for a relatively simple check.
+
+- **Alternative:** Inline the check directly in `AddCommand.execute()`.
+    - Pros: Fewer classes. All add logic in one place.
+    - Cons: Violates SRP. Makes `AddCommand` harder to test in isolation.
+
+The separate class was chosen because it keeps `AddCommand` focused on its primary responsibility and makes the budget check independently testable.
+
+**Aspect: Threshold value**
+
+The 90% warning threshold is defined as a named constant (`WARNING_THRESHOLD = 0.9`) in `BudgetChecker` to avoid magic numbers. The exact boundary at 100% uses `totalSpent > budget` (strict greater than) so that spending exactly at budget shows a warning rather than an alert — the user has not yet exceeded their limit.
+
+---
+
+### Clear All Expenses Feature
+
+The clear feature removes all expenses from the list after a confirmation prompt:
+
+```
+clear
+```
+
+#### How it works
+
+1. The user enters `clear`.
+2. `Parser.parse()` creates a `ClearCommand`.
+3. `ClearCommand.execute()` first checks if the expense list is empty. If so, it shows `No expenses to clear.` and returns without prompting.
+4. If the list is non-empty, it shows a confirmation prompt via `Ui.showMessage()` asking `Are you sure...? (yes/no):`.
+5. It reads the user's response via `Ui.readCommand()`.
+6. If the response is `yes` (case-insensitive), it calls `ExpenseList.clearAll()` which clears the internal `ArrayList`, then shows a success message with the count of removed expenses.
+7. Any other input cancels the operation with `Clear cancelled.`
+8. Because `mutatesData()` returns `true`, `Storage.save()` is called after execution.
+
+The following sequence diagram shows the clear command flow:
+
+![Sequence diagram for clear command](images/ClearCommandSequence.png)
+
+#### Design considerations
+
+**Aspect: Confirmation before destructive action**
+
+- **Current approach:** Require the user to type `yes` to confirm. Any other input cancels.
+    - Pros: Prevents accidental data loss. The user must explicitly opt in. Case-insensitive matching (`YES`, `Yes`, `yes` all work) is forgiving.
+    - Cons: Adds an extra step for the user.
+
+- **Alternative:** Clear immediately without confirmation.
+    - Pros: Faster for the user.
+    - Cons: A single typo could delete all data with no recovery (unless undo is available).
+
+Confirmation was chosen because clearing all expenses is irreversible and high-risk. The minor inconvenience of typing `yes` is worth the safety.
+
+**Aspect: Empty list handling**
+
+If the list is already empty, `ClearCommand` shows `No expenses to clear.` without prompting. This avoids confusing the user with a confirmation prompt when there is nothing to clear.
+
+---
+
+### Undo Feature
+
+The undo feature restores the expense list to its state before the last mutating command:
+
+```
+undo
+```
+
+#### How it works
+
+1. `SpendTrack` owns an `UndoManager` instance, created on startup.
+2. Before every mutating command executes (except `undo` itself), `SpendTrack` calls `UndoManager.saveSnapshot(expenses)`.
+3. `saveSnapshot()` creates a deep copy of all `Expense` objects in the list and stores the current budget value. This ensures the snapshot is independent of future mutations.
+4. When the user enters `undo`, `Parser` creates an `UndoCommand` with a reference to the `UndoManager`.
+5. `UndoCommand.execute()` calls `UndoManager.undo(expenses)`.
+6. `undo()` checks if a snapshot exists. If not, it returns `false` and the command prints `Nothing to undo.`
+7. If a snapshot exists, it calls `ExpenseList.restoreFrom()` which replaces the internal expense list and budget with the snapshot data. The snapshot is then consumed (set to `null`), preventing a second undo.
+8. Because `mutatesData()` returns `true`, `Storage.save()` persists the restored state.
+
+The following sequence diagram shows the undo flow:
+
+![Sequence diagram for undo command](images/UndoSequence.png)
+
+The following class diagram shows the relationships between the undo-related classes:
+
+![Class diagram for undo feature](images/UndoClassDiagram.png)
+
+#### Design considerations
+
+**Aspect: Snapshot depth**
+
+- **Current approach:** Single-level undo. Only one snapshot is stored at a time. A second consecutive `undo` prints `Nothing to undo.`
+    - Pros: Simple implementation. Low memory usage. Predictable behaviour — the user always knows exactly one step can be undone.
+    - Cons: Cannot undo multiple steps.
+
+- **Alternative:** Multi-level undo using a stack of snapshots.
+    - Pros: More flexible — users can undo several steps.
+    - Cons: Higher memory usage (each snapshot is a full deep copy). More complex to implement and test. Risk of unbounded memory growth.
+
+Single-level undo was chosen because it covers the most common use case (undoing a mistake immediately after making it) without the complexity of multi-level undo.
+
+**Aspect: Deep copy vs shallow copy**
+
+`UndoManager.deepCopyExpenses()` creates new `Expense` objects for each entry in the list. This is necessary because `Expense` fields are mutable (via setters used by `EditCommand`). A shallow copy would share object references, causing the snapshot to be corrupted when the original expenses are modified.
+
+**Aspect: Excluding undo from the snapshot**
+
+`SpendTrack` explicitly skips `saveSnapshot()` when the command is an `UndoCommand` (checked via `instanceof`). Without this, undoing would save the current (post-undo) state as the new snapshot, making it impossible to redo or detect "nothing to undo".
+
+---
+
+### Export CSV Feature
+
+The export feature writes all expenses to a CSV file:
+
+```
+export csv
+```
+
+#### How it works
+
+1. The user enters `export csv`.
+2. `Parser.parse()` checks for the `csv` sub-command. If missing, a `SpendTrackException` is thrown with usage instructions.
+3. An `ExportCommand` is created and returned.
+4. `ExportCommand.execute()` checks if the expense list is empty. If so, it shows `No expenses to export.` and returns without creating a file.
+5. `ensureDirectoryExists()` creates the `data/` directory if it does not exist.
+6. A `FileWriter` is opened using `try-with-resources` for `data/spendtrack_export.csv`.
+7. The CSV header row (`Description,Amount,Category,Date,Recurring`) is written first.
+8. For each expense, `formatCsvRow()` formats the row. If the description contains a comma or double quote, it is wrapped in double quotes with internal quotes escaped (`"` → `""`).
+9. On success, a confirmation message is shown. On `IOException`, a warning is printed and the app continues.
+
+The following sequence diagram shows the export flow:
+
+![Sequence diagram for export command](images/ExportCommandSequence.png)
+
+#### Design considerations
+
+**Aspect: CSV quoting strategy**
+
+- **Current approach:** Only descriptions containing commas or double quotes are quoted. All other fields are written as-is.
+    - Pros: Produces cleaner CSV output for the common case. Follows RFC 4180 conventions.
+    - Cons: If a category ever contains a comma (unlikely with current normalisation), it would break the CSV.
+
+- **Alternative:** Always quote all string fields.
+    - Pros: Guaranteed safe regardless of content.
+    - Cons: Noisier output — every row has unnecessary quotes.
+
+The selective quoting approach was chosen because category normalisation prevents commas in categories, and amounts/dates/booleans never contain commas.
+
+**Aspect: Testability**
+
+`ExportCommand` accepts a custom file path via a second constructor, allowing tests to write to a temporary file rather than the production path. The `formatCsvRow()` method is package-private (`static`) so tests can verify CSV formatting independently of file I/O.
+
+---
+
+### Savings Goal Feature
+
+The savings goal feature lets users set a monthly savings target and track progress:
+
+```
+goal g/AMOUNT
+goal status
+```
+
+#### How it works
+
+**Setting a goal:**
+
+1. The user enters `goal g/200`.
+2. `Parser.parseGoalCommand()` extracts the `g/` value, validates it is a positive number, and creates a `GoalCommand(200.0)`.
+3. `GoalCommand.execute()` calls `ExpenseList.setGoal(200.0)` to store the goal.
+4. A confirmation message is printed.
+5. Because `mutatesData()` returns `true`, `Storage.save()` persists the goal.
+
+**Viewing status:**
+
+1. The user enters `goal status`.
+2. `Parser.parseGoalCommand()` matches the keyword `status` and creates a `GoalCommand()` (status mode).
+3. `GoalCommand.execute()` checks `ExpenseList.hasGoal()`. If no goal is set, it prints `No savings goal set.` and returns.
+4. Otherwise, it retrieves the goal and total spent, computes `saved = goal - spent`.
+5. If `saved >= 0`, it displays the saved amount and percentage. If `saved < 0`, it shows `Goal not reached. Over by $X.XX.`
+6. `mutatesData()` returns `false` for status queries, so no save is triggered.
+
+The following sequence diagram shows both the set and status flows:
+
+![Sequence diagram for goal command](images/GoalCommandSequence.png)
+
+#### Design considerations
+
+**Aspect: Single command class for set and status**
+
+- **Current approach:** `GoalCommand` handles both `goal g/AMOUNT` (set) and `goal status` (view) using a boolean `isStatusRequest` flag.
+    - Pros: Keeps related functionality together. The `goal` command namespace is intuitive — `goal g/200` to set, `goal status` to view.
+    - Cons: One class handles two concerns.
+
+- **Alternative:** Separate `SetGoalCommand` and `GoalStatusCommand`.
+    - Pros: Cleaner SRP.
+    - Cons: Two classes for a simple feature. The `mutatesData()` distinction is already handled by the boolean flag.
+
+The single-class approach was chosen for simplicity, following the same pattern as `BudgetCommand` which handles `budget AMOUNT`, `budget reset`, and `budget history` through parser routing.
+
+**Aspect: Persistence**
+
+The goal is stored as a `double goal` field in `ExpenseList` and persisted via `Storage` using a `---GOAL---` marker in the save file, following the same pattern as budget and budget history. This keeps all state in one place and requires no additional file.
 
 ## Product scope
 
@@ -322,6 +883,16 @@ SpendTrack helps students track expenses faster than a typical GUI app. Users ca
 | v2.0 | student | filter expenses by date range | analyse spending over specific periods |
 | v2.0 | student | view full details of a single expense by index | inspect it without scrolling the entire list |
 | v2.0 | forgetful user | see my last logged expense on startup | avoid logging duplicate entries |
+| v2.0 | student | list only recurring expenses | identify habitual spending patterns |
+| v2.0 | student | mark an expense as recurring | track regular purchases |
+| v2.0 | student | edit any field of an existing expense | correct mistakes without deleting and re-adding |
+| v2.0 | student | set and reset a monthly budget | control my spending flexibly |
+| v2.0 | student | view budget history | track how my budget has changed over time |
+| v2.0 | student | be warned when approaching my budget | avoid overspending before it is too late |
+| v2.0 | student | clear all expenses at once | start fresh for a new month |
+| v2.0 | student | undo my last action | recover from mistakes quickly |
+| v2.0 | student | export expenses to CSV | open them in Excel or Google Sheets |
+| v2.0 | student | set a savings goal and track progress | stay motivated to save money |
 
 ## Non-Functional Requirements
 
@@ -408,3 +979,30 @@ SpendTrack helps students track expenses faster than a typical GUI app. Users ca
 3. Type `remaining` to verify the remaining balance.
 4. Type `budget -10` to test negative amount.
 5. Expected: error message.
+
+### Listing expenses
+
+1. Add a few expenses then type `list`.
+2. Expected: formatted table with dynamic column widths.
+3. Type `add d/Netflix a/18.00 c/Entertainment recurring/true`.
+4. Type `list recurring`.
+5. Expected: only Netflix shown with `[R]` tag.
+
+### Editing an expense
+
+1. Type `list` to see current expenses.
+2. Type `edit 1 d/Latte a/6.00` to edit description and amount.
+3. Expected: before and after shown.
+4. Type `edit 1 recurring/true` to mark as recurring.
+5. Type `edit 999 d/Test` to test out-of-range.
+6. Expected: error message.
+
+### Budget reset and history
+
+1. Type `budget 500` then `budget 300` to set two budgets.
+2. Type `budget history` to view history.
+3. Expected: entries in reverse chronological order.
+4. Type `budget reset` to clear the budget.
+5. Type `budget reset` again.
+6. Expected: error — no budget to reset.
+
