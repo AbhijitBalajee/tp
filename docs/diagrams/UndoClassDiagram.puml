@@ -1,0 +1,59 @@
+@startuml
+!define BGCOLOR white
+skinparam backgroundColor BGCOLOR
+skinparam classAttributeIconSize 0
+hide circle
+
+abstract class Command {
+    + {abstract} execute(expenses, ui)
+    + isExit(): boolean
+    + mutatesData(): boolean
+}
+
+class UndoCommand {
+    - undoManager: UndoManager
+    + execute(expenses, ui)
+    + mutatesData(): boolean
+}
+
+class UndoManager {
+    - snapshot: ArrayList<Expense>
+    - snapshotBudget: double
+    - hasSnapshot: boolean
+    + saveSnapshot(expenses: ExpenseList)
+    + undo(expenses: ExpenseList): boolean
+    + hasSnapshot(): boolean
+    - deepCopyExpenses(list: ArrayList<Expense>): ArrayList<Expense>
+}
+
+class SpendTrack {
+    - undoManager: UndoManager
+    - expenses: ExpenseList
+    - storage: Storage
+    - ui: Ui
+    + run()
+}
+
+class ExpenseList {
+    - expenses: ArrayList<Expense>
+    - budget: double
+    + restoreFrom(expenses: ArrayList<Expense>, budget: double)
+    + getExpenses(): ArrayList<Expense>
+    + getBudget(): double
+}
+
+class Expense {
+    - description: String
+    - amount: double
+    - category: String
+    - date: LocalDate
+    - isRecurring: boolean
+}
+
+Command <|-- UndoCommand
+UndoCommand --> UndoManager : restores via
+SpendTrack "1" --> "1" UndoManager : owns
+SpendTrack "1" --> "1" ExpenseList : owns
+UndoManager ..> ExpenseList : snapshots / restores
+ExpenseList "1" *-- "0..*" Expense : contains
+@enduml
