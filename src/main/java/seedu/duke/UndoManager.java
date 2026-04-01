@@ -3,6 +3,7 @@ package seedu.duke;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
+// @@author pranavjana
 /**
  * Manages undo functionality by storing a snapshot of the expense list
  * before each mutating command. Supports single-level undo only.

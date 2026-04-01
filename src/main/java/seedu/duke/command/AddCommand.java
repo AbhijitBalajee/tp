@@ -79,7 +79,9 @@ public class AddCommand extends Command {
         Expense expense = new Expense(description, amount, category, date, isRecurring);
         expenses.addExpense(expense);
         ui.showAddSuccess(expense);
+        // @@author pranavjana
         BudgetChecker.check(expenses, ui);
+        // @@author
         logger.info("Expense added successfully. Total expenses: " + expenses.size());
     }
 

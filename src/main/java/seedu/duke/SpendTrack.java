@@ -43,11 +43,13 @@ public class SpendTrack {
         while (isRunning) {
             String input = ui.readCommand();
             try {
+                // @@author pranavjana
                 Command command = Parser.parse(input, undoManager);
                 if (command.mutatesData() && !(command instanceof
                         seedu.duke.command.UndoCommand)) {
                     undoManager.saveSnapshot(expenses);
                 }
+                // @@author
                 command.execute(expenses, ui);
                 if (command.mutatesData()) {
                     storage.save(expenses);

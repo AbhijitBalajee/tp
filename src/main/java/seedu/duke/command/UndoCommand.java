@@ -6,6 +6,7 @@ import seedu.duke.ExpenseList;
 import seedu.duke.Ui;
 import seedu.duke.UndoManager;
 
+// @@author pranavjana
 /**
  * Undoes the last mutating command by restoring the previous expense list snapshot.
  */
