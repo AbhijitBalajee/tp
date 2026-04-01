@@ -349,59 +349,21 @@ public class Ui {
      * Displays all available commands.
      */
     public void showHelp() {
-        System.out.println("Available commands:\n");
+        System.out.println(LINE);
+        System.out.println(" Available commands (alias in brackets):");
 
-        System.out.println("add:\n"
-                    + "  Adds a new expense\n"
-                    + "  Usage: add d/<desc> a/<amount> c/<category>\n");
-
-        System.out.println("delete:\n"
-                    + "  Deletes an expense by index\n"
-                    + "  Usage: delete <index>\n");
-
-        System.out.println("edit:\n"
-                    + "  Edit an existing expense\n"
-                    + "  Usage: edit <index> [d/<desc>] [a/<amount>] [c/<category>]\n");
-
-        System.out.println("list:\n"
-                    + "  List all expenses\n"
-                    + "  Usage: list\n");
-
-        System.out.println("find:\n"
-                    + "  Find expense by index\n"
-                    + "  Usage: find <index>\n");
-
-        System.out.println("filter:\n"
-                    + "  Filter expenses by date\n"
-                    + "  Usage: filter from/YYYY-MM-DD to/YYYY-MM-DD\n");
-
-        System.out.println("total:\n"
-                    + "  Show total expenses\n"
-                    + "  Usage: total\n");
-
-        System.out.println("budget:\n"
-                    + "  Set budget\n"
-                    + "  Usage: budget <amount>\n");
-
-        System.out.println("remaining:\n"
-                    + "  Show remaining budget\n"
-                    + "  Usage: remaining\n");
-
-        System.out.println("summary:\n"
-                    + "  Show expense summary\n"
-                    + "  Usage: summary\n");
-
-        System.out.println("search:\n"
-                    + "  Search expenses by keyword\n"
-                    + "  Usage: search <keyword>\n");
-
-        System.out.println("sort:\n"
-                    + "  Sort expenses by amount\n"
-                    + "  Usage: sort\n");
-
-        System.out.println("bye:\n"
-                    + "  Exit application\n"
-                    + "  Usage: bye\n");
+        System.out.println("  add (a)    d/<desc> a/<amt> c/<cat> [date/<YYYY-MM-DD>] -- add expense");
+        System.out.println("  delete (d) <index>                                     -- delete expense");
+        System.out.println("  list (l)                                               -- list all");
+        System.out.println("  total                                                  -- show total");
+        System.out.println("  summary (s)                                            -- category breakdown");
+        System.out.println("  budget (b) <amount>                                    -- set budget");
+        System.out.println("  filter     from/<YYYY-MM-DD> to/<YYYY-MM-DD>           -- filter by date range");
+        System.out.println("  find       <index>                                     -- view expense details");
+        System.out.println("  remaining                                              -- show remaining");
+        System.out.println("  help (h)                                               -- show this help");
+        System.out.println("  bye                                                    -- exit");
+        System.out.println(LINE);
 
     }
     /**
