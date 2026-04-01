@@ -5,6 +5,7 @@ import java.util.logging.Logger;
 import seedu.duke.ExpenseList;
 import seedu.duke.Ui;
 
+// @@author pranavjana
 /**
  * Clears all expenses from the list after user confirmation.
  */

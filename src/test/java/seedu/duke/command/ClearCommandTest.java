@@ -17,6 +17,7 @@ import seedu.duke.Ui;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+// @@author pranavjana
 class ClearCommandTest {
 
     private static final PrintStream ORIGINAL_OUT = System.out;

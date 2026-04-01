@@ -507,6 +507,7 @@ public class Ui {
                 + " | " + expense.getDate());
     }
 
+    // @@author pranavjana
     /**
      * Displays a general message to the user.
      *
@@ -517,6 +518,7 @@ public class Ui {
         System.out.println(" " + message);
         System.out.println(LINE);
     }
+    // @@author
 
     /**
      * Displays an error message to the user.

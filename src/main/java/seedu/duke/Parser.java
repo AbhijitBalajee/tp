@@ -89,8 +89,10 @@ public class Parser {
             return parseBudgetCommand(parts.length > 1 ? parts[1] : "");
         case "remaining":
             return new RemainingCommand();
+        // @@author pranavjana
         case "clear":
             return new ClearCommand();
+        // @@author
         case "summary":
             return new SummaryCommand();
         case "help":
