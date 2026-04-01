@@ -1,0 +1,29 @@
+@startuml
+actor User
+participant ":SpendTrack" as ST
+participant ":Parser" as P
+participant ":RemainingCommand" as RC
+participant ":ExpenseList" as EL
+participant ":Ui" as UI
+
+User -> ST : "remaining"
+ST -> P : parse(input)
+P --> ST : :RemainingCommand
+ST -> RC : execute(expenses, ui)
+RC -> EL : hasBudget()
+
+alt no budget set
+    EL --> RC : false
+    RC --> ST : throw SpendTrackException
+    ST -> UI : showError("No budget set...")
+    UI --> User : "No budget set..."
+else budget set
+    EL --> RC : true
+    RC -> EL : getBudget()
+    EL --> RC : 500.0
+    RC -> EL : getTotal()
+    EL --> RC : 87.30
+    RC -> UI : showRemaining(500.0, 87.30, 412.70)
+    UI --> User : "Remaining: $412.70"
+end
+@enduml

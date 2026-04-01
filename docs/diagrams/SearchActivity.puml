@@ -1,0 +1,31 @@
+@startuml
+start
+
+:Receive search keyword;
+
+if (keyword is empty?) then (yes)
+    :Show error message;
+    stop
+endif
+
+:Convert keyword to lowercase;
+:Initialize empty results list;
+
+while (more expenses?) is (yes)
+    :Get next expense;
+
+    if (description contains keyword?) then (yes)
+        :Add to results;
+    endif
+
+endwhile (no)
+
+if (results empty?) then (yes)
+    :Show "No expenses found";
+else (no)
+    :Display matching expenses;
+    :Show total matches;
+endif
+
+stop
+@enduml
