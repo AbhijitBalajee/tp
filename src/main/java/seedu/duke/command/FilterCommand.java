@@ -1,3 +1,4 @@
+// @@author Ariff1422
 package seedu.duke.command;
 
 import java.time.LocalDate;
@@ -62,3 +63,4 @@ public class FilterCommand extends Command {
         ui.showFilteredExpenses(filtered, from, to);
     }
 }
+// @@author

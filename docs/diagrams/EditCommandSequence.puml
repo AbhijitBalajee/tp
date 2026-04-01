@@ -1,0 +1,48 @@
+@startuml
+!define BGCOLOR white
+skinparam backgroundColor BGCOLOR
+skinparam sequenceMessageAlign center
+
+actor User
+participant ":SpendTrack" as ST
+participant "Parser" as P
+participant ":EditCommand" as EC
+participant ":ExpenseList" as EL
+participant ":Ui" as UI
+
+User -> ST : "edit 1 d/Latte a/6.00"
+activate ST
+ST -> P : parse("edit 1 d/Latte a/6.00")
+activate P
+P -> P : parseEditCommand("1 d/Latte a/6.00")
+note right of P
+    Extracts index=1
+    newDescription="Latte"
+    newAmount=6.00
+    others remain null
+end note
+P --> ST : EditCommand(1, "Latte", 6.00, null, null, null)
+deactivate P
+
+ST -> EC : execute(expenseList, ui)
+activate EC
+EC -> EC : validate index and fields
+EC -> EL : getExpense(0)
+activate EL
+EL --> EC : old Expense
+deactivate EL
+note right of EC
+    null fields fall back to
+    original expense values
+end note
+EC -> EL : setExpense(0, updatedExpense)
+activate EL
+EL --> EC
+deactivate EL
+EC -> UI : showEditSuccess(1, old, updated)
+activate UI
+UI --> User : before/after display
+deactivate UI
+deactivate EC
+deactivate ST
+@enduml
