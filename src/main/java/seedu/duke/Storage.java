@@ -62,8 +62,10 @@ public class Storage {
             for (String entry : expenses.getBudgetHistory()) {
                 fw.write(entry + "\n");
             }
+            // @@author pranavjana
             fw.write(GOAL_MARKER + "\n");
             fw.write(expenses.getGoal() + "\n");
+            // @@author
             logger.info("Saved " + expenses.size() + " expenses to " + filePath);
         } catch (IOException e) {
             System.out.println("Warning: could not save data. " + e.getMessage());
@@ -111,6 +113,7 @@ public class Storage {
                     readingGoal = false;
                     continue;
                 }
+                // @@author pranavjana
                 if (line.equals(GOAL_MARKER)) {
                     readingBudget = false;
                     readingHistory = false;
@@ -127,6 +130,7 @@ public class Storage {
                         System.out.println("Warning: could not parse goal value: " + line);
                     }
                     readingGoal = false;
+                // @@author
                     continue;
                 }
                 if (readingBudget) {

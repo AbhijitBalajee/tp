@@ -89,8 +89,10 @@ public class Parser {
             return parseBudgetCommand(parts.length > 1 ? parts[1] : "");
         case "remaining":
             return new RemainingCommand();
+        // @@author pranavjana
         case "goal":
             return parseGoalCommand(parts.length > 1 ? parts[1] : "");
+        // @@author
         case "summary":
             return new SummaryCommand();
         case "help":
@@ -297,6 +299,7 @@ public class Parser {
         }
     }
 
+    // @@author pranavjana
     private static Command parseGoalCommand(String args) throws SpendTrackException {
         String trimmed = args.trim();
         if (trimmed.equalsIgnoreCase("status")) {

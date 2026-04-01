@@ -182,6 +182,7 @@ public class ExpenseList {
         logger.info("Budget restored to: " + budget);
     }
 
+    // @@author pranavjana
     /**
      * Sets the savings goal amount.
      *
@@ -210,4 +211,5 @@ public class ExpenseList {
     public boolean hasGoal() {
         return goal > 0.0;
     }
+    // @@author
 }
