@@ -3,19 +3,17 @@ package seedu.duke;
 import org.junit.jupiter.api.Test;
 import seedu.duke.command.HelpCommand;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 public class HelpCommandTest {
 
     @Test
-    public void helpCommand_isNotExit() {
-        HelpCommand cmd = new HelpCommand();
-        assertFalse(cmd.isExit());
-    }
+    public void execute_help_noCrash() {
+        ExpenseList list = new ExpenseList();
+        Ui ui = new Ui();
 
-    @Test
-    public void helpCommand_executesWithoutError() {
         HelpCommand cmd = new HelpCommand();
-        cmd.execute(new ExpenseList(), new Ui());
+
+        assertDoesNotThrow(() -> cmd.execute(list, ui));
     }
 }
