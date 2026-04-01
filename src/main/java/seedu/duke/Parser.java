@@ -1,26 +1,12 @@
 package seedu.duke;
 
+import seedu.duke.command.*;
+import seedu.duke.command.RemainingCommand;
+
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
-
-import seedu.duke.command.AddCommand;
-import seedu.duke.command.DeleteCommand;
-import seedu.duke.command.EditCommand;
-import seedu.duke.command.FilterCommand;
-import seedu.duke.command.FindCommand;
-import seedu.duke.command.TotalCommand;
-import seedu.duke.command.ListCommand;
-import seedu.duke.command.BudgetCommand;
-import seedu.duke.command.BudgetResetCommand;
-import seedu.duke.command.BudgetHistoryCommand;
-import seedu.duke.command.RemainingCommand;
-import seedu.duke.command.SummaryCommand;
-import seedu.duke.command.SearchCommand;
-import seedu.duke.command.HelpCommand;
-import seedu.duke.command.Command;
-import seedu.duke.UnknownCommand;
 
 /**
  * Parses user input into commands.

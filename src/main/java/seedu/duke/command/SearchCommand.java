@@ -3,8 +3,8 @@ package seedu.duke.command;
 
 import seedu.duke.Expense;
 import seedu.duke.ExpenseList;
-import seedu.duke.Ui;
 import seedu.duke.SpendTrackException;
+import seedu.duke.Ui;
 
 public class SearchCommand extends Command {
 
