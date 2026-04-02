@@ -19,13 +19,19 @@ SpendTrack is a CLI expense tracker for NUS students who prefer typing over clic
 - **Command aliases** (v2.0): Added single-letter aliases (`a`, `d`, `l`, `s`, `b`, `h`) resolved via a static map in `Parser` before command routing. Commands are also case-insensitive.
 - **Category normalisation** (v2.0): Added `normalizeCategory()` in `Parser` to auto-capitalise category names (e.g. `food` becomes `Food`, `public transport` becomes `Public Transport`), preventing duplicate categories in the summary.
 - **Assertions and logging** (v1.0): Added assertions and `java.util.logging` to `AddCommand`, `Parser`, `ExpenseList`, `RemainingCommand`, and `HelpCommand`. Enabled assertions in `build.gradle` with `-ea` flag (PR #31).
+- **Wired missing commands into Parser** (v2.0): Added `top`, `last`, `report`, `month` to Parser switch statement — command classes existed but were never routed. Moved `MonthCommand.java` from test folder to main source. Deleted duplicate `ReportCommand.java` in wrong package.
+- **Fixed output formatting** (v2.0): Fixed `search`, `sort`, `last`, `top`, `report`, `month` commands to use `ui.showMessage()` instead of `System.out.println()` for consistent Ui borders across all commands.
+- **Updated help command** (v2.0): Rewrote `Ui.showHelp()` to list all 25+ commands with aliases and descriptions, replacing the outdated v1.0 help output.
 
 ### Contributions to the UG
 
 - Add expense section with date formats, category normalisation, and examples
+- Delete expense section with error cases
 - Category summary section with column explanations
 - Command aliases table
 - FAQ and command summary table
+- Fixed UG error messages to match actual app output (bye, delete, remaining, edit)
+- Updated help expected output to match all v2.0 commands
 
 ### Contributions to the DG
 
@@ -33,12 +39,15 @@ SpendTrack is a CLI expense tracker for NUS students who prefer typing over clic
 - Flexible date parsing (DateParser) section with design considerations (format strategy, SRP extraction)
 - Category summary feature section with design considerations (data structures, sorting)
 - Command aliases section
-- UML diagrams:
-  - Sequence diagram: add command flow with DateParser and category normalisation
-  - Sequence diagram: DateParser internal format fallthrough
-  - Sequence diagram: SummaryCommand execution with enhanced stats
+- Architecture sequence diagram showing full runtime loop
+- UML diagrams (3 types, 6 diagrams):
+  - Sequence diagram: add command flow with alt/opt boxes for validation and optional date
+  - Sequence diagram: DateParser internal format fallthrough with alt boxes
+  - Sequence diagram: SummaryCommand execution with loop and alt boxes
+  - Sequence diagram: Architecture runtime loop with loop and alt boxes
   - Class diagram: Parser, DateParser, AddCommand, SummaryCommand, Expense, ExpenseList
   - Object diagram: SummaryCommand state snapshot showing category maps
+- Cleaned up DG: removed duplicate Remaining/Help/Search sections, fixed heading levels, removed orphaned content, removed duplicate manual testing sections
 - Updated user stories, glossary, and manual testing appendix
 
 ### Contributions to team-based tasks
@@ -50,6 +59,7 @@ SpendTrack is a CLI expense tracker for NUS students who prefer typing over clic
 - Reviewed PRs from teammates
 - Fixed build-breaking issues from teammates' PRs (PRs #23, #24, #27, #28)
 - Enabled assertions in `build.gradle` for the entire team (PR #31)
+- Fixed critical release-blocking bugs: wired 4 missing commands into Parser, fixed output formatting across 6 commands, updated help and expected test output
 
 ### Community
 
