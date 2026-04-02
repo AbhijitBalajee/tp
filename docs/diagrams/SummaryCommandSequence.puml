@@ -30,13 +30,12 @@ deactivate EL
 alt expenses list is empty
     SC -> UI : showError("No expenses recorded yet.")
 else expenses exist
-    SC -> SC : group by category
-    note right of SC
-      For each expense:
-      - categoryTotals: sum amounts
-      - categoryCounts: count txns
-      - categoryMax: track max amount
-    end note
+    loop for each expense in allExpenses
+        SC -> SC : update categoryTotals
+        SC -> SC : update categoryCounts
+        SC -> SC : update categoryMax
+        SC -> SC : accumulate grandTotal
+    end
     SC -> SC : sort categories descending by total
     SC -> UI : showEnhancedSummary(sorted, counts, max, grandTotal)
     activate UI
