@@ -604,6 +604,286 @@ Error cases:
 - `goal g/abc` → `Goal amount must be a number. Usage: goal g/<amount>`
 - `goal` or `goal abc` → `Usage: goal g/<amount> or goal status`
 
+### Generating a monthly report: `report`
+
+Displays the total amount spent in a given month, along with a breakdown by category.
+
+Format: `report YYYY-MM`
+
+- `YYYY-MM` is the year and month you want the report for (e.g. `2026-03`).
+- Only expenses with a recorded date in that month are included.
+
+Examples:
+
+- `report 2026-03` — shows the full spending report for March 2026
+
+Expected output:
+```
+____________________________________________________________
+ Monthly Report for 2026-03:
+ Total spent: $32.30
+ Breakdown by category:
+  - Food: $15.50
+  - Transport: $16.80
+____________________________________________________________
+```
+
+If no expenses exist for that month:
+```
+____________________________________________________________
+ No expenses found for 2026-03
+____________________________________________________________
+```
+
+Error cases:
+- `report 03-2026` or `report abc` → `Usage: report <YYYY-MM>`
+
+---
+
+### Listing expenses by month: `month`
+
+Lists all individual expenses recorded in a specific month, one per line.
+
+Format: `month YYYY-MM`
+
+- `YYYY-MM` is the year and month (e.g. `2026-03`).
+- Unlike `report`, this shows each expense individually rather than grouping by category.
+
+Examples:
+
+- `month 2026-03` — lists every expense recorded in March 2026
+
+Expected output:
+```
+____________________________________________________________
+ Expenses for 2026-03:
+ 1. [Food] Coffee - $3.50 (2026-03-15)
+ 2. [Transport] Bus - $1.80 (2026-03-22)
+____________________________________________________________
+```
+
+If no expenses exist for that month:
+```
+____________________________________________________________
+ No expenses found for 2026-03
+____________________________________________________________
+```
+
+Error cases:
+- `month abc` or `month 03-2026` → `Usage: month <YYYY-MM>`
+
+---
+
+### Viewing top N expenses: `top`
+
+Displays the N most expensive expenses, sorted from highest to lowest amount.
+
+Format: `top N`
+
+- `N` must be a positive integer.
+- If `N` is greater than the total number of expenses, all expenses are shown.
+
+Examples:
+
+- `top 3` — shows the 3 most expensive expenses recorded
+
+Expected output:
+```
+____________________________________________________________
+ Top 3 expenses:
+ 1. [Transport] Grab to airport - $24.50 (2026-03-15)
+ 2. [Entertainment] Netflix - $18.00 (2026-03-22)
+ 3. [Food] Dinner - $12.00 (2026-03-22)
+____________________________________________________________
+```
+
+Error cases:
+- `top 0` or `top -1` → `Number must be greater than 0.`
+- `top` on an empty list → `No expenses recorded.`
+
+---
+
+### Viewing last N expenses: `last`
+
+Displays the N most recently added expenses, in the order they were added.
+
+Format: `last N`
+
+- `N` must be a positive integer.
+- If `N` exceeds the total number of expenses, all expenses are shown.
+
+Examples:
+
+- `last 3` — shows the last 3 expenses that were added
+
+Expected output:
+```
+____________________________________________________________
+ Showing last 3 expenses:
+ 1. [Food] Coffee - $3.50 (2026-03-22)
+ 2. [Transport] Bus - $1.80 (2026-03-22)
+ 3. [Entertainment] Netflix - $18.00 (2026-03-22)
+____________________________________________________________
+```
+
+Error cases:
+- `last 0` or `last -5` → `Number must be greater than 0.`
+- `last` on an empty list → `No expenses recorded.`
+
+---
+
+### Searching expenses by keyword: `search`
+
+Finds all expenses whose description contains the given keyword. The search is case-insensitive.
+
+Format: `search KEYWORD`
+
+- `KEYWORD` is matched against the description of each expense.
+- Partial matches are supported (e.g. `search cof` will match `Coffee`).
+
+Examples:
+
+- `search coffee` — finds all expenses with coffee in the description
+
+Expected output:
+```
+____________________________________________________________
+ Search results:
+ 1. [Food] Coffee - $3.50 (2026-03-22)
+____________________________________________________________
+```
+
+If no matches are found:
+```
+____________________________________________________________
+ No matches found.
+____________________________________________________________
+```
+
+---
+
+### Sorting expenses by amount: `sort`
+
+Displays all expenses sorted from highest to lowest amount. The original list order is not changed.
+
+Format: `sort`
+
+Examples:
+
+- `sort` — displays all expenses in descending order of amount
+
+Expected output:
+```
+____________________________________________________________
+ Here are your expenses sorted by amount:
+ 1. [Transport] Grab to airport - $24.50 (2026-03-15)
+ 2. [Entertainment] Netflix - $18.00 (2026-03-22)
+ 3. [Food] Dinner - $12.00 (2026-03-22)
+ 4. [Food] Coffee - $3.50 (2026-03-22)
+____________________________________________________________
+```
+
+If no expenses have been added:
+```
+____________________________________________________________
+ No expenses recorded.
+____________________________________________________________
+```
+
+---
+
+### Checking remaining budget: `remaining`
+
+Displays how much of your monthly budget is left after deducting all recorded expenses.
+
+Format: `remaining`
+
+- A budget must be set using the `budget` command before using this.
+- The remaining balance is calculated as: budget - total expenses.
+
+Example: `remaining`
+
+Expected output:
+```
+____________________________________________________________
+ Budget    : $500.00
+ Spent     : $87.30
+ Remaining : $412.70
+____________________________________________________________
+```
+
+If no budget has been set:
+```
+____________________________________________________________
+ No budget set. Use the budget command to set one.
+____________________________________________________________
+```
+
+---
+
+### Viewing all commands: `help`
+
+Displays a list of all available commands and their formats.
+
+Format: `help`
+
+Alias: `h`
+
+- No parameters are needed.
+- Shows every command supported by SpendTrack.
+
+Example: `help` or `h`
+
+Expected output:
+```
+____________________________________________________________
+ Here are the commands you can use:
+ add d/DESCRIPTION a/AMOUNT c/CATEGORY [date/DATE] [recurring/true|false]
+ delete INDEX
+ list
+ summary
+ total
+ budget AMOUNT
+ remaining
+ report YYYY-MM
+ month YYYY-MM
+ top N
+ last N
+ search KEYWORD
+ sort
+ clear
+ undo
+ export csv
+ goal g/AMOUNT
+ goal status
+ help
+ bye
+____________________________________________________________
+```
+
+---
+
+### Exiting the application: `bye`
+
+Exits SpendTrack and saves all data automatically.
+
+Format: `bye`
+
+- All expenses and budget data are saved before the application closes.
+- No data will be lost when you exit.
+
+Example: `bye`
+
+Expected output:
+```
+____________________________________________________________
+ Goodbye and take care!
+____________________________________________________________
+```
+
+---
+
+
 ## FAQ
 
 **Q**: How do I transfer my data to another computer?
@@ -620,25 +900,31 @@ Error cases:
 
 ## Command Summary
 
-| Action | Format | Alias |
-|--------|--------|-------|
-| Add expense | `add d/DESC a/AMT c/CAT [date/DATE] [recurring/true\|false]` | `a` |
-| Delete expense | `delete INDEX` | `d` |
-| Edit expense | `edit INDEX [d/DESC] [a/AMT] [c/CAT] [date/DATE] [recurring/true\|false]` | — |
-| List expenses | `list` | `l` |
-| List recurring | `list recurring` | — |
-| Filter by date | `filter from/DATE to/DATE` | — |
-| Find by index | `find INDEX` | — |
-| Summary | `summary` | `s` |
-| Total | `total` | — |
-| Set budget | `budget AMOUNT` | `b` |
-| Reset budget | `budget reset` | — |
-| Budget history | `budget history` | — |
-| Remaining | `remaining` | — |
-| Clear all | `clear` | — |
-| Undo | `undo` | — |
-| Export CSV | `export csv` | — |
-| Set goal | `goal g/AMOUNT` | — |
-| Goal status | `goal status` | — |
-| Help | `help` | `h` |
-| Exit | `bye` | — |
+| Action            | Format | Alias |
+|-------------------|--------|-------|
+| Add expense       | `add d/DESC a/AMT c/CAT [date/DATE] [recurring/true\|false]` | `a` |
+| Delete expense    | `delete INDEX` | `d` |
+| Edit expense      | `edit INDEX [d/DESC] [a/AMT] [c/CAT] [date/DATE] [recurring/true\|false]` | — |
+| List expenses     | `list` | `l` |
+| List recurring    | `list recurring` | — |
+| Filter by date    | `filter from/DATE to/DATE` | — |
+| Find by index     | `find INDEX` | — |
+| Summary           | `summary` | `s` |
+| Total             | `total` | — |
+| Set budget        | `budget AMOUNT` | `b` |
+| Reset budget      | `budget reset` | — |
+| Budget history    | `budget history` | — |
+| Remaining         | `remaining` | — |
+| Clear all         | `clear` | — |
+| Undo              | `undo` | — |
+| Export CSV        | `export csv` | — |
+| Set goal          | `goal g/AMOUNT` | — |
+| Goal status       | `goal status` | — |
+| Monthly report    | `report YYYY-MM`  | — |
+| List by month     | `month YYYY-MM`   | — |
+| Top N expenses    | `top N`           | — |
+| Last N expenses   | `last N`          | — |
+| Search by keyword | `search KEYWORD`  | — |
+| Sort by amount    | `sort`            | — |
+| Help              | `help` | `h` |
+| Exit              | `bye` | — |
