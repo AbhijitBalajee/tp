@@ -81,8 +81,7 @@ ____________________________________________________________
 
 Error cases:
 - `delete 0` or `delete 99` (out of range) → `Index 99 is out of range. There are 3 expense(s).`
-- `delete abc` → `Index must be a whole number. Usage: delete <index>`
-- `delete` (missing index) → `Please provide an index. Usage: delete <index>`
+- `delete abc` or `delete` (missing/invalid index) → `delete requires a number. Usage: delete <index>`
 
 ---
 
@@ -358,7 +357,7 @@ Error cases:
 - `edit 999 d/Test` — index out of range → error message with valid range
 - `edit 1` — no fields provided → `No fields provided to edit. Usage: edit <index> [d/<desc>] [a/<amount>] [c/<category>] [date/<YYYY-MM-DD>] [recurring/true|false]`
 - `edit 1 a/-5` — negative amount → `Amount must be greater than 0.`
-- `edit 1 d/` — empty description → `Description cannot be empty.`
+- `edit 1 d/` — empty description → `Description cannot be empty. Please provide a valid description after d/`
 - `edit abc d/Latte` — non-integer index → `Index must be a whole number.`
 
 ---
@@ -845,7 +844,7 @@ ____________________________________________________________
 If no budget has been set:
 ```
 ____________________________________________________________
- No budget set. Use the budget command to set one.
+ No budget set. Use 'budget <amount>' to set one first.
 ____________________________________________________________
 ```
 
@@ -907,7 +906,7 @@ Example: `bye`
 Expected output:
 ```
 ____________________________________________________________
- Goodbye and take care!
+ Goodbye! Stay on budget!
 ____________________________________________________________
 ```
 
