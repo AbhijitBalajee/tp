@@ -34,6 +34,7 @@ public class Parser {
 
     private static final Logger logger = Logger.getLogger(Parser.class.getName());
     private static final String TOKEN_SPLIT_REGEX = " (?=(?:d|a|c|date|recurring)/)";
+    // @@author AfshalG
     private static final Map<String, String> ALIASES = new HashMap<>();
 
     static {
@@ -45,6 +46,7 @@ public class Parser {
         ALIASES.put("b", "budget");
         ALIASES.put("h", "help");
     }
+    // @@author
 
     /**
      * Parses the user input and returns the corresponding command.
@@ -140,6 +142,7 @@ public class Parser {
         }
     }
 
+    // @@author AfshalG
     private static AddCommand parseAddCommand(String args) throws SpendTrackException {
         String description = "";
         double amount = 0.0;
@@ -187,6 +190,7 @@ public class Parser {
 
         return new AddCommand(description, amount, category, date, isRecurring);
     }
+    // @@author
 
     private static Command parseEditCommand(String args) throws SpendTrackException {
         String[] parts = args.trim().split(" ", 2);
@@ -274,6 +278,7 @@ public class Parser {
         return new EditCommand(index, newDescription, newAmount, newCategory, newDate, newRecurring);
     }
 
+    // @@author AfshalG
     private static String normalizeCategory(String category) {
         if (category.isEmpty()) {
             return "Uncategorised";
@@ -291,6 +296,7 @@ public class Parser {
         }
         return normalized.toString();
     }
+    // @@author
 
     private static Command parseFilterCommand(String args) throws SpendTrackException {
         LocalDate from = null;
