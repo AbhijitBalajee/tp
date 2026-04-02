@@ -418,6 +418,350 @@ The current approach was chosen to keep `Parser` stateless and decoupled from `E
 
 The `recurring/` flag is editable via `edit INDEX recurring/false` to allow users to un-mark an expense. This follows the same `null`-sentinel pattern as other fields — if `recurring/` is not provided, the existing value is preserved. Only `true` or `false` are accepted; any other value throws a `SpendTrackException`.
 
+### Add Expense Feature
+
+The current approach was chosen to keep `Parser` stateless and decoupled from `ExpenseList`.
+
+#### Remaining Command
+
+The `remaining` command allows users to check how much budget is left after deducting expenses.
+
+#### How it works
+
+1. The user enters `remaining`.
+2. `Parser.parse()` identifies the command and creates a `RemainingCommand` object.
+3. `RemainingCommand.execute()` calls `ExpenseList.hasBudget()` to check if a budget has been set. If not, a `SpendTrackException` is thrown.
+4. If a budget exists, the budget is retrieved using `ExpenseList.getBudget()` and the total expenses using `ExpenseList.getTotal()`.
+5. The remaining balance is calculated as: budget - total.
+6. `Ui.showRemaining()` displays the result to the user.
+7. `mutatesData()` returns `false`, so no save is triggered.
+
+The following sequence diagram illustrates the flow of the remaining command:
+
+![Sequence diagram for remaining command](images/RemainingCommandSequence.png)
+
+#### Design considerations
+
+**Aspect: What to show when no budget is set**
+
+- **Current approach:** Throw a `SpendTrackException` when no budget is set.
+    - Pros: Clear and honest feedback — the user knows they must set a budget first. No risk of misleading the user with a `$0.00` figure.
+    - Cons: Slightly more abrupt than showing a neutral message.
+
+- **Alternative:** Return `$0.00` remaining when no budget is set.
+    - Pros: Always shows a result without an error.
+    - Cons: Misleading — `$0.00` remaining implies a budget of zero was set, which is not the case.
+
+The exception approach was chosen because correctness and clarity matter more than always producing output.
+
+**Aspect: Where to compute the remaining balance**
+
+- **Current approach:** Calculated dynamically as budget - total on every call.
+    - Pros: Always accurate regardless of how many expenses have been added or removed since the budget was set.
+    - Cons: Requires calling both `getBudget()` and `getTotal()` each time.
+
+- **Alternative:** Cache the remaining balance and update it after every mutating command.
+    - Pros: O(1) lookup.
+    - Cons: Risk of the cached value diverging from actual state if any mutating path forgets to update it.
+
+The on-demand approach was chosen because correctness is more important than micro-optimisation for a student budget tracker.
+
+---
+
+#### Help Command
+
+The `help` command provides users with a list of all available commands and their usage.
+
+#### How it works
+
+1. The user enters `help` (or alias `h`).
+2. `Parser.parse()` identifies the command and creates a `HelpCommand` object.
+3. `HelpCommand.execute()` calls `Ui.showHelp()`, which displays a formatted list of all commands and their formats.
+4. `mutatesData()` returns `false`, so no save is triggered.
+
+#### Design considerations
+
+**Aspect: How to generate help content**
+
+- **Current approach:** Help content is hardcoded in `Ui.showHelp()`.
+    - Pros: Simple to implement and maintain. No coupling between command classes and the help output.
+    - Cons: Must be manually updated when new commands are added.
+
+- **Alternative:** Dynamically generate help content by iterating over all registered command classes.
+    - Pros: Help content is always in sync with available commands.
+    - Cons: Adds significant complexity for v1.0. Requires each command class to expose metadata about itself.
+
+The hardcoded approach was chosen for simplicity. The help text is short enough that manual maintenance is not a burden.
+
+---
+
+#### Search Feature
+
+The `search` command allows users to find expenses based on a keyword in the description.
+
+#### How it works
+
+1. The user enters `search KEYWORD`.
+2. `Parser.parse()` creates a `SearchCommand` with the keyword string.
+3. `SearchCommand.execute()` iterates through all expenses using `getExpenses()`.
+4. For each expense, `.getDescription().toLowerCase().contains(keyword.toLowerCase())` is used for case-insensitive substring matching.
+5. Matching expenses are printed with a running count.
+6. If no matches are found, `No matches found.` is shown.
+
+The following activity diagram shows the logic of the search feature:
+
+![Activity diagram for search feature](images/SearchActivity.png)
+
+#### Design considerations
+
+**Aspect: Type of keyword matching**
+
+- **Current approach:** Simple case-insensitive substring match.
+    - Pros: Intuitive and fast. Partial matches work naturally (e.g. `cof` matches `Coffee`). No configuration needed.
+    - Cons: Cannot handle typos or approximate matches.
+
+- **Alternative:** Regex or fuzzy matching.
+    - Pros: More powerful — handles typos and partial word boundaries.
+    - Cons: Significantly more complex to implement and explain to users. Unexpected results if the user is unfamiliar with regex syntax.
+
+Simple substring matching was chosen because it covers the most common use case and is easy to understand.
+
+---
+
+#### Sort Feature
+
+The `sort` command displays all expenses ordered from highest to lowest amount without modifying the underlying list.
+
+#### How it works
+
+1. The user enters `sort`.
+2. `Parser.parse()` creates a `SortCommand`.
+3. `SortCommand.execute()` copies all expenses into a new `ArrayList` via `getExpenses()`.
+4. The copy is sorted in descending order using `Comparator.comparingDouble(Expense::getAmount).reversed()`.
+5. Each expense is printed with a 1-based index.
+6. `mutatesData()` returns `false`, so no save is triggered.
+
+#### Design considerations
+
+**Aspect: Whether to sort the original list or a copy**
+
+- **Current approach:** Sort a copy of the list. The original list order is preserved.
+    - Pros: Index-based commands like `delete` and `edit` still work correctly after `sort` since the underlying list is unchanged.
+    - Cons: Requires creating a new `ArrayList` for every `sort` call.
+
+- **Alternative:** Sort the original list in place.
+    - Pros: No additional memory allocation.
+    - Cons: Permanently changes the insertion order of expenses, breaking index-based commands for the rest of the session.
+
+Sorting a copy was chosen to keep the application state consistent and predictable.
+
+---
+
+#### Top N Expenses Feature
+
+The `top N` command shows the N most expensive expenses.
+
+#### How it works
+
+1. The user enters `top N`.
+2. `Parser.parse()` parses `N` as an integer and creates a `TopCommand(N)`.
+3. `TopCommand.execute()` validates that `count > 0`. If not, an error is shown.
+4. If the list is empty, `No expenses recorded.` is shown.
+5. All expenses are copied into a local `ArrayList` and sorted in descending order using `Comparator.comparingDouble(Expense::getAmount).reversed()`.
+6. The first `Math.min(count, list.size())` entries are displayed via `Ui.showMessage()`.
+7. `mutatesData()` returns `false`, so no save is triggered.
+
+#### Design considerations
+
+**Aspect: Whether to sort the original list or a copy**
+
+- **Current approach:** Sort a copy of the list.
+    - Pros: Original insertion order is preserved. Index-based commands remain correct after `top` is used.
+    - Cons: Slightly more memory usage per call.
+
+- **Alternative:** Sort the original list in place.
+    - Pros: Simpler code, no copy needed.
+    - Cons: Permanently reorders expenses, corrupting the behaviour of `delete`, `edit`, and `find`.
+
+Sorting a copy was chosen for the same reason as `SortCommand` — correctness of index-based commands takes priority.
+
+**Aspect: Handling N greater than list size**
+
+- **Current approach:** Use `Math.min(count, list.size())` to cap the display count.
+    - Pros: Gracefully handles oversized requests without an error. Shows all available expenses instead.
+    - Cons: The output header says `Top N expenses` but fewer than N may be shown — could be slightly confusing.
+
+- **Alternative:** Throw an error if N exceeds the list size.
+    - Pros: Strictly accurate output label.
+    - Cons: Unnecessarily strict for a simple display command.
+
+The capped approach was chosen for a better user experience.
+
+---
+
+#### Last N Expenses Feature
+
+The `last N` command shows the N most recently added expenses based on insertion order.
+
+#### How it works
+
+1. The user enters `last N`.
+2. `Parser.parse()` creates a `LastCommand(N)`.
+3. `LastCommand.execute()` validates that `count > 0`. If not, an error is shown.
+4. If the list is empty, `No expenses recorded.` is shown.
+5. The start index is calculated as `Math.max(0, total - count)`.
+6. Expenses from that index to the end of the list are collected into a new `ArrayList`.
+7. They are displayed with a 1-based index.
+8. `mutatesData()` returns `false`, so no save is triggered.
+
+#### Design considerations
+
+**Aspect: How to determine the most recent expenses**
+
+- **Current approach:** Use insertion order — take the last N entries from the `ArrayList`.
+    - Pros: Simple and fast. No sorting needed. Reflects the order in which the user actually added expenses.
+    - Cons: If expenses are added out of chronological order (e.g. backdated with `date/`), the last N by insertion may not be the last N by date.
+
+- **Alternative:** Sort by date descending and take the first N.
+    - Pros: Always shows the N most recent by date.
+    - Cons: More expensive. Behaviour differs from what "last added" implies. Could confuse users who expect to see what they just typed.
+
+Insertion order was chosen because `last` is intended to mean "last added", not "last by date".
+
+---
+
+#### Monthly Report Feature
+
+The `report` command generates a monthly spending summary grouped by category.
+
+#### How it works
+
+1. The user enters `report YYYY-MM`.
+2. `Parser.parse()` creates a `ReportCommand` with the month string.
+3. `ReportCommand.execute()` splits the input on `-` to extract year and month as integers.
+4. All expenses are iterated. For each expense, `getYear()` and `getMonthValue()` are compared to the target month.
+5. Matching expenses are accumulated into a running total and a `categoryTotals` `HashMap`.
+6. If the total is zero, `No expenses found for YYYY-MM` is shown and the command returns.
+7. The total and each category's subtotal are displayed via `Ui.showMessage()`.
+8. `mutatesData()` returns `false`, so no save is triggered.
+
+#### Design considerations
+
+**Aspect: Data structure for category grouping**
+
+- **Current approach:** A `HashMap<String, Double>` mapping category name to total.
+    - Pros: Simple and efficient. No additional classes needed.
+    - Cons: `HashMap` does not guarantee order, so category display order is non-deterministic.
+
+- **Alternative:** Use a `LinkedHashMap` or sort entries before display.
+    - Pros: Consistent, predictable output order.
+    - Cons: Slightly more code. For a simple report, ordering may not matter much.
+
+`HashMap` was chosen for simplicity. Sorting categories by total descending (like `summary`) is a natural future improvement.
+
+**Aspect: Error handling for malformed input**
+
+- **Current approach:** A broad `catch (Exception e)` catches any parsing failure and shows `Usage: report <YYYY-MM>`.
+    - Pros: Simple and robust. Any malformed input (wrong format, missing parts, non-numeric) is caught cleanly.
+    - Cons: Catches too broadly — unexpected errors may be silently swallowed.
+
+- **Alternative:** Validate the format explicitly with a regex before parsing.
+    - Pros: More precise error detection. Can give more specific error messages.
+    - Cons: Adds complexity for a simple format check.
+
+The broad catch was chosen for simplicity in v1.0.
+
+---
+
+#### Month Listing Feature
+
+The `month` command lists all individual expenses recorded in a specific month, one per line.
+
+#### How it works
+
+1. The user enters `month YYYY-MM`.
+2. `Parser.parse()` creates a `MonthCommand` with the month string.
+3. `MonthCommand.execute()` splits the input on `-` to extract year and month.
+4. All expenses are iterated. Those whose date matches the target year and month are collected into an `ArrayList`.
+5. If the result is empty, `No expenses found for YYYY-MM` is shown.
+6. Otherwise, each matching expense is printed with a 1-based index via `Ui.showMessage()`.
+7. `mutatesData()` returns `false`, so no save is triggered.
+
+#### Design considerations
+
+**Aspect: Overlap with ReportCommand**
+
+- **Current approach:** `MonthCommand` and `ReportCommand` are separate classes with similar date-matching logic.
+    - Pros: Each class has a single clear responsibility. `MonthCommand` lists individual entries; `ReportCommand` aggregates by category. Independent testability.
+    - Cons: Some duplication of date-matching logic between the two classes.
+
+- **Alternative:** Merge into a single command with a flag (e.g. `month YYYY-MM --report`).
+    - Pros: Less duplication.
+    - Cons: Violates Single Responsibility Principle. Makes the command harder to understand and test.
+
+Separate classes were chosen to keep each command focused and independently testable. A shared date-matching utility method could be extracted in a future refactor.
+
+---
+
+#### Unknown Command Handling
+
+When the user enters an unrecognised command, the `Parser` returns an `UnknownCommand` object.
+
+#### How it works
+
+1. The user enters an unrecognised command word.
+2. `Parser.parse()` falls through all switch cases and returns an `UnknownCommand`.
+3. `UnknownCommand.execute()` asserts that `ui` is not null.
+4. The event is logged using `java.util.logging.Logger` at warning level.
+5. The error message `Unknown command. Try typing 'help' to see available commands.` is built and passed to `ui.showError()`.
+6. `mutatesData()` returns `false`, so no save is triggered.
+
+#### Design considerations
+
+**Aspect: How to build the error message**
+
+- **Current approach:** Message is assembled from small private methods (`buildHeader()`, `buildSuggestion()`).
+    - Pros: Each part is independently testable. Easy to modify one part without touching others.
+    - Cons: Extra methods for a simple string concatenation.
+
+- **Alternative:** Return the full message as a single string literal.
+    - Pros: Simpler and more direct.
+    - Cons: Harder to test individual parts of the message in isolation.
+
+The decomposed approach was chosen to keep each method focused and testable.
+
+---
+
+#### Exit Command
+
+When the user enters `bye`, the `Parser` returns an `ExitCommand`.
+
+#### How it works
+
+1. The user enters `bye`.
+2. `Parser.parse()` creates an `ExitCommand`.
+3. `ExitCommand.execute()` asserts that `ui` is not null.
+4. The farewell message is prepared by combining `"Goodbye"`, `" and take care"`, and `"!"`.
+5. The preparation is logged using `Logger`.
+6. `ui.showGoodbye()` displays the farewell to the user.
+7. `isExit()` returns `true`, which causes `SpendTrack.run()` to exit the main loop.
+
+#### Design considerations
+
+**Aspect: How to build the farewell message**
+
+- **Current approach:** Message is assembled from small private methods (`getGreeting()`, `getClosing()`, `getPunctuation()`).
+    - Pros: Each part is independently testable. Consistent with the decomposed style used in `UnknownCommand`.
+    - Cons: Verbose for a simple string.
+
+- **Alternative:** Return the full farewell as a single string literal.
+    - Pros: Much simpler — one line instead of several methods.
+    - Cons: Less granular testability.
+
+The decomposed approach was chosen for consistency with the rest of the codebase and to keep each method focused.
+
+---
+
 ### List Expenses Feature
 
 The list feature displays all recorded expenses in a formatted table:
@@ -873,6 +1217,9 @@ SpendTrack helps students track expenses faster than a typical GUI app. Users ca
 | v1.0 | student | view the total of all expenses | know how much I have spent overall |
 | v1.0 | student | set a monthly budget | control my spending |
 | v1.0 | student | view my remaining balance | know how much I can still spend |
+| v1.0 | student | see usage instructions | refer to them when I forget how to use the application |
+| v1.0 | student | check my remaining budget | understand how much I can still spend |
+| v1.0 | student | view help commands | know how to use the system easily |
 | v2.0 | student | tag expenses with a date | log past purchases I forgot to record |
 | v2.0 | student | enter dates in DD-MM-YYYY or use "today"/"yesterday" | log expenses quickly without remembering ISO format |
 | v2.0 | student | view a category breakdown with statistics | see where I am overspending and by how much |
@@ -893,23 +1240,36 @@ SpendTrack helps students track expenses faster than a typical GUI app. Users ca
 | v2.0 | student | undo my last action | recover from mistakes quickly |
 | v2.0 | student | export expenses to CSV | open them in Excel or Google Sheets |
 | v2.0 | student | set a savings goal and track progress | stay motivated to save money |
+| v2.0 | student | search for expenses by keyword | locate specific expenses quickly |
+| v2.0 | student | sort expenses by amount | see my biggest expenses at a glance |
+| v2.0 | student | view the top N most expensive expenses | identify my largest spending items |
+| v2.0 | student | view the last N expenses I added | quickly review my most recent spending |
+| v2.0 | student | generate a monthly spending report | analyse my spending for a given month |
+| v2.0 | student | list all expenses for a specific month | review individual transactions in a month |
 
 ## Non-Functional Requirements
 
 1. Should work on any mainstream OS (Windows, macOS, Linux) with Java 17 installed.
 2. Should respond to any command within 1 second.
 3. A user with average typing speed should be able to log an expense faster than using a GUI app.
-4. Data files should be human-readable plain text.
+4. Data files should be human-readable plain text. 
+5. The application should handle invalid inputs gracefully without crashing. 
+6. The code should follow object-oriented design principles. 
+7. Logging and assertions should be used for debugging and reliability.
 
 ## Glossary
 
 * *Expense* - A single spending entry with a description, amount, category, and date.
-* *Budget* - A monthly spending limit set by the user.
-* *Remaining balance* - The difference between the budget and total expenses.
+* *Budget* - The total amount of money allocated for spending.
+* *Remaining Balance* - The amount of money left after subtracting expenses from the budget.
 * *Mutating command* - A command that changes the expense list (add, delete, edit).
 * *Category normalisation* - Automatic capitalisation of the first letter of each word in a category name (e.g., `public transport` becomes `Public Transport`).
 * *Alias* - A single-letter shortcut for a command (e.g., `a` for `add`, `s` for `summary`).
 * *DateParser* - A utility class that parses date strings in multiple formats (ISO, Singapore, keywords).
+* *Command* - A user input that triggers a specific action in the system.
+* *Keyword* - A search term used to filter expenses by description.
+* *Monthly Report* - A summary of all expenses in a given month grouped by category.
+* *Insertion order* - The order in which expenses were added by the user, preserved by the underlying `ArrayList`
 
 ## Instructions for manual testing
 
@@ -979,6 +1339,65 @@ SpendTrack helps students track expenses faster than a typical GUI app. Users ca
 3. Type `remaining` to verify the remaining balance.
 4. Type `budget -10` to test negative amount.
 5. Expected: error message.
+
+### Viewing remaining budget
+1. Set a budget using the budget command.
+2. Add some expenses.
+3. Enter `remaining`
+4. Verify that the remaining balance is displayed correctly.
+
+### Using the help command
+1. Enter `help`
+2. Verify that a list of commands and their usage is displayed.
+3. Enter `h` to test the alias.
+4. Expected: same output as `help`.
+
+### Searching for expenses
+1. Add several expenses with different descriptions.
+2. Enter `search coffee`
+3. Verify that only expenses containing "coffee" are shown (case-insensitive).
+4. Enter `search zzz` for a keyword with no matches.
+5. Expected: `No matches found.`
+
+### Sorting expenses by amount
+1. Add several expenses with different amounts.
+2. Enter `sort`
+3. Verify that expenses are displayed from highest to lowest amount.
+4. Enter `list` and verify the original order is unchanged.
+
+### Viewing top expenses
+1. Add several expenses with different amounts.
+2. Enter `top 3`
+3. Verify the 3 most expensive expenses are shown in descending order.
+4. Enter `top 0`
+5. Expected: error message — number must be greater than 0.
+
+### Viewing most recent expenses
+1. Add several expenses.
+2. Enter `last 3`
+3. Verify the last 3 expenses added are shown in insertion order.
+4. Enter `last 0`
+5. Expected: error message — number must be greater than 0.
+
+### Generating a monthly report
+1. Add expenses with explicit dates: `add d/Coffee a/3.50 c/Food date/2026-03-22`
+2. Enter `report 2026-03`
+3. Verify total and category breakdown for March 2026 is shown.
+4. Enter `report 2026-04` for a month with no expenses.
+5. Expected: `No expenses found for 2026-04`
+6. Enter `report abc`
+7. Expected: `Usage: report <YYYY-MM>`
+
+### Viewing expenses by month
+1. Add expenses with explicit dates across different months.
+2. Enter `month 2026-03`
+3. Verify only expenses from March 2026 are listed individually.
+4. Enter `month 2026-04` for a month with no expenses.
+5. Expected: `No expenses found for 2026-04`
+
+### Handling missing budget errors
+1. Run `remaining` without setting a budget
+2. Verify that an error message is shown.
 
 ### Listing expenses
 
