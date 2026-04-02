@@ -372,6 +372,7 @@ public class Ui {
      * @param sortedCategories the categories sorted by total descending
      * @param grandTotal the total of all expenses
      */
+    // @@author AfshalG
     public void showSummary(ArrayList<Map.Entry<String, Double>> sortedCategories,
             double grandTotal) {
         System.out.println(LINE);
@@ -412,6 +413,7 @@ public class Ui {
         System.out.printf(" %-16s: $%.2f%n", "Total", grandTotal);
         System.out.println(LINE);
     }
+    // @@author
 
     /**
      * Displays full details of a single expense.
