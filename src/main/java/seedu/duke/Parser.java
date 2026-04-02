@@ -6,19 +6,22 @@ import java.util.Map;
 import java.util.logging.Logger;
 import seedu.duke.command.SortCommand;
 import seedu.duke.command.AddCommand;
-import seedu.duke.command.BudgetCommand;
-import seedu.duke.command.Command;
 import seedu.duke.command.DeleteCommand;
+import seedu.duke.command.EditCommand;
 import seedu.duke.command.FilterCommand;
 import seedu.duke.command.FindCommand;
-import seedu.duke.command.HelpCommand;
-import seedu.duke.command.ListCommand;
-import seedu.duke.command.RemainingCommand;
-import seedu.duke.command.SummaryCommand;
 import seedu.duke.command.TotalCommand;
-import seedu.duke.command.EditCommand;
+import seedu.duke.command.ListCommand;
+import seedu.duke.command.BudgetCommand;
 import seedu.duke.command.BudgetResetCommand;
 import seedu.duke.command.BudgetHistoryCommand;
+import seedu.duke.command.RemainingCommand;
+import seedu.duke.command.SummaryCommand;
+import seedu.duke.command.SearchCommand;
+import seedu.duke.command.HelpCommand;
+import seedu.duke.command.Command;
+
+
 import seedu.duke.command.GoalCommand;
 import seedu.duke.command.ClearCommand;
 import seedu.duke.command.ExportCommand;
@@ -75,7 +78,7 @@ public class Parser {
 
         switch (commandWord) {
         case "add":
-            return parseAddCommand(parts.length > 1 ? parts[1] : "");     
+            return parseAddCommand(parts.length > 1 ? parts[1] : "");
         case "delete":
             try {
                 return new DeleteCommand(Integer.parseInt(parts[1].trim()));
@@ -123,6 +126,8 @@ public class Parser {
             return new UndoCommand(undoManager);
         case "summary":
             return new SummaryCommand();
+        case "search":
+            return new SearchCommand(parts.length > 1 ? parts[1] : "");
         case "sort":
             return new SortCommand();
         case "help":
@@ -198,13 +203,13 @@ public class Parser {
         Double newAmount = null;
         String newCategory = null;
         LocalDate newDate = null;
-        Boolean newRecurring = null;          
+        Boolean newRecurring = null;
 
         boolean seenDescription = false;
         boolean seenAmount = false;
         boolean seenCategory = false;
         boolean seenDate = false;
-        boolean seenRecurring = false;        
+        boolean seenRecurring = false;
 
         String[] tokens = remaining.split(TOKEN_SPLIT_REGEX);
         for (String token : tokens) {
@@ -252,7 +257,7 @@ public class Parser {
                 seenCategory = true;
                 newCategory = normalizeCategory(token.substring(2).trim());
 
-            } else if (token.startsWith("recurring/")) {   
+            } else if (token.startsWith("recurring/")) {
                 if (seenRecurring) {
                     throw new SpendTrackException("Duplicate 'recurring/' detected. "
                             + "Please provide only one recurring value.");
@@ -266,7 +271,7 @@ public class Parser {
             }
         }
 
-        return new EditCommand(index, newDescription, newAmount, newCategory, newDate, newRecurring); 
+        return new EditCommand(index, newDescription, newAmount, newCategory, newDate, newRecurring);
     }
 
     private static String normalizeCategory(String category) {

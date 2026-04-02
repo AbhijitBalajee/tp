@@ -25,7 +25,7 @@ public class SummaryCommand extends Command {
      * and displaying totals with percentages.
      *
      * @param expenses the expense list to summarise
-     * @param ui the UI for displaying output
+     * @param ui       the UI for displaying output
      */
     @Override
     public void execute(ExpenseList expenses, Ui ui) {
@@ -64,3 +64,5 @@ public class SummaryCommand extends Command {
         logger.info("Summary displayed with " + sorted.size() + " categories");
     }
 }
+
+

@@ -4,6 +4,10 @@
 
 No external libraries or reused code beyond the Java standard library.
 
+This project follows the structure and concepts taught in CS2113, including the Command pattern and separation of concerns between Parser, Command, and UI components. No external third-party libraries were used beyond standard Java libraries.
+
+---
+
 ## Design & Implementation
 
 ### Architecture
@@ -410,6 +414,77 @@ The following sequence diagram illustrates the full flow of the edit command:
 
 The current approach was chosen to keep `Parser` stateless and decoupled from `ExpenseList`.
 
+#### Remaining Command
+
+The `remaining` command allows users to check how much budget is left after deducting expenses.
+
+When the user enters `remaining`, the input is passed to the `Parser`, which identifies the command and creates a `RemainingCommand` object. The `execute()` method of this command is then called.
+
+The command first checks whether a budget has been set using `ExpenseList.hasBudget()`. If no budget is set, a `SpendTrackException` is thrown to inform the user clearly.
+
+If a budget exists:
+- The budget is retrieved using `ExpenseList.getBudget()`
+- The total expenses are retrieved using `ExpenseList.getTotal()`
+- The remaining balance is calculated as: budget - total
+
+The result is then displayed using `Ui.showRemaining()`.
+
+The following sequence diagram illustrates the flow of the remaining command:
+
+![Sequence diagram for remaining command](images/RemainingCommandSequence.png)
+
+---
+
+#### Help Command
+
+The `help` command provides users with a list of all available commands and their usage.
+
+When the user enters `help`, the `Parser` identifies the command and creates a `HelpCommand` object. The `execute()` method then calls `Ui.showHelp()`, which displays a formatted list of all commands.
+
+This command does not require any parameters and always shows the full help menu.
+
+---
+
+#### Alternatives considered
+
+- Returning `$0.00` when no budget is set was considered but rejected because it is misleading.
+- Dynamically generating help content from command classes was considered but rejected due to added complexity for v1.0.
+
+---
+
+#### Search Feature (Proposed v2.0)
+
+The search command allows users to find expenses based on a keyword entered by the user.
+
+When the user enters a search command, the system first validates that the keyword is not empty. If the keyword is empty, an error message is shown to the user.
+
+If a valid keyword is provided:
+- The keyword is converted to lowercase to allow case-insensitive matching
+- The system iterates through all stored expenses
+- Each expense description is checked to see if it contains the keyword
+- Matching expenses are added to a results list
+
+After processing all expenses:
+- If no matches are found, a message is shown indicating that no results were found
+- If matches are found, the results are displayed in a list format along with the total number of matches
+
+The following activity diagram shows the logic of the search feature:
+
+The following activity diagram shows the logic of the search feature:
+
+![Activity diagram for search feature](images/SearchActivity.png)
+
+---
+
+#### Design Considerations
+
+For the remaining command, an exception is thrown when no budget is set instead of returning a default value such as `$0.00`. This ensures that users are not misled and receive clear feedback.
+
+The remaining balance is calculated dynamically instead of being stored. This avoids inconsistencies when expenses are modified.
+
+The help command is implemented as a stateless command, meaning it does not depend on any stored data. This keeps the implementation simple and reliable.
+
+---
 **Aspect: Duplicate flag detection**
 
 `parseEditCommand()` tracks which flags have been seen using boolean variables (`seenDescription`, `seenAmount`, etc.). If the same flag appears twice in a single edit command, a `SpendTrackException` is thrown immediately. This prevents ambiguous updates like `edit 1 d/Latte d/Coffee` where the intended value is unclear.
@@ -1399,6 +1474,13 @@ SpendTrack helps students track expenses faster than a typical GUI app. Users ca
 1. Run `remaining` without setting a budget
 2. Verify that an error message is shown.
 
+### Testing help command
+1. Enter `help`
+2. Verify that a list of commands and their usage is displayed.
+
+### Testing error case
+1. Run `remaining` without setting a budget
+2. Verify that an error message is shown.
 ### Listing expenses
 
 1. Add a few expenses then type `list`.
