@@ -351,31 +351,60 @@ public class Ui {
     public void showHelp() {
         System.out.println(LINE);
         System.out.println(" Here are the commands you can use:");
-        System.out.println(" add d/DESCRIPTION a/AMOUNT c/CATEGORY"
-                + " [date/DATE] [recurring/true|false]");
-        System.out.println(" delete INDEX");
-        System.out.println(" list");
-        System.out.println(" summary");
-        System.out.println(" total");
-        System.out.println(" budget AMOUNT");
-        System.out.println(" remaining");
-        System.out.println(" edit INDEX [d/DESC] [a/AMT]"
-                + " [c/CAT] [date/DATE] [recurring/true|false]");
-        System.out.println(" filter from/DATE to/DATE");
-        System.out.println(" find INDEX");
-        System.out.println(" search KEYWORD");
-        System.out.println(" sort");
-        System.out.println(" top N");
-        System.out.println(" last N");
-        System.out.println(" report YYYY-MM");
-        System.out.println(" month YYYY-MM");
-        System.out.println(" clear");
-        System.out.println(" undo");
-        System.out.println(" export csv");
-        System.out.println(" goal g/AMOUNT");
-        System.out.println(" goal status");
-        System.out.println(" help");
-        System.out.println(" bye");
+        String format = "  %-48s -- %s";
+        System.out.println(String.format(format,
+                "add (a) d/DESC a/AMT c/CAT [date/DATE]", "add expense"));
+        System.out.println(String.format(format,
+                "delete (d) INDEX", "delete expense"));
+        System.out.println(String.format(format,
+                "list (l)", "list all"));
+        System.out.println(String.format(format,
+                "list recurring", "list recurring only"));
+        System.out.println(String.format(format,
+                "summary (s)", "category breakdown"));
+        System.out.println(String.format(format,
+                "total", "show total"));
+        System.out.println(String.format(format,
+                "budget (b) AMOUNT", "set budget"));
+        System.out.println(String.format(format,
+                "budget reset", "reset budget"));
+        System.out.println(String.format(format,
+                "budget history", "view budget history"));
+        System.out.println(String.format(format,
+                "remaining", "show remaining"));
+        System.out.println(String.format(format,
+                "edit INDEX [d/DESC] [a/AMT] [c/CAT] [date/DATE]",
+                "edit expense"));
+        System.out.println(String.format(format,
+                "filter from/DATE to/DATE", "filter by date"));
+        System.out.println(String.format(format,
+                "find INDEX", "view expense details"));
+        System.out.println(String.format(format,
+                "search KEYWORD", "search by keyword"));
+        System.out.println(String.format(format,
+                "sort", "sort by amount"));
+        System.out.println(String.format(format,
+                "top N", "top N expenses"));
+        System.out.println(String.format(format,
+                "last N", "last N added"));
+        System.out.println(String.format(format,
+                "report YYYY-MM", "monthly report"));
+        System.out.println(String.format(format,
+                "month YYYY-MM", "list by month"));
+        System.out.println(String.format(format,
+                "clear", "clear all"));
+        System.out.println(String.format(format,
+                "undo", "undo last"));
+        System.out.println(String.format(format,
+                "export csv", "export to CSV"));
+        System.out.println(String.format(format,
+                "goal g/AMOUNT", "set savings goal"));
+        System.out.println(String.format(format,
+                "goal status", "check goal"));
+        System.out.println(String.format(format,
+                "help (h)", "show this help"));
+        System.out.println(String.format(format,
+                "bye", "exit"));
         System.out.println(LINE);
     }
     /**
