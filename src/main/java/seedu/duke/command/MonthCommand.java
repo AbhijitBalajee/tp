@@ -44,10 +44,13 @@ public class MonthCommand extends Command {
                 return;
             }
 
-            ui.showMessage("Expenses for " + monthInput + ":");
+            StringBuilder sb = new StringBuilder();
+            sb.append(" Expenses for ").append(monthInput).append(":\n");
             for (int i = 0; i < result.size(); i++) {
-                ui.showMessage((i + 1) + ". " + result.get(i));
+                sb.append(" ").append(i + 1).append(". ").append(result.get(i)).append("\n");
             }
+
+            ui.showMessage(sb.toString().trim());
 
         } catch (Exception e) {
             ui.showError("Usage: month <YYYY-MM>");

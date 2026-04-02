@@ -867,26 +867,32 @@ Expected output:
 ```
 ____________________________________________________________
  Here are the commands you can use:
- add d/DESCRIPTION a/AMOUNT c/CATEGORY [date/DATE] [recurring/true|false]
- delete INDEX
- list
- summary
- total
- budget AMOUNT
- remaining
- report YYYY-MM
- month YYYY-MM
- top N
- last N
- search KEYWORD
- sort
- clear
- undo
- export csv
- goal g/AMOUNT
- goal status
- help
- bye
+  add (a) d/DESC a/AMT c/CAT [date/DATE]           -- add expense
+  delete (d) INDEX                                 -- delete expense
+  list (l)                                         -- list all
+  list recurring                                   -- list recurring only
+  summary (s)                                      -- category breakdown
+  total                                            -- show total
+  budget (b) AMOUNT                                -- set budget
+  budget reset                                     -- reset budget
+  budget history                                   -- view budget history
+  remaining                                        -- show remaining
+  edit INDEX [d/DESC] [a/AMT] [c/CAT] [date/DATE]  -- edit expense
+  filter from/DATE to/DATE                         -- filter by date
+  find INDEX                                       -- view expense details
+  search KEYWORD                                   -- search by keyword
+  sort                                             -- sort by amount
+  top N                                            -- top N expenses
+  last N                                           -- last N added
+  report YYYY-MM                                   -- monthly report
+  month YYYY-MM                                    -- list by month
+  clear                                            -- clear all
+  undo                                             -- undo last
+  export csv                                       -- export to CSV
+  goal g/AMOUNT                                    -- set savings goal
+  goal status                                      -- check goal
+  help (h)                                         -- show this help
+  bye                                              -- exit
 ____________________________________________________________
 ```
 

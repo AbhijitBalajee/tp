@@ -26,6 +26,10 @@ import seedu.duke.command.GoalCommand;
 import seedu.duke.command.ClearCommand;
 import seedu.duke.command.ExportCommand;
 import seedu.duke.command.UndoCommand;
+import seedu.duke.command.TopCommand;
+import seedu.duke.command.LastCommand;
+import seedu.duke.command.ReportCommand;
+import seedu.duke.command.MonthCommand;
 
 /**
  * Parses user input into commands.
@@ -132,6 +136,28 @@ public class Parser {
             return new SearchCommand(parts.length > 1 ? parts[1] : "");
         case "sort":
             return new SortCommand();
+        case "top":
+            try {
+                return new TopCommand(Integer.parseInt(parts[1].trim()));
+            } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
+                throw new SpendTrackException("Usage: top <number>");
+            }
+        case "last":
+            try {
+                return new LastCommand(Integer.parseInt(parts[1].trim()));
+            } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
+                throw new SpendTrackException("Usage: last <number>");
+            }
+        case "report":
+            if (parts.length < 2 || parts[1].trim().isEmpty()) {
+                throw new SpendTrackException("Usage: report <YYYY-MM>");
+            }
+            return new ReportCommand(parts[1].trim());
+        case "month":
+            if (parts.length < 2 || parts[1].trim().isEmpty()) {
+                throw new SpendTrackException("Usage: month <YYYY-MM>");
+            }
+            return new MonthCommand(parts[1].trim());
         case "help":
             return new HelpCommand();
         case "bye":

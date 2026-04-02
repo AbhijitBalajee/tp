@@ -50,14 +50,16 @@ public class ReportCommand extends Command {
                 return;
             }
 
-            ui.showMessage("Monthly Report for " + monthInput + ":");
-            ui.showMessage("Total spent: $" + String.format("%.2f", total));
-
-            ui.showMessage("Breakdown by category:");
+            StringBuilder sb = new StringBuilder();
+            sb.append(" Monthly Report for ").append(monthInput).append(":\n");
+            sb.append(" Total spent: $").append(String.format("%.2f", total)).append("\n");
+            sb.append(" Breakdown by category:\n");
             for (Map.Entry<String, Double> entry : categoryTotals.entrySet()) {
-                ui.showMessage(" - " + entry.getKey() + ": $" +
-                        String.format("%.2f", entry.getValue()));
+                sb.append("  - ").append(entry.getKey()).append(": $")
+                        .append(String.format("%.2f", entry.getValue())).append("\n");
             }
+
+            ui.showMessage(sb.toString().trim());
 
         } catch (Exception e) {
             ui.showError("Usage: report <YYYY-MM>");

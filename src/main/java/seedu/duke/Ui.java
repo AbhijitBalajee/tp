@@ -350,21 +350,62 @@ public class Ui {
      */
     public void showHelp() {
         System.out.println(LINE);
-        System.out.println(" Available commands (alias in brackets):");
-
-        System.out.println("  add (a)    d/<desc> a/<amt> c/<cat> [date/<YYYY-MM-DD>] -- add expense");
-        System.out.println("  delete (d) <index>                                     -- delete expense");
-        System.out.println("  list (l)                                               -- list all");
-        System.out.println("  total                                                  -- show total");
-        System.out.println("  summary (s)                                            -- category breakdown");
-        System.out.println("  budget (b) <amount>                                    -- set budget");
-        System.out.println("  filter     from/<YYYY-MM-DD> to/<YYYY-MM-DD>          -- filter by date range");
-        System.out.println("  find       <index>                                     -- view expense details");
-        System.out.println("  remaining                                              -- show remaining");
-        System.out.println("  help (h)                                               -- show this help");
-        System.out.println("  bye                                                    -- exit");
+        System.out.println(" Here are the commands you can use:");
+        String format = "  %-48s -- %s";
+        System.out.println(String.format(format,
+                "add (a) d/DESC a/AMT c/CAT [date/DATE]", "add expense"));
+        System.out.println(String.format(format,
+                "delete (d) INDEX", "delete expense"));
+        System.out.println(String.format(format,
+                "list (l)", "list all"));
+        System.out.println(String.format(format,
+                "list recurring", "list recurring only"));
+        System.out.println(String.format(format,
+                "summary (s)", "category breakdown"));
+        System.out.println(String.format(format,
+                "total", "show total"));
+        System.out.println(String.format(format,
+                "budget (b) AMOUNT", "set budget"));
+        System.out.println(String.format(format,
+                "budget reset", "reset budget"));
+        System.out.println(String.format(format,
+                "budget history", "view budget history"));
+        System.out.println(String.format(format,
+                "remaining", "show remaining"));
+        System.out.println(String.format(format,
+                "edit INDEX [d/DESC] [a/AMT] [c/CAT] [date/DATE]",
+                "edit expense"));
+        System.out.println(String.format(format,
+                "filter from/DATE to/DATE", "filter by date"));
+        System.out.println(String.format(format,
+                "find INDEX", "view expense details"));
+        System.out.println(String.format(format,
+                "search KEYWORD", "search by keyword"));
+        System.out.println(String.format(format,
+                "sort", "sort by amount"));
+        System.out.println(String.format(format,
+                "top N", "top N expenses"));
+        System.out.println(String.format(format,
+                "last N", "last N added"));
+        System.out.println(String.format(format,
+                "report YYYY-MM", "monthly report"));
+        System.out.println(String.format(format,
+                "month YYYY-MM", "list by month"));
+        System.out.println(String.format(format,
+                "clear", "clear all"));
+        System.out.println(String.format(format,
+                "undo", "undo last"));
+        System.out.println(String.format(format,
+                "export csv", "export to CSV"));
+        System.out.println(String.format(format,
+                "goal g/AMOUNT", "set savings goal"));
+        System.out.println(String.format(format,
+                "goal status", "check goal"));
+        System.out.println(String.format(format,
+                "help (h)", "show this help"));
+        System.out.println(String.format(format,
+                "bye", "exit"));
         System.out.println(LINE);
-
     }
     /**
      * Displays a spending summary grouped by category.

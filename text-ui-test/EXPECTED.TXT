@@ -84,18 +84,33 @@ ____________________________________________________________
  Error: Start date must be before end date.
 ____________________________________________________________
 > ____________________________________________________________
- Available commands (alias in brackets):
-  add (a)    d/<desc> a/<amt> c/<cat> [date/<YYYY-MM-DD>] -- add expense
-  delete (d) <index>                                     -- delete expense
-  list (l)                                               -- list all
-  total                                                  -- show total
-  summary (s)                                            -- category breakdown
-  budget (b) <amount>                                    -- set budget
-  filter     from/<YYYY-MM-DD> to/<YYYY-MM-DD>          -- filter by date range
-  find       <index>                                     -- view expense details
-  remaining                                              -- show remaining
-  help (h)                                               -- show this help
-  bye                                                    -- exit
+ Here are the commands you can use:
+  add (a) d/DESC a/AMT c/CAT [date/DATE]           -- add expense
+  delete (d) INDEX                                 -- delete expense
+  list (l)                                         -- list all
+  list recurring                                   -- list recurring only
+  summary (s)                                      -- category breakdown
+  total                                            -- show total
+  budget (b) AMOUNT                                -- set budget
+  budget reset                                     -- reset budget
+  budget history                                   -- view budget history
+  remaining                                        -- show remaining
+  edit INDEX [d/DESC] [a/AMT] [c/CAT] [date/DATE]  -- edit expense
+  filter from/DATE to/DATE                         -- filter by date
+  find INDEX                                       -- view expense details
+  search KEYWORD                                   -- search by keyword
+  sort                                             -- sort by amount
+  top N                                            -- top N expenses
+  last N                                           -- last N added
+  report YYYY-MM                                   -- monthly report
+  month YYYY-MM                                    -- list by month
+  clear                                            -- clear all
+  undo                                             -- undo last
+  export csv                                       -- export to CSV
+  goal g/AMOUNT                                    -- set savings goal
+  goal status                                      -- check goal
+  help (h)                                         -- show this help
+  bye                                              -- exit
 ____________________________________________________________
 > ____________________________________________________________
  New expense added:

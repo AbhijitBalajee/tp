@@ -18,19 +18,20 @@ public class SearchCommand extends Command {
     public void execute(ExpenseList expenses, Ui ui) throws SpendTrackException {
 
         int count = 0;
-        System.out.println("Search results:");
+        StringBuilder sb = new StringBuilder();
+        sb.append(" Search results:\n");
 
         for (Expense e : expenses.getExpenses()) {
-
             if (e.getDescription().toLowerCase().contains(keyword.toLowerCase())) {
-
                 count++;
-                System.out.println(count + ". " + e);
+                sb.append(" ").append(count).append(". ").append(e).append("\n");
             }
         }
 
         if (count == 0) {
-            System.out.println("No matches found.");
+            sb.append(" No matches found.\n");
         }
+
+        ui.showMessage(sb.toString().trim());
     }
 }

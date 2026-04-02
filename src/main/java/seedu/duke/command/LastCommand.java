@@ -24,7 +24,7 @@ public class LastCommand extends Command {
         int total = expenses.size();
 
         if (total == 0) {
-            System.out.println("No expenses recorded.");
+            ui.showMessage("No expenses recorded.");
             return;
         }
 
@@ -35,10 +35,13 @@ public class LastCommand extends Command {
             lastExpenses.add(expenses.getExpense(i));
         }
 
-        System.out.println("Showing last " + lastExpenses.size() + " expenses:");
+        StringBuilder sb = new StringBuilder();
+        sb.append(" Showing last ").append(lastExpenses.size()).append(" expenses:\n");
         for (int i = 0; i < lastExpenses.size(); i++) {
-            System.out.println((i + 1) + ". " + lastExpenses.get(i));
+            sb.append(" ").append(i + 1).append(". ").append(lastExpenses.get(i)).append("\n");
         }
+
+        ui.showMessage(sb.toString().trim());
     }
 
     @Override
