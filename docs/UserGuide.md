@@ -56,6 +56,36 @@ ____________________________________________________________
 ____________________________________________________________
 ```
 
+### Deleting an expense: `delete`
+
+Removes an expense from the list by its index.
+
+Format: `delete INDEX`
+
+- `INDEX` is 1-based (same numbering as `list`).
+- Use `list` first to find the index of the expense you want to delete.
+
+Alias: `d`
+
+Examples:
+- `delete 1` — removes the first expense
+- `d 2` — using alias, removes the second expense
+
+Expected output:
+```
+____________________________________________________________
+ Expense deleted:
+   [Food] Coffee - $3.50 (2026-03-22)
+____________________________________________________________
+```
+
+Error cases:
+- `delete 0` or `delete 99` (out of range) → `Index 99 is out of range. There are 3 expense(s).`
+- `delete abc` → `Index must be a whole number. Usage: delete <index>`
+- `delete` (missing index) → `Please provide an index. Usage: delete <index>`
+
+---
+
 ### Viewing total expenses: `total`
 
 Displays the total sum of all recorded expenses.
