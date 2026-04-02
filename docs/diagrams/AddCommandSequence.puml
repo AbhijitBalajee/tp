@@ -10,6 +10,7 @@ participant "DateParser" as DP
 participant ":AddCommand" as AC
 participant ":Expense" as E
 participant ":ExpenseList" as EL
+participant ":BudgetChecker" as BC
 participant ":Ui" as UI
 
 User -> ST : "add d/Coffee a/3.50 c/food date/22-03-2026"
@@ -24,13 +25,22 @@ note right of P
   to extract d/, a/, c/,
   date/ tokens in any order
 end note
-P -> P : normalizeCategory("food")
-note right of P : Returns "Food"
-P -> DP : parse("22-03-2026")
-activate DP
-DP --> P : LocalDate(2026-03-22)
-deactivate DP
-P --> ST : :AddCommand("Coffee", 3.50, "Food", 2026-03-22)
+
+alt missing d/ or a/ flag
+    P --> ST : throw SpendTrackException("Missing required field")
+else valid flags present
+    P -> P : normalizeCategory("food")
+    note right of P : Returns "Food"
+
+    opt date/ parameter provided
+        P -> DP : parse("22-03-2026")
+        activate DP
+        DP --> P : LocalDate(2026-03-22)
+        deactivate DP
+    end
+
+    P --> ST : :AddCommand("Coffee", 3.50, "Food", 2026-03-22)
+end
 deactivate P
 
 ST -> AC : execute(expenses, ui)
@@ -44,6 +54,15 @@ AC -> UI : showAddSuccess(expense)
 activate UI
 UI --> User : "Added: [Food] Coffee - $3.50 (2026-03-22)"
 deactivate UI
+AC -> BC : check(expenses, ui)
+activate BC
+alt totalSpent > budget
+    BC -> UI : showBudgetAlert(...)
+else totalSpent >= 90% of budget
+    BC -> UI : showBudgetWarning(...)
+else under threshold
+end
+deactivate BC
 deactivate AC
 
 deactivate ST
