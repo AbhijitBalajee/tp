@@ -16,12 +16,20 @@ public class SortCommand extends Command {
 
         sorted.sort(Comparator.comparingDouble(Expense::getAmount).reversed());
 
-        System.out.println("Here are your expenses sorted by amount:");
+        if (sorted.isEmpty()) {
+            ui.showMessage("No expenses recorded.");
+            return;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(" Here are your expenses sorted by amount:\n");
 
         int index = 1;
         for (Expense e : sorted) {
-            System.out.println(index + ". " + e.toString());
+            sb.append(" ").append(index).append(". ").append(e).append("\n");
             index++;
         }
+
+        ui.showMessage(sb.toString().trim());
     }
 }

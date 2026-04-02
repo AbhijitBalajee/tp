@@ -40,10 +40,13 @@ public class TopCommand extends Command {
 
         int limit = Math.min(count, list.size());
 
-        ui.showMessage("Top " + limit + " expenses:");
+        StringBuilder sb = new StringBuilder();
+        sb.append(" Top ").append(limit).append(" expenses:\n");
         for (int i = 0; i < limit; i++) {
-            ui.showMessage((i + 1) + ". " + list.get(i));
+            sb.append(" ").append(i + 1).append(". ").append(list.get(i)).append("\n");
         }
+
+        ui.showMessage(sb.toString().trim());
     }
 
     @Override

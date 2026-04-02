@@ -350,21 +350,33 @@ public class Ui {
      */
     public void showHelp() {
         System.out.println(LINE);
-        System.out.println(" Available commands (alias in brackets):");
-
-        System.out.println("  add (a)    d/<desc> a/<amt> c/<cat> [date/<YYYY-MM-DD>] -- add expense");
-        System.out.println("  delete (d) <index>                                     -- delete expense");
-        System.out.println("  list (l)                                               -- list all");
-        System.out.println("  total                                                  -- show total");
-        System.out.println("  summary (s)                                            -- category breakdown");
-        System.out.println("  budget (b) <amount>                                    -- set budget");
-        System.out.println("  filter     from/<YYYY-MM-DD> to/<YYYY-MM-DD>          -- filter by date range");
-        System.out.println("  find       <index>                                     -- view expense details");
-        System.out.println("  remaining                                              -- show remaining");
-        System.out.println("  help (h)                                               -- show this help");
-        System.out.println("  bye                                                    -- exit");
+        System.out.println(" Here are the commands you can use:");
+        System.out.println(" add d/DESCRIPTION a/AMOUNT c/CATEGORY"
+                + " [date/DATE] [recurring/true|false]");
+        System.out.println(" delete INDEX");
+        System.out.println(" list");
+        System.out.println(" summary");
+        System.out.println(" total");
+        System.out.println(" budget AMOUNT");
+        System.out.println(" remaining");
+        System.out.println(" edit INDEX [d/DESC] [a/AMT]"
+                + " [c/CAT] [date/DATE] [recurring/true|false]");
+        System.out.println(" filter from/DATE to/DATE");
+        System.out.println(" find INDEX");
+        System.out.println(" search KEYWORD");
+        System.out.println(" sort");
+        System.out.println(" top N");
+        System.out.println(" last N");
+        System.out.println(" report YYYY-MM");
+        System.out.println(" month YYYY-MM");
+        System.out.println(" clear");
+        System.out.println(" undo");
+        System.out.println(" export csv");
+        System.out.println(" goal g/AMOUNT");
+        System.out.println(" goal status");
+        System.out.println(" help");
+        System.out.println(" bye");
         System.out.println(LINE);
-
     }
     /**
      * Displays a spending summary grouped by category.
