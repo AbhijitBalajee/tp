@@ -46,6 +46,9 @@ deactivate P
 ST -> AC : execute(expenses, ui)
 activate AC
 AC -> E ** : new Expense("Coffee", 3.50, "Food", 2026-03-22, false)
+activate E
+E --> AC
+deactivate E
 AC -> EL : addExpense(expense)
 activate EL
 EL --> AC
