@@ -6,7 +6,6 @@ skinparam sequenceMessageAlign center
 actor User
 participant ":SpendTrack" as ST
 participant "Parser" as P
-participant ":SummaryCommand" as SC
 participant ":ExpenseList" as EL
 participant ":Ui" as UI
 
@@ -16,6 +15,11 @@ activate ST
 ST -> P : parse(input)
 activate P
 P -> P : resolve alias ("s" -> "summary")
+create ":SummaryCommand" as SC
+P -> SC : new SummaryCommand()
+activate SC
+SC --> P
+deactivate SC
 P --> ST : :SummaryCommand
 deactivate P
 
