@@ -3,8 +3,8 @@
 skinparam backgroundColor BGCOLOR
 skinparam sequenceMessageAlign center
 
-participant "Parser" as P
-participant "DateParser" as DP
+participant "<<class>>\nParser" as P
+participant "<<class>>\nDateParser" as DP
 
 P -> DP : parse(dateString)
 activate DP

@@ -5,10 +5,10 @@ skinparam sequenceMessageAlign center
 
 actor User
 participant ":SpendTrack" as ST
-participant "Parser" as P
-participant "DateParser" as DP
+participant "<<class>>\nParser" as P
+participant "<<class>>\nDateParser" as DP
 participant ":ExpenseList" as EL
-participant ":BudgetChecker" as BC
+participant "<<class>>\nBudgetChecker" as BC
 participant ":Ui" as UI
 
 User -> ST : "add d/Coffee a/3.50 c/food date/22-03-2026"
