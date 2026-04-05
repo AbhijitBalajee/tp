@@ -75,5 +75,5 @@ AddCommand --> ExpenseList : adds to
 AddCommand --> Ui : displays via
 SummaryCommand --> ExpenseList : reads from
 SummaryCommand --> Ui : displays via
-ExpenseList o-- Expense : stores
+ExpenseList "1" *-- "0..*" Expense : contains
 @enduml
