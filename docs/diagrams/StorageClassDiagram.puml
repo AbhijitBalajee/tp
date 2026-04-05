@@ -19,7 +19,6 @@ class Storage {
 }
 
 class ExpenseList {
-    - expenses: ArrayList<Expense>
     - budget: double
     - budgetHistory: ArrayList<String>
     + addExpense(expense: Expense)
