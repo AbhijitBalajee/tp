@@ -5,42 +5,42 @@ skinparam objectAttributeIconSize 0
 
 title Object Diagram: SummaryCommand State After Processing 3 Expenses
 
-object ":SummaryCommand" as sc
+object "<u>:SummaryCommand</u>" as sc
 
-object "categoryTotals : Map" as ct {
+object "<u>categoryTotals : Map</u>" as ct {
     "Food" = 13.50
     "Transport" = 1.20
 }
 
-object "categoryCounts : Map" as cc {
+object "<u>categoryCounts : Map</u>" as cc {
     "Food" = 2
     "Transport" = 1
 }
 
-object "categoryMax : Map" as cm {
+object "<u>categoryMax : Map</u>" as cm {
     "Food" = 10.00
     "Transport" = 1.20
 }
 
-object "grandTotal : double" as gt {
+object "<u>grandTotal : double</u>" as gt {
     value = 14.70
 }
 
-object "e1 : Expense" as e1 {
+object "<u>e1 : Expense</u>" as e1 {
     description = "Coffee"
     amount = 3.50
     category = "Food"
     date = 2026-03-22
 }
 
-object "e2 : Expense" as e2 {
+object "<u>e2 : Expense</u>" as e2 {
     description = "Lunch"
     amount = 10.00
     category = "Food"
     date = 2026-03-22
 }
 
-object "e3 : Expense" as e3 {
+object "<u>e3 : Expense</u>" as e3 {
     description = "Bus"
     amount = 1.20
     category = "Transport"
@@ -52,7 +52,4 @@ sc --> cc : builds
 sc --> cm : builds
 sc --> gt : computes
 
-ct ..> e1 : aggregates
-ct ..> e2 : aggregates
-ct ..> e3 : aggregates
 @enduml
