@@ -135,100 +135,38 @@ class StorageTest {
         assertEquals(2, loaded.getBudgetHistory().size());
     }
 
-    // --- Malformed lines ---
+    // --- Tamper detection ---
 
     @Test
-    void load_malformedExpenseLine_skipsAndContinues() throws IOException {
+    void load_tamperedFile_startsEmpty() throws IOException {
+        ExpenseList saved = new ExpenseList();
+        saved.addExpense(new Expense("Coffee", 4.50, "Food", DATE_A));
+        storage.save(saved);
+
+        // Overwrite the encrypted file with plain text (simulates tampering)
         File file = new File(TEST_FILE);
-        file.getParentFile().mkdirs();
         try (FileWriter fw = new FileWriter(file)) {
-            fw.write("---EXPENSES---\n");
-            fw.write("BAD_LINE_NO_PIPES\n");
-            fw.write("Coffee|4.50|Food|2026-03-10\n");
-            fw.write("---BUDGET---\n");
-            fw.write("0.0\n");
-            fw.write("---BUDGET-HISTORY---\n");
+            fw.write("---EXPENSES---\nFree Money|99999.99|Food|2026-04-06\n---BUDGET---\n0.0\n---BUDGET-HISTORY---\n");
         }
 
         ExpenseList loaded = new ExpenseList();
         storage.load(loaded);
 
-        assertEquals(1, loaded.size());
-        assertEquals("Coffee", loaded.getExpense(0).getDescription());
+        assertEquals(0, loaded.size());
     }
 
     @Test
-    void load_malformedAmountInExpenseLine_skipsLine() throws IOException {
+    void load_corruptedFile_startsEmpty() throws IOException {
         File file = new File(TEST_FILE);
         file.getParentFile().mkdirs();
         try (FileWriter fw = new FileWriter(file)) {
-            fw.write("---EXPENSES---\n");
-            fw.write("Coffee|notanumber|Food|2026-03-10\n");
-            fw.write("Bus|1.80|Transport|2026-03-15\n");
-            fw.write("---BUDGET---\n");
-            fw.write("0.0\n");
-            fw.write("---BUDGET-HISTORY---\n");
+            fw.write("this is not valid base64 or encrypted content!!!");
         }
 
         ExpenseList loaded = new ExpenseList();
         storage.load(loaded);
 
-        assertEquals(1, loaded.size());
-        assertEquals("Bus", loaded.getExpense(0).getDescription());
-    }
-
-    @Test
-    void load_malformedDateInExpenseLine_skipsLine() throws IOException {
-        File file = new File(TEST_FILE);
-        file.getParentFile().mkdirs();
-        try (FileWriter fw = new FileWriter(file)) {
-            fw.write("---EXPENSES---\n");
-            fw.write("Coffee|4.50|Food|not-a-date\n");
-            fw.write("Bus|1.80|Transport|2026-03-15\n");
-            fw.write("---BUDGET---\n");
-            fw.write("0.0\n");
-            fw.write("---BUDGET-HISTORY---\n");
-        }
-
-        ExpenseList loaded = new ExpenseList();
-        storage.load(loaded);
-
-        assertEquals(1, loaded.size());
-        assertEquals("Bus", loaded.getExpense(0).getDescription());
-    }
-
-    @Test
-    void load_malformedBudgetValue_budgetNotSet() throws IOException {
-        File file = new File(TEST_FILE);
-        file.getParentFile().mkdirs();
-        try (FileWriter fw = new FileWriter(file)) {
-            fw.write("---EXPENSES---\n");
-            fw.write("---BUDGET---\n");
-            fw.write("notanumber\n");
-            fw.write("---BUDGET-HISTORY---\n");
-        }
-
-        ExpenseList loaded = new ExpenseList();
-        storage.load(loaded);
-
-        assertFalse(loaded.hasBudget());
-    }
-
-    @Test
-    void load_zeroBudgetValue_budgetNotSet() throws IOException {
-        File file = new File(TEST_FILE);
-        file.getParentFile().mkdirs();
-        try (FileWriter fw = new FileWriter(file)) {
-            fw.write("---EXPENSES---\n");
-            fw.write("---BUDGET---\n");
-            fw.write("0.0\n");
-            fw.write("---BUDGET-HISTORY---\n");
-        }
-
-        ExpenseList loaded = new ExpenseList();
-        storage.load(loaded);
-
-        assertFalse(loaded.hasBudget());
+        assertEquals(0, loaded.size());
     }
 
     // --- Field-level round-trip ---
