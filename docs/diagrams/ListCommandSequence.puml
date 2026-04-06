@@ -6,16 +6,22 @@ skinparam sequenceMessageAlign center
 actor User
 participant ":SpendTrack" as ST
 participant "Parser" as P
-participant ":ListCommand" as LC
-participant ":Ui" as UI
 participant ":ExpenseList" as EL
+participant ":Ui" as UI
 
 User -> ST : "list" or "list recurring"
 activate ST
 ST -> P : parse(input)
 activate P
 P -> P : check for "recurring" token
-P --> ST : ListCommand(recurringOnly)
+
+create participant ":ListCommand" as LC
+P -> LC : new ListCommand(recurringOnly)
+activate LC
+LC --> P
+deactivate LC
+
+P --> ST : :ListCommand
 deactivate P
 
 ST -> LC : execute(expenseList, ui)

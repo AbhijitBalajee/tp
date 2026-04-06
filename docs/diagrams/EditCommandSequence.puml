@@ -6,7 +6,6 @@ skinparam sequenceMessageAlign center
 actor User
 participant ":SpendTrack" as ST
 participant "Parser" as P
-participant ":EditCommand" as EC
 participant ":ExpenseList" as EL
 participant ":Ui" as UI
 
@@ -21,7 +20,14 @@ note right of P
     newAmount=6.00
     others remain null
 end note
-P --> ST : EditCommand(1, "Latte", 6.00, null, null, null)
+
+create participant ":EditCommand" as EC
+P -> EC : new EditCommand(1, "Latte", 6.00, null, null, null)
+activate EC
+EC --> P :
+deactivate EC
+
+P --> ST : :EditCommand
 deactivate P
 
 ST -> EC : execute(expenseList, ui)

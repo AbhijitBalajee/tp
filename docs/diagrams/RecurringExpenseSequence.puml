@@ -6,13 +6,11 @@ skinparam sequenceMessageAlign center
 actor User
 participant ":SpendTrack" as ST
 participant "Parser" as P
-participant ":AddCommand" as AC
-participant ":Expense" as E
 participant ":ExpenseList" as EL
-participant ":ListCommand" as LC
 participant ":Ui" as UI
 
-== Add recurring expense ==
+note over ST, UI : Add recurring expense
+
 User -> ST : "add d/Netflix a/18.00 c/Entertainment recurring/true"
 activate ST
 ST -> P : parse(input)
@@ -22,11 +20,19 @@ note right of P
     Extracts recurring/true token
     validates value is true or false
 end note
-P --> ST : AddCommand(..., isRecurring=true)
+
+create participant ":AddCommand" as AC
+P -> AC : new AddCommand(..., isRecurring=true)
+activate AC
+AC --> P
+deactivate AC
+
+P --> ST : :AddCommand
 deactivate P
+
 ST -> AC : execute(expenseList, ui)
 activate AC
-AC -> E ** : new Expense(..., isRecurring=true)
+AC -> ":Expense" as E ** : new Expense(..., isRecurring=true)
 AC -> EL : addExpense(expense)
 activate EL
 EL --> AC
@@ -38,13 +44,22 @@ deactivate UI
 deactivate AC
 deactivate ST
 
-== List recurring expenses ==
+note over ST, UI : List recurring expenses
+
 User -> ST : "list recurring"
 activate ST
 ST -> P : parse("list recurring")
 activate P
-P --> ST : ListCommand(recurringOnly=true)
+
+create participant ":ListCommand" as LC
+P -> LC : new ListCommand(recurringOnly=true)
+activate LC
+LC --> P
+deactivate LC
+
+P --> ST : :ListCommand
 deactivate P
+
 ST -> LC : execute(expenseList, ui)
 activate LC
 LC -> UI : showRecurringList(expenses)
