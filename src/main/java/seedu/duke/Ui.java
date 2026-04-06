@@ -14,30 +14,69 @@ public class Ui {
 
     private static final Logger logger = Logger.getLogger(Ui.class.getName());
     private static final String LINE = "____________________________________________________________";
+    // @@author Ariff1422
+    private static final String LOGO =
+            "  ____                       _ _____               _\n"
+            + " / ___| _ __   ___ _ __   __| |_   _| __ __ _  ___| | __\n"
+            + " \\___ \\| '_ \\ / _ \\ '_ \\ / _` | | || '__/ _` |/ __| |/ /\n"
+            + "  ___) | |_) |  __/ | | | (_| | | || | | (_| | (__|   <\n"
+            + " |____/| .__/ \\___|_| |_|\\__,_| |_||_|  \\__,_|\\___|_|\\_\\\n"
+            + "       |_|";
+    private static final String LOGO_BLOCK =
+            " \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2557\u2588\u2588\u2588\u2588\u2588\u2588\u2557"
+            + " \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2557\u2588\u2588\u2588\u2557   \u2588\u2588\u2557"
+            + "\u2588\u2588\u2588\u2588\u2588\u2588\u2557 \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2557"
+            + "\u2588\u2588\u2588\u2588\u2588\u2588\u2557  \u2588\u2588\u2588\u2588\u2588\u2557 "
+            + " \u2588\u2588\u2588\u2588\u2588\u2588\u2557\u2588\u2588\u2557  \u2588\u2588\u2557\n"
+            + " \u2588\u2588\u2554\u2550\u2550\u2550\u2550\u255d\u2588\u2588\u2554\u2550\u2550\u2588\u2588\u2557"
+            + "\u2588\u2588\u2554\u2550\u2550\u2550\u2550\u255d\u2588\u2588\u2588\u2588\u2557  \u2588\u2588\u2551"
+            + "\u2588\u2588\u2554\u2550\u2550\u2588\u2588\u2557\u255a\u2550\u2550\u2588\u2588\u2554\u2550\u2550\u255d"
+            + "\u2588\u2588\u2554\u2550\u2550\u2588\u2588\u2557\u2588\u2588\u2554\u2550\u2550\u2588\u2588\u2557"
+            + "\u2588\u2588\u2554\u2550\u2550\u2550\u2550\u255d\u2588\u2588\u2551 \u2588\u2588\u2554\u255d\n"
+            + " \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2557\u2588\u2588\u2588\u2588\u2588\u2588\u2554\u255d"
+            + "\u2588\u2588\u2588\u2588\u2588\u2557  \u2588\u2588\u2554\u2588\u2588\u2557 \u2588\u2588\u2551"
+            + "\u2588\u2588\u2551  \u2588\u2588\u2551   \u2588\u2588\u2551   "
+            + "\u2588\u2588\u2588\u2588\u2588\u2588\u2554\u255d\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2551"
+            + "\u2588\u2588\u2551     \u2588\u2588\u2588\u2588\u2588\u2554\u255d \n"
+            + " \u255a\u2550\u2550\u2550\u2550\u2588\u2588\u2551\u2588\u2588\u2554\u2550\u2550\u2550\u255d "
+            + "\u2588\u2588\u2554\u2550\u2550\u255d  \u2588\u2588\u2551\u255a\u2588\u2588\u2557\u2588\u2588\u2551"
+            + "\u2588\u2588\u2551  \u2588\u2588\u2551   \u2588\u2588\u2551   "
+            + "\u2588\u2588\u2554\u2550\u2550\u2588\u2588\u2557\u2588\u2588\u2554\u2550\u2550\u2588\u2588\u2551"
+            + "\u2588\u2588\u2551     \u2588\u2588\u2554\u2550\u2588\u2588\u2557 \n"
+            + " \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2551\u2588\u2588\u2551     "
+            + "\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2557\u2588\u2588\u2551 \u255a\u2588\u2588\u2588\u2588\u2551"
+            + "\u2588\u2588\u2588\u2588\u2588\u2588\u2554\u255d   \u2588\u2588\u2551   "
+            + "\u2588\u2588\u2551  \u2588\u2588\u2551\u2588\u2588\u2551  \u2588\u2588\u2551"
+            + "\u255a\u2588\u2588\u2588\u2588\u2588\u2588\u2557\u2588\u2588\u2551  \u2588\u2588\u2557\n"
+            + " \u255a\u2550\u2550\u2550\u2550\u2550\u2550\u255d\u255a\u2550\u255d     "
+            + "\u255a\u2550\u2550\u2550\u2550\u2550\u2550\u255d\u255a\u2550\u255d  \u255a\u2550\u2550\u2550\u255d"
+            + "\u255a\u2550\u2550\u2550\u2550\u2550\u255d    \u255a\u2550\u255d   "
+            + "\u255a\u2550\u255d  \u255a\u2550\u255d\u255a\u2550\u255d  \u255a\u2550\u255d"
+            + " \u255a\u2550\u2550\u2550\u2550\u2550\u255d\u255a\u2550\u255d  \u255a\u2550\u255d";
+    // @@author
     private final Scanner scanner;
 
     static {
         logger.setUseParentHandlers(false);
     }
-    
+
     public Ui() {
         this.scanner = new Scanner(System.in);
     }
 
+    // @@author Ariff1422
     /**
-     * Displays the welcome message on startup.
+     * Displays the welcome message on startup with ASCII logo.
      */
     public void showWelcome() {
         System.out.println(LINE);
-        System.out.println(" Welcome to SpendTrack!");
-        System.out.println(" Type 'add d/<desc> a/<amount> c/<category> [date/<YYYY-MM-DD>]' to add an expense.");
-        System.out.println(" Type 'list' to view all expenses.");
-        System.out.println(" Type 'delete <index>' to delete an expense.");
-        System.out.println(" Type 'total' to view total expenses.");
-        System.out.println(" Type 'budget <amount>' to set your monthly budget.");
-        System.out.println(" Type 'bye' to exit.");
+        System.out.println(LOGO);
+        System.out.println(LINE);
+        System.out.println(" Welcome to SpendTrack! Your personal CLI expense tracker.");
+        System.out.println(" Type 'help' to see all available commands.");
         System.out.println(LINE);
     }
+    // @@author
 
     /**
      * Displays the goodbye message on exit.
@@ -48,15 +87,17 @@ public class Ui {
         System.out.println(LINE);
     }
 
+    // @@author Ariff1422
     /**
-     * Reads the next line of user input.
+     * Reads the next line of user input, wrapped with input separator bars.
      *
      * @return the user's input string
      */
     public String readCommand() {
-        System.out.print("> ");
+        System.out.print(" > ");
         return scanner.nextLine();
     }
+    // @@author
 
     /**
      * Displays a success message after an expense is added.
@@ -113,6 +154,9 @@ public class Ui {
 
         if (expenses.size() == 0) {
             System.out.println(" No expenses recorded yet.");
+            // @@author Ariff1422
+            System.out.println(" Hint: Use 'add d/DESCRIPTION a/AMOUNT c/CATEGORY' to add one.");
+            // @@author
             System.out.println(LINE);
             return;
         }
@@ -288,7 +332,7 @@ public class Ui {
         System.out.println(" No budget is currently set.");
         System.out.println(LINE);
     }
-  
+
     /**
      * Displays the budget history in reverse chronological order.
      *
@@ -298,7 +342,8 @@ public class Ui {
         assert history != null : "Budget history list should not be null";
 
         System.out.println(LINE);
-        System.out.println(" ===== Budget History =====");
+        System.out.println(" Budget History");
+        System.out.println(LINE);
 
         if (history.isEmpty()) {
             System.out.println(" No budget history recorded.");
@@ -323,7 +368,6 @@ public class Ui {
             }
         }
 
-        System.out.println(" ==========================");
         System.out.println(LINE);
     }
 
@@ -350,7 +394,8 @@ public class Ui {
      */
     public void showHelp() {
         System.out.println(LINE);
-        System.out.println(" Here are the commands you can use:");
+        System.out.println(" Available Commands");
+        System.out.println(LINE);
         String format = "  %-48s -- %s";
         System.out.println(String.format(format,
                 "add (a) d/DESC a/AMT c/CAT [date/DATE]", "add expense"));
@@ -407,6 +452,7 @@ public class Ui {
                 "bye", "exit"));
         System.out.println(LINE);
     }
+
     /**
      * Displays a spending summary grouped by category.
      *
@@ -456,6 +502,7 @@ public class Ui {
     }
     // @@author
 
+    // @@author Ariff1422
     /**
      * Displays full details of a single expense.
      *
@@ -465,13 +512,15 @@ public class Ui {
     public void showExpenseDetail(int index, Expense expense) {
         assert expense != null : "Expense passed to showExpenseDetail should not be null";
         System.out.println(LINE);
-        System.out.println(" ===== Expense #" + index + " =====");
+        System.out.println(" Expense #" + index + " Details");
+        System.out.println(LINE);
         System.out.printf(" Description : %s%n", expense.getDescription());
         System.out.printf(" Amount      : $%.2f%n", expense.getAmount());
         System.out.printf(" Category    : %s%n", expense.getCategory());
         System.out.printf(" Date        : %s%n", expense.getDate());
         System.out.println(LINE);
     }
+    // @@author
 
     /**
      * Displays expenses filtered by date range.
@@ -489,6 +538,9 @@ public class Ui {
 
         if (filtered.isEmpty()) {
             System.out.println(" No expenses found in the given date range.");
+            // @@author Ariff1422
+            System.out.println(" Hint: Use 'filter from/YYYY-MM-DD to/YYYY-MM-DD' to adjust the range.");
+            // @@author
             System.out.println(LINE);
             return;
         }
@@ -537,6 +589,7 @@ public class Ui {
         System.out.println(LINE);
     }
 
+    // @@author Ariff1422
     /**
      * Displays the most recently recorded expense as a startup reminder.
      *
@@ -544,12 +597,16 @@ public class Ui {
      */
     public void showLastExpense(Expense expense) {
         assert expense != null : "Expense passed to showLastExpense should not be null";
-        System.out.println(" Last recorded expense: "
-                + expense.getDescription()
-                + " | $" + String.format("%.2f", expense.getAmount())
-                + " | " + expense.getCategory()
-                + " | " + expense.getDate());
+        System.out.println(LINE);
+        System.out.println(" Last recorded expense:");
+        System.out.printf("   %s | $%.2f | %s | %s%n",
+                expense.getDescription(),
+                expense.getAmount(),
+                expense.getCategory(),
+                expense.getDate());
+        System.out.println(LINE);
     }
+    // @@author
 
     // @@author pranavjana
     /**
@@ -588,14 +645,21 @@ public class Ui {
     }
     // @@author
 
+    // @@author Ariff1422
     /**
-     * Displays an error message to the user.
+     * Displays an error message with a hint where applicable.
      *
      * @param message the error message to display
      */
     public void showError(String message) {
         System.out.println(LINE);
         System.out.println(" Error: " + message);
+        if (message.contains("out of range")) {
+            System.out.println(" Hint: Use 'list' to see valid indices.");
+        } else if (message.contains("requires") || message.contains("Usage")) {
+            System.out.println(" Hint: Type 'help' to see the correct command format.");
+        }
         System.out.println(LINE);
     }
+    // @@author
 }
