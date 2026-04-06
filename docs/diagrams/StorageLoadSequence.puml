@@ -17,37 +17,46 @@ ST -> S : load(expenseList)
 activate S
 
 alt save file exists
-    loop for each line in file
-        alt line is EXPENSES marker
-            S -> S : set mode = EXPENSES
-        else line is BUDGET marker
-            S -> S : set mode = BUDGET
-        else line is BUDGET-HISTORY marker
-            S -> S : set mode = HISTORY
-        else mode = EXPENSES
-            S -> S : parseLine(line)
-            S -> E ** : new Expense(desc, amt, cat, date)
-            S -> EL : addExpense(expense)
-            activate EL
-            EL --> S
-            deactivate EL
-        else mode = BUDGET
-            S -> EL : setBudgetDirectly(amount)
-            activate EL
-            EL --> S
-            deactivate EL
-        else mode = HISTORY
-            S -> EL : addBudgetHistory(entry)
-            activate EL
-            EL --> S
-            deactivate EL
+    S -> S : readAllBytes(file)
+    S -> S : decrypt(ciphertext)
+
+    alt decryption fails (tampered or wrong machine)
+        S -> S : print tamper warning
+        S --> ST
+    else decryption succeeds (valid file)
+        loop for each line in plainText
+            alt line is EXPENSES marker
+                S -> S : set mode = EXPENSES
+            else line is BUDGET marker
+                S -> S : set mode = BUDGET
+            else line is BUDGET-HISTORY marker
+                S -> S : set mode = HISTORY
+            else mode = EXPENSES
+                S -> S : parseLine(line)
+                S -> E ** : new Expense(desc, amt, cat, date)
+                S -> EL : addExpense(expense)
+                activate EL
+                EL --> S
+                deactivate EL
+            else mode = BUDGET
+                S -> EL : setBudgetDirectly(amount)
+                activate EL
+                EL --> S
+                deactivate EL
+            else mode = HISTORY
+                S -> EL : addBudgetHistory(entry)
+                activate EL
+                EL --> S
+                deactivate EL
+            end
         end
+        S --> ST
     end
 else save file missing
     S -> S : log "No save file found. Starting fresh."
+    S --> ST
 end
 
-S --> ST
 deactivate S
 
 opt expenseList is non-empty

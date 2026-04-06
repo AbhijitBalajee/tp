@@ -163,9 +163,19 @@ Commands are case-insensitive: `ADD`, `Add`, and `add` all work.
 
 SpendTrack automatically saves your expenses and budget to `data/spendtrack.txt` after every `add`, `delete`, and `edit`. The file is created automatically if it does not exist.
 
-On startup, SpendTrack loads your saved data before accepting commands. If the save file is missing, the app starts with an empty list silently. Malformed lines in the save file are skipped with a warning — the rest of your data is still loaded.
+On startup, SpendTrack loads your saved data before accepting commands. If the save file is missing, the app starts with an empty list silently.
 
 You do not need to run any save or load command. It happens automatically.
+
+**File encryption**
+
+The save file is encrypted using AES-128-CBC with a key derived from your machine (OS name and username). This means:
+- The file is not human-readable and cannot be manually edited.
+- If the file is tampered with, SpendTrack will detect this on startup, reject the file, and start fresh with a warning:
+  ```
+  Warning: save file could not be decrypted. It may have been tampered with or created on a different machine. Starting fresh.
+  ```
+- The save file is tied to your machine — it cannot be transferred to another computer.
 
 **Startup reminder**
 
@@ -923,7 +933,7 @@ ____________________________________________________________
 
 **Q**: How do I transfer my data to another computer?
 
-**A**: Copy the `data/spendtrack.txt` file to the same location on the other computer. SpendTrack loads this file automatically on startup.
+**A**: The save file is encrypted with a machine-specific key, so it cannot be transferred directly to another computer. You will need to re-enter your expenses on the new machine.
 
 **Q**: What date formats are accepted?
 

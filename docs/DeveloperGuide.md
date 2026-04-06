@@ -265,40 +265,55 @@ The alias map is defined as a static `HashMap<String, String>` initialised in a 
 
 ### Storage Feature
 
-The storage feature allows SpendTrack to persist expense data and budget across sessions. Expenses are saved to `data/spendtrack.txt` automatically after every mutating command (`add`, `delete`, `edit`), and loaded back on startup.
+The storage feature allows SpendTrack to persist expense data and budget across sessions. Expenses are saved to `data/spendtrack.txt` automatically after every mutating command (`add`, `delete`, `edit`), and loaded back on startup. The file is encrypted so it cannot be read or tampered with outside the application.
 
 #### How it works
 
 **Saving:**
 
 1. After every mutating command executes, `SpendTrack` calls `Storage.save(expenseList)`.
-2. `Storage` opens `data/spendtrack.txt` using a `try-with-resources` block with a `FileWriter`.
-3. Each expense is written as a pipe-delimited line: `DESCRIPTION|AMOUNT|CATEGORY|DATE|RECURRING`.
-4. The budget is written at the end after a `---BUDGET---` separator line.
+2. `Storage` serialises all data (expenses, budget, budget history, goal) into a pipe-delimited plain-text string with section markers.
+3. The plain-text string is encrypted using AES-128-CBC with a machine-derived key and a random IV.
+4. The resulting Base64-encoded ciphertext is written to `data/spendtrack.txt`.
 5. If the `data/` directory does not exist, it is created automatically before writing.
 6. Any write failure prints a warning — the app does not crash.
 
 **Loading:**
 
 1. On startup, `SpendTrack` calls `Storage.load(expenseList)` before the main command loop.
-2. `Storage` reads `data/spendtrack.txt` line by line using a `BufferedReader`.
-3. Lines above `---BUDGET---` are parsed into `Expense` objects and added to the `ExpenseList`.
-4. The line below `---BUDGET---` is parsed as the saved budget amount.
-5. Malformed lines are skipped with a warning message.
+2. `Storage` reads the Base64-encoded ciphertext from `data/spendtrack.txt`.
+3. The ciphertext is decrypted using the machine-derived key. If decryption fails (file tampered or from a different machine), the file is rejected entirely and the app starts fresh with a warning.
+4. The decrypted plain-text is scanned line by line using section markers (`---EXPENSES---`, `---BUDGET---`, etc.) to populate the `ExpenseList`.
+5. Malformed lines within the decrypted content are skipped with a warning.
 6. If the file does not exist, the app starts silently with an empty list.
 
 The following sequence diagram shows the startup load flow, including the startup reminder:
 
 ![Sequence diagram for storage load](images/StorageLoadSequence.png)
 
-#### File format
+#### Encryption design
+
+The key is derived at runtime using `SHA-256(os.name + "|" + user.name)`, truncated to 128 bits. This means:
+- The key is never stored anywhere — not in the file, not in the JAR.
+- Even with access to the source code, an attacker on a different machine cannot reproduce the key.
+- A random IV is generated for every save, so the ciphertext differs each time even for identical data.
+
+#### Internal file format (before encryption)
+
+The plain-text content before encryption follows this structure:
 
 ```
-DESCRIPTION|AMOUNT|CATEGORY|DATE|RECURRING
-Coffee|3.50|Food|2026-03-22|false
-Bus fare|1.80|Transport|2026-03-22|false
+---EXPENSES---
+DESCRIPTION|AMOUNT|CATEGORY|DATE
+Coffee|3.50|Food|2026-03-22
+Bus fare|1.80|Transport|2026-03-22
 ---BUDGET---
 500.00
+---BUDGET-HISTORY---
+Set budget: $300.00
+Set budget: $500.00
+---GOAL---
+0.0
 ```
 
 #### Design considerations
@@ -313,10 +328,20 @@ Bus fare|1.80|Transport|2026-03-22|false
     - Pros: Fewer writes.
     - Cons: Data loss if the app is closed unexpectedly.
 
+**Aspect: Encryption key derivation**
+
+- **Current approach:** Machine-derived key from OS name and username.
+    - Pros: Key is never stored; cannot be forged from source code alone; prevents tampering by PE testers who have access to the source code.
+    - Cons: Save file is not portable across machines.
+
+- **Alternative:** Hardcoded key in source code.
+    - Pros: File is portable.
+    - Cons: Anyone with source code access can decrypt and forge the file.
+
 **Aspect: File format**
 
 - Pipe (`|`) delimiter was chosen over CSV because expense descriptions may contain commas.
-- All file I/O is encapsulated inside `Storage` — no `FileWriter` or `BufferedReader` exists in command classes, keeping the separation of concerns clean.
+- All file I/O is encapsulated inside `Storage` — no `FileWriter` or encryption logic exists in command classes, keeping the separation of concerns clean.
 
 #### Class structure
 
