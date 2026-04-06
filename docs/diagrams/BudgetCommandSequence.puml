@@ -6,20 +6,26 @@ skinparam sequenceMessageAlign center
 actor User
 participant ":SpendTrack" as ST
 participant "Parser" as P
-participant ":BudgetCommand" as BC
-participant ":BudgetResetCommand" as BRC
-participant ":BudgetHistoryCommand" as BHC
 participant ":ExpenseList" as EL
 participant ":Ui" as UI
 
-== Set budget ==
+note over ST, UI : Set budget
+
 User -> ST : "budget 500"
 activate ST
 ST -> P : parse("budget 500")
 activate P
 P -> P : parseBudgetCommand("500")
-P --> ST : :BudgetCommand(500.0)
+
+create participant ":BudgetCommand" as BC
+P -> BC : new BudgetCommand(500.0)
+activate BC
+BC --> P
+deactivate BC
+
+P --> ST : :BudgetCommand
 deactivate P
+
 ST -> BC : execute(expenseList, ui)
 activate BC
 BC -> BC : validateBudget(500.0)
@@ -39,13 +45,22 @@ deactivate UI
 deactivate BC
 deactivate ST
 
-== Reset budget ==
+note over ST, UI : Reset budget
+
 User -> ST : "budget reset"
 activate ST
 ST -> P : parse("budget reset")
 activate P
+
+create participant ":BudgetResetCommand" as BRC
+P -> BRC : new BudgetResetCommand()
+activate BRC
+BRC --> P
+deactivate BRC
+
 P --> ST : :BudgetResetCommand
 deactivate P
+
 ST -> BRC : execute(expenseList, ui)
 activate BRC
 BRC -> EL : hasBudget()
@@ -63,13 +78,22 @@ deactivate UI
 deactivate BRC
 deactivate ST
 
-== View budget history ==
+note over ST, UI : View budget history
+
 User -> ST : "budget history"
 activate ST
 ST -> P : parse("budget history")
 activate P
+
+create participant ":BudgetHistoryCommand" as BHC
+P -> BHC : new BudgetHistoryCommand()
+activate BHC
+BHC --> P
+deactivate BHC
+
 P --> ST : :BudgetHistoryCommand
 deactivate P
+
 ST -> BHC : execute(expenseList, ui)
 activate BHC
 BHC -> EL : getBudgetHistory()

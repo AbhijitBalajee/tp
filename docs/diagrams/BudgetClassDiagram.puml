@@ -1,13 +1,11 @@
 @startuml
-!define BGCOLOR white
-skinparam backgroundColor BGCOLOR
 skinparam classAttributeIconSize 0
 hide circle
 
 abstract class Command {
-    + execute(expenses, ui)
-    + isExit(): boolean
-    + mutatesData(): boolean
+    + execute(expenses, ui) {abstract}
+    + isExit(): boolean {abstract}
+    + mutatesData(): boolean {abstract}
 }
 
 class BudgetCommand {
