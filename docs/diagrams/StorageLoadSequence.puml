@@ -18,11 +18,11 @@ activate S
 
 alt save file exists
     loop for each line in file
-        alt line is "---EXPENSES---" marker
+        alt line is EXPENSES marker
             S -> S : set mode = EXPENSES
-        else line is "---BUDGET---" marker
+        else line is BUDGET marker
             S -> S : set mode = BUDGET
-        else line is "---BUDGET-HISTORY---" marker
+        else line is BUDGET-HISTORY marker
             S -> S : set mode = HISTORY
         else mode = EXPENSES
             S -> S : parseLine(line)
@@ -50,7 +50,7 @@ end
 S --> ST
 deactivate S
 
-alt expenseList is non-empty
+opt expenseList is non-empty
     ST -> UI : showLastExpense(lastExpense)
     activate UI
     UI --> User : "Last recorded expense: ..."

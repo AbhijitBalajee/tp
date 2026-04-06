@@ -11,8 +11,6 @@ participant ":FindCommand" as FNC
 participant ":ExpenseList" as EL
 participant ":Ui" as UI
 
-== Filter by date range ==
-
 User -> ST : "filter from/2026-03-01 to/2026-03-31"
 activate ST
 
@@ -44,8 +42,6 @@ UI --> User : filtered expense table
 deactivate UI
 deactivate FC
 deactivate ST
-
-== Find by index ==
 
 User -> ST : "find 2"
 activate ST
