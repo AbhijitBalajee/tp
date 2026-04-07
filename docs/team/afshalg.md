@@ -15,7 +15,7 @@ SpendTrack is a CLI expense tracker for NUS students who prefer typing over clic
 - **Add expense command** (v1.0): Implemented the core `add d/DESC a/AMOUNT c/CATEGORY` command with regex-based flag parsing that supports flags in any order. Created the `Expense`, `ExpenseList`, `Command`, and `AddCommand` classes that form the foundation of the app.
 - **Date tagging** (v2.0): Added an optional `date/` parameter to the add command. If omitted, defaults to today's date. This was a foundational change that unblocked filter-by-date, sort-by-date, and monthly report features for other team members.
 - **Flexible date parsing — DateParser** (v2.0): Extracted a `DateParser` utility class supporting four input formats: `YYYY-MM-DD`, `DD-MM-YYYY`, `today`, and `yesterday`. Uses sequential try-catch fallthrough for simplicity and is reused by the `filter` and `edit` commands.
-- **Category summary with enhanced statistics** (v2.0): Implemented the `summary` command that groups expenses by category and displays total, percentage, transaction count, average, and maximum per category, sorted descending by total.
+- **Category summary with enhanced statiscs** (v2.0): Implemented the `summary` command that groups expenses by category and displays total, percentage, transaction count, average, and maximum per category, sorted descending by total.
 - **Command aliases** (v2.0): Added single-letter aliases (`a`, `d`, `l`, `s`, `b`, `h`) resolved via a static map in `Parser` before command routing. Commands are also case-insensitive.
 - **Category normalisation** (v2.0): Added `normalizeCategory()` in `Parser` to auto-capitalise category names (e.g. `food` becomes `Food`, `public transport` becomes `Public Transport`), preventing duplicate categories in the summary.
 - **Assertions and logging** (v1.0): Added assertions and `java.util.logging` to `AddCommand`, `Parser`, `ExpenseList`, `RemainingCommand`, and `HelpCommand`. Enabled assertions in `build.gradle` with `-ea` flag (PR #31).
@@ -39,6 +39,7 @@ SpendTrack is a CLI expense tracker for NUS students who prefer typing over clic
 - Flexible date parsing (DateParser) section with design considerations (format strategy, SRP extraction)
 - Category summary feature section with design considerations (data structures, sorting)
 - Command aliases section
+
 - Architecture sequence diagram showing full runtime loop
 - UML diagrams (3 types, 6 diagrams):
   - Sequence diagram: add command flow with alt/opt boxes for validation and optional date
@@ -48,7 +49,15 @@ SpendTrack is a CLI expense tracker for NUS students who prefer typing over clic
   - Class diagram: Parser, DateParser, AddCommand, SummaryCommand, Expense, ExpenseList
   - Object diagram: SummaryCommand state snapshot showing category maps
 - Cleaned up DG: removed duplicate Remaining/Help/Search sections, fixed heading levels, removed orphaned content, removed duplicate manual testing sections
+
+- UML diagrams:
+    - Sequence diagram: add command flow with DateParser and category normalisation
+    - Sequence diagram: DateParser internal format fallthrough
+    - Sequence diagram: SummaryCommand execution with enhanced stats
+    - Class diagram: Parser, DateParser, AddCommand, SummaryCommand, Expense, ExpenseList
+    - Object diagram: SummaryCommand state snapshot showing category maps
 - Updated user stories, glossary, and manual testing appendix
+
 
 ### Contributions to team-based tasks
 
