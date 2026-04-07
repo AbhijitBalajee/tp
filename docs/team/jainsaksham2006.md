@@ -39,40 +39,34 @@ SpendTrack is a CLI expense tracker for NUS students who prefer typing over clic
 
 ### Contributions to the UG
 
-- Authored user-facing documentation for multiple commands including:
-    - `search`, `sort`, `top`, `last`, `report`, `month`, `remaining`, and `help`
-
-- Provided:
-    - clear command formats
-    - multiple usage examples
-    - expected outputs with formatting
-    - comprehensive error cases
-
-- Ensured consistency in documentation style across sections to improve readability and usability for new users.
-
----
+- Search command section with keyword-based filtering and usage examples
+- Sort command section explaining sorting by amount and expected output order
+- Report command section describing monthly report format and category breakdown
+- Remaining budget section explaining how remaining balance is calculated
+- Help command section listing all available commands and usage formats
+- Last command section showing how to retrieve the most recent n expenses
+- Top command section describing retrieval of top n expenses by amount
+- Updated command summary table to include all newly added commands
+- Ensured consistency in command format and examples across all sections for better usability
 
 ### Contributions to the DG
 
-- Documented detailed design and implementation for:
-    - search, sort, top, last, report, and month features
+- Search feature section with design considerations (simple keyword matching vs extensibility)
+- Sort feature section with design considerations (sorting on a copy vs mutating original list)
+- Report feature section with design considerations (use of HashMap for category aggregation and total computation)
+- Remaining budget feature section with design considerations (static computation vs persistent state)
+- Last command section with design considerations (index-based retrieval and boundary handling)
+- Top command section with design considerations (sorting strategy and selecting top n elements)
+- Help command section describing command dispatch and interaction with UI
 
-- Added:
-    - sequence diagram for `RemainingCommand`
-    - activity diagram for search feature
-    - structured explanation of command execution flow
+- UML diagrams:
+    - Sequence diagram: search command execution flow
+    - Sequence diagram: report command aggregation logic
+    - Sequence diagram: top/last command execution flow
+    - Class diagram: Command hierarchy and interaction with ExpenseList and Ui
 
-- Included design considerations such as:
-    - sorting on copies vs mutating original list
-    - insertion order vs date-based logic for recent expenses
-    - use of `HashMap` for aggregation in reports
-    - substring matching vs advanced search techniques
-
-- Explained trade-offs between simplicity, performance, and correctness for each feature.
-
-- Contributed to manual testing section with step-by-step test cases covering normal and edge scenarios.
-
----
+- Explained trade-offs between simplicity, performance, and correctness across implemented features
+- Ensured alignment with overall architecture and maintained separation of concerns across commands
 
 ### Contributions to team-based tasks
 
