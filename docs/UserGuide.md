@@ -256,6 +256,7 @@ If no recurring expenses exist:
 ```
  No recurring expenses found.
 ```
+- The sub-command is case-insensitive: `list RECURRING` and `list Recurring` both work.
 
 ---
 
@@ -367,7 +368,7 @@ Error cases:
 
 ### Viewing budget history: `budget history`
 
-Displays all previously set budgets in reverse chronological order (most recent first).
+Displays all previously set budgets in reverse chronological order (most recent first). Budget history is preserved after `budget reset` — resetting only clears the active limit, not the log.
 
 Format: `budget history`
 
