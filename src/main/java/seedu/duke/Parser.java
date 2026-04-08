@@ -106,7 +106,8 @@ public class Parser {
         case "total":
             return new TotalCommand();
         case "list":
-            if (parts.length > 1 && parts[1].trim().equalsIgnoreCase("recurring")) {
+            if (parts.length > 1
+                    && parts[1].trim().toLowerCase().startsWith("recurring")) {
                 return new ListCommand(true);
             }
             return new ListCommand();
