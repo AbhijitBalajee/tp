@@ -1,7 +1,9 @@
-package seedu.duke;
+package seedu.duke.command;
 
 import org.junit.jupiter.api.Test;
-import seedu.duke.command.ReportCommand;
+import seedu.duke.Expense;
+import seedu.duke.ExpenseList;
+import seedu.duke.Ui;
 
 import java.time.LocalDate;
 

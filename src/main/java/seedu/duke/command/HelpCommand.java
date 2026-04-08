@@ -1,3 +1,4 @@
+// @@author jainsaksham2006
 package seedu.duke.command;
 
 import java.util.logging.Logger;
@@ -6,7 +7,7 @@ import seedu.duke.ExpenseList;
 import seedu.duke.Ui;
 
 /**
- * Displays all available commands to the user.
+ * Displays all available commands and their usage to the user.
  */
 public class HelpCommand extends Command {
 
@@ -17,18 +18,27 @@ public class HelpCommand extends Command {
     }
 
     /**
-     * Executes the help command by displaying all available commands.
+     * Executes the help command.
+     * Displays a list of all supported commands through the UI.
      *
-     * @param expenses the expense list (unused)
-     * @param ui the UI for displaying output
+     * @param expenses the expense list (unused in this command)
+     * @param ui the UI used to display output
      */
     @Override
     public void execute(ExpenseList expenses, Ui ui) {
+        assert expenses != null : "ExpenseList should not be null";
         assert ui != null : "Ui should not be null";
-        logger.info("Displaying help menu");
+
+        logger.info("Executing HelpCommand");
+
         ui.showHelp();
     }
 
+    /**
+     * Indicates that this command does not terminate the application.
+     *
+     * @return false since this is not an exit command
+     */
     @Override
     public boolean isExit() {
         return false;
