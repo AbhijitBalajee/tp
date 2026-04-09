@@ -153,12 +153,12 @@ public class Parser {
             if (parts.length < 2 || parts[1].trim().isEmpty()) {
                 throw new SpendTrackException("Usage: report <YYYY-MM>");
             }
-            return new ReportCommand(parts[1].trim());
+            return new ReportCommand(validateYearMonth(parts[1].trim(), "report"));
         case "month":
             if (parts.length < 2 || parts[1].trim().isEmpty()) {
                 throw new SpendTrackException("Usage: month <YYYY-MM>");
             }
-            return new MonthCommand(parts[1].trim());
+            return new MonthCommand(validateYearMonth(parts[1].trim(), "month"));
         case "help":
             return new HelpCommand();
         case "bye":
@@ -343,6 +343,34 @@ public class Parser {
     }
 
     // @@author AfshalG
+    /**
+     * Validates that the given string is a valid YYYY-MM format with month 1-12.
+     * Used by month and report commands for strict format enforcement.
+     *
+     * @param input the user-provided year-month string
+     * @param commandName the calling command, used in the usage error message
+     * @return the validated input (unchanged) if valid
+     * @throws SpendTrackException if format is wrong or month is out of range
+     */
+    private static String validateYearMonth(String input, String commandName) throws SpendTrackException {
+        if (!input.matches("\\d{4}-\\d{2}")) {
+            throw new SpendTrackException(
+                    "Invalid format. Usage: " + commandName + " <YYYY-MM> (e.g. 2026-03)");
+        }
+        int month;
+        try {
+            month = Integer.parseInt(input.substring(5));
+        } catch (NumberFormatException e) {
+            throw new SpendTrackException(
+                    "Invalid format. Usage: " + commandName + " <YYYY-MM> (e.g. 2026-03)");
+        }
+        if (month < 1 || month > 12) {
+            throw new SpendTrackException(
+                    "Invalid month. Use YYYY-MM with month between 01 and 12.");
+        }
+        return input;
+    }
+
     private static String normalizeCategory(String category) {
         if (category.isEmpty()) {
             return "Uncategorised";
