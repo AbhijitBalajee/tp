@@ -14,8 +14,10 @@ SpendTrack is a CLI expense tracker for NUS students who prefer typing over clic
 
 - **UI and main application loop** (v1.0): Set up `Ui.java` and the main `SpendTrack` command loop. All user-facing input/output methods are centralised in `Ui`, keeping command classes free of `System.out` calls.
 - **Delete expense command** (v1.0): Implemented `DeleteCommand` with 1-based index validation. Throws a `SpendTrackException` with a clear range message for out-of-bounds indices.
+- **Delete confirmation** (v2.1): Extended `DeleteCommand` to prompt the user for `yes/no` confirmation before deleting. If the user does not type `yes`, the deletion is cancelled and the list is unchanged. Prevents accidental deletion of the wrong expense.
 - **Save and load to file — Storage** (v2.0): Created the `Storage` class that persists the expense list, budget, and budget history to `data/spendtrack.txt` using a pipe-delimited format with section markers. Save is triggered automatically after every mutating command. Load is called on startup; malformed lines are skipped with a warning and the rest of the data is preserved.
 - **Encrypted save file** (v2.1): Extended `Storage` to encrypt the save file using AES-128-CBC with a machine-derived key (SHA-256 of OS name and username). The file is unreadable outside the application. If the file is tampered with or loaded on a different machine, decryption fails and the app starts fresh with a warning. The key is never stored — it is derived at runtime — so access to the source code alone is not sufficient to forge a valid save file.
+- **Load-time data validation** (v2.1): Added `validateExpense()` to `Storage` — each expense parsed from the save file is checked for blank description, non-positive amount, amount exceeding $1,000,000, and dates before year 2000. Invalid entries are skipped with a warning while the rest of the data loads normally.
 - **Filter expenses by date range** (v2.0): Implemented `FilterCommand` which filters expenses inclusively between two dates. Depends on Afshal's date tagging. Validates that `from` is not after `to` and displays results in the same table format as `list`.
 - **Find expense by index** (v2.0): Implemented `FindCommand` which displays full details of a single expense at a given 1-based index in a labelled detail view.
 - **Startup reminder** (v2.0): After loading from file, if the list is non-empty, the most recently added expense is shown before the first prompt via `Ui.showLastExpense()`. Helps users avoid duplicate entries.
@@ -23,7 +25,7 @@ SpendTrack is a CLI expense tracker for NUS students who prefer typing over clic
 
 ### Contributions to testing
 
-- **`DeleteCommandTest`** (v1.0): Tests for valid deletion, correct item removed, last index, out-of-range, and zero index.
+- **`DeleteCommandTest`** (v1.0, updated v2.1): Tests for valid deletion, correct item removed, last index, out-of-range, and zero index. Updated in v2.1 to simulate `yes/no` confirmation input via `ByteArrayInputStream`. Added tests for cancel with `no` and cancel with invalid response.
 - **`ExpenseTest`** (v2.0): Tests for both constructors, all getters/setters, recurring flag defaults, and `toString` formatting.
 - **`ExpenseListTest`** (v2.0): Tests for add/get/set/delete, size tracking, `getTotal`, budget set/reset/directly, `hasBudget`, and budget history ordering.
 - **`StorageTest`** (v2.0, updated v2.1): Full round-trip save/load tests for expenses, budget, and budget history. Also covers missing file, zero/malformed budget value, and field-level precision. Updated in v2.1 to add tamper-detection tests: tampered file starts fresh, corrupted file starts fresh.
@@ -35,7 +37,8 @@ SpendTrack is a CLI expense tracker for NUS students who prefer typing over clic
 
 ### Contributions to the UG
 
-- Auto-save and load section explaining the file format, startup behaviour, and data transfer
+- Auto-save and load section explaining the file format, startup behaviour, data transfer, and load-time validation
+- Delete command section updated with confirmation prompt, expected outputs for confirmed and cancelled deletion
 - File encryption section explaining tamper detection, machine-specific key, and portability limitation
 - Updated FAQ: data transfer answer updated to reflect encryption
 - Startup reminder section with example output
@@ -46,7 +49,7 @@ SpendTrack is a CLI expense tracker for NUS students who prefer typing over clic
 ### Contributions to the DG
 
 - Architecture section — overview of the command-driven loop and component responsibilities
-- Delete expense feature section with design considerations (1-based indexing, parse vs execute validation)
+- Delete expense feature section with design considerations (1-based indexing, parse vs execute validation, delete confirmation)
 - Storage implementation section (save/load design, file format, section markers, encryption design, key derivation, design considerations)
 - Filter and Find feature section with design considerations (list immutability, index validation)
 - User stories for save/load, filter, find, and startup reminder features

@@ -58,24 +58,44 @@ ____________________________________________________________
 
 ### Deleting an expense: `delete`
 
-Removes an expense from the list by its index.
+Removes an expense from the list by its index. SpendTrack will ask you to confirm before deleting.
 
 Format: `delete INDEX`
 
 - `INDEX` is 1-based (same numbering as `list`).
 - Use `list` first to find the index of the expense you want to delete.
+- Type `yes` to confirm deletion, or anything else to cancel.
 
 Alias: `d`
 
 Examples:
-- `delete 1` — removes the first expense
+- `delete 1` — prompts for confirmation, then removes the first expense
 - `d 2` — using alias, removes the second expense
 
-Expected output:
+Expected output (confirmed):
 ```
+____________________________________________________________
+ About to delete:
+   [Food] Coffee - $3.50 (2026-03-22)
+ Are you sure? (yes/no)
+ > yes
+____________________________________________________________
 ____________________________________________________________
  Expense deleted:
    [Food] Coffee - $3.50 (2026-03-22)
+____________________________________________________________
+```
+
+Expected output (cancelled):
+```
+____________________________________________________________
+ About to delete:
+   [Food] Coffee - $3.50 (2026-03-22)
+ Are you sure? (yes/no)
+ > no
+____________________________________________________________
+____________________________________________________________
+ Delete cancelled.
 ____________________________________________________________
 ```
 
@@ -164,6 +184,8 @@ Commands are case-insensitive: `ADD`, `Add`, and `add` all work.
 SpendTrack automatically saves your expenses and budget to `data/spendtrack.txt` after every `add`, `delete`, and `edit`. The file is created automatically if it does not exist.
 
 On startup, SpendTrack loads your saved data before accepting commands. If the save file is missing, the app starts with an empty list silently.
+
+Each expense is validated on load — entries with a blank description, non-positive amount, amount exceeding $1,000,000, or a date before the year 2000 are skipped with a warning. The rest of your data is still loaded normally.
 
 You do not need to run any save or load command. It happens automatically.
 

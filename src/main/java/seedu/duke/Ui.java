@@ -97,6 +97,24 @@ public class Ui {
         System.out.print(" > ");
         return scanner.nextLine();
     }
+
+    /**
+     * Prompts the user to confirm deletion of the given expense.
+     * Returns true if the user types "yes" (case-insensitive), false otherwise.
+     *
+     * @param expense the expense to be deleted
+     * @return true if user confirms, false if user cancels
+     */
+    public boolean confirmDelete(Expense expense) {
+        System.out.println(LINE);
+        System.out.println(" About to delete:");
+        System.out.println("   " + expense);
+        System.out.println(" Are you sure? (yes/no)");
+        System.out.print(" > ");
+        String response = scanner.nextLine().trim();
+        System.out.println(LINE);
+        return response.equalsIgnoreCase("yes");
+    }
     // @@author
 
     /**
