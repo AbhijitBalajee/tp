@@ -29,13 +29,19 @@ SpendTrack is a CLI expense tracker for NUS students who prefer typing over clic
 
 ### Contributions to testing
 
-- **`SortCommandTest`** (v2.0): Added test to verify that the sort command executes without crashing when handling multiple expenses.
+- **`SortCommandTest`** (v2.0): Added test to verify that the sort command executes successfully with multiple expenses and does not throw runtime exceptions.
+- **`TopCommandTest`** (v2.0): Added test to ensure the top-N expenses command executes correctly and handles valid input without crashing.
+- **`LastCommandTest`** (v2.0): Added test to validate that the last-N expenses command executes without errors on a populated list.
+- **`MonthCommandTest`** (v2.0): Added test to confirm that filtering expenses by month executes correctly for valid input.
+- **`SearchCommandTest`** (v2.0): Added test to verify that the search command executes successfully with keyword matching.
 - **`ReportCommandTest`** (v2.0): Added test to ensure the report command executes correctly for a valid month input.
-- **`HelpCommandTest`** (v1.0): Tested execution of help command to confirm that it displays command information without errors.
+- **`HelpCommandTest`** (v1.0): Added test to verify that the help command executes successfully and displays command information without errors.
 - **`RemainingCommandTest`** (v1.0): Implemented functional test to verify correct remaining budget calculation.
+- **`UnknownCommandTest`** (v2.0): Added test to ensure unrecognized commands are handled gracefully without crashing.
+- **`ExitCommandTest`** (v2.0): Added test to verify that the exit command executes without errors.
 
-- Focused on validating **command execution stability** using `assertDoesNotThrow()` to ensure robustness.
-- Covered basic scenarios such as handling valid inputs and ensuring commands do not crash during execution.
+- Focused on validating **command execution stability** using `assertDoesNotThrow()` to ensure robustness across commands.
+- Covered key scenarios including handling valid inputs, command execution flow, and ensuring the application remains stable during operations.
 
 ### Contributions to the UG
 
@@ -48,6 +54,8 @@ SpendTrack is a CLI expense tracker for NUS students who prefer typing over clic
 - Top command section describing retrieval of top n expenses by amount
 - Updated command summary table to include all newly added commands
 - Ensured consistency in command format and examples across all sections for better usability
+- Added examples to improve clarity for new users
+- Ensured consistency in formatting and command syntax
 
 ### Contributions to the DG
 
@@ -57,7 +65,8 @@ SpendTrack is a CLI expense tracker for NUS students who prefer typing over clic
 - Remaining budget feature section with design considerations (static computation vs persistent state)
 - Last command section with design considerations (index-based retrieval and boundary handling)
 - Top command section with design considerations (sorting strategy and selecting top n elements)
-- Help command section describing command dispatch and interaction with UI
+- Help command section describing command dispatch and interaction with UI 
+- Ensured all features follow modular command-based architecture and adhere to separation of concerns.
 
 - UML diagrams:
     - Sequence diagram: search command execution flow

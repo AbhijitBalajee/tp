@@ -598,6 +598,10 @@ The `top N` command shows the N most expensive expenses.
 6. The first `Math.min(count, list.size())` entries are displayed via `Ui.showMessage()`.
 7. `mutatesData()` returns `false`, so no save is triggered.
 
+The following activity diagram shows the logic of the top feature:
+
+![Activity diagram for top feature](images/TopActivity.png)
+
 #### Design considerations
 
 **Aspect: Whether to sort the original list or a copy**
@@ -671,6 +675,10 @@ The `report` command generates a monthly spending summary grouped by category.
 6. If the total is zero, `No expenses found for YYYY-MM` is shown and the command returns.
 7. The total and each category's subtotal are displayed via `Ui.showMessage()`.
 8. `mutatesData()` returns `false`, so no save is triggered.
+
+The following activity diagram shows the logic of the report feature:
+
+![Activity diagram for report feature](images/ReportActivity.png)
 
 #### Design considerations
 
