@@ -1,8 +1,10 @@
 package seedu.duke;
 
+import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.logging.Logger;
 
@@ -64,6 +66,17 @@ public class Ui {
         this.scanner = new Scanner(System.in);
     }
 
+    // @@author AfshalG
+    /**
+     * Package-private constructor for tests, allowing a custom input stream.
+     *
+     * @param in the input stream to read commands from
+     */
+    Ui(InputStream in) {
+        this.scanner = new Scanner(in);
+    }
+    // @@author
+
     // @@author Ariff1422
     /**
      * Displays the welcome message on startup with ASCII logo.
@@ -90,12 +103,21 @@ public class Ui {
     // @@author Ariff1422
     /**
      * Reads the next line of user input, wrapped with input separator bars.
+     * If stdin reaches EOF (e.g. Ctrl+D or piped input ending without 'bye'),
+     * returns "bye" so the main loop can exit gracefully instead of crashing.
      *
-     * @return the user's input string
+     * @return the user's input string, or "bye" on EOF
      */
     public String readCommand() {
         System.out.print(" > ");
-        return scanner.nextLine();
+        // @@author AfshalG
+        try {
+            return scanner.nextLine();
+        } catch (NoSuchElementException e) {
+            logger.info("EOF reached on stdin — treating as 'bye' for graceful exit");
+            return "bye";
+        }
+        // @@author
     }
 
     /**

@@ -35,7 +35,7 @@ public class ClearCommand extends Command {
         }
 
         ui.showMessage("Are you sure you want to delete all expenses? "
-                + "This cannot be undone. (yes/no):");
+                + "You can undo this with 'undo'. (yes/no):");
         String confirmation = ui.readCommand().trim();
         logger.info("Clear confirmation input: " + confirmation);
 

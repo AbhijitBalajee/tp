@@ -153,12 +153,12 @@ public class Parser {
             if (parts.length < 2 || parts[1].trim().isEmpty()) {
                 throw new SpendTrackException("Usage: report <YYYY-MM>");
             }
-            return new ReportCommand(parts[1].trim());
+            return new ReportCommand(validateYearMonth(parts[1].trim(), "report"));
         case "month":
             if (parts.length < 2 || parts[1].trim().isEmpty()) {
                 throw new SpendTrackException("Usage: month <YYYY-MM>");
             }
-            return new MonthCommand(parts[1].trim());
+            return new MonthCommand(validateYearMonth(parts[1].trim(), "month"));
         case "help":
             return new HelpCommand();
         case "bye":
@@ -204,6 +204,10 @@ public class Parser {
                     throw new SpendTrackException("Description cannot be empty. "
                             + "Please provide a valid description after d/");
                 }
+                if (description.contains("|")) {
+                    throw new SpendTrackException("Description cannot contain '|' "
+                            + "(reserved for save file format). Please use a different character.");
+                }
             } else if (token.startsWith("a/")) {
                 if (seenAmount) {
                     throw new SpendTrackException("Duplicate 'a/' detected. "
@@ -214,6 +218,9 @@ public class Parser {
                     amount = Double.parseDouble(token.substring(2).trim());
                 } catch (NumberFormatException e) {
                     throw new SpendTrackException("Amount must be a number. Usage: a/<amount>");
+                }
+                if (!Double.isFinite(amount)) {
+                    throw new SpendTrackException("Amount must be a finite number. Usage: a/<amount>");
                 }
                 if (amount <= 0) {
                     throw new SpendTrackException("Amount must be a positive number. Usage: a/<amount>");
@@ -295,6 +302,12 @@ public class Parser {
                     throw new SpendTrackException("Description cannot be empty. "
                             + "Please provide a valid description after d/");
                 }
+                // @@author AfshalG
+                if (newDescription.contains("|")) {
+                    throw new SpendTrackException("Description cannot contain '|' "
+                            + "(reserved for save file format). Please use a different character.");
+                }
+                // @@author
 
             } else if (token.startsWith("a/")) {
                 if (seenAmount) {
@@ -306,6 +319,9 @@ public class Parser {
                     newAmount = Double.parseDouble(token.substring(2).trim());
                 } catch (NumberFormatException e) {
                     throw new SpendTrackException("Amount must be a number. Usage: a/<amount>");
+                }
+                if (!Double.isFinite(newAmount)) {
+                    throw new SpendTrackException("Amount must be a finite number. Usage: a/<amount>");
                 }
                 if (newAmount <= 0) {
                     throw new SpendTrackException("Amount must be greater than 0.");
@@ -337,6 +353,34 @@ public class Parser {
     }
 
     // @@author AfshalG
+    /**
+     * Validates that the given string is a valid YYYY-MM format with month 1-12.
+     * Used by month and report commands for strict format enforcement.
+     *
+     * @param input the user-provided year-month string
+     * @param commandName the calling command, used in the usage error message
+     * @return the validated input (unchanged) if valid
+     * @throws SpendTrackException if format is wrong or month is out of range
+     */
+    private static String validateYearMonth(String input, String commandName) throws SpendTrackException {
+        if (!input.matches("\\d{4}-\\d{2}")) {
+            throw new SpendTrackException(
+                    "Invalid format. Usage: " + commandName + " <YYYY-MM> (e.g. 2026-03)");
+        }
+        int month;
+        try {
+            month = Integer.parseInt(input.substring(5));
+        } catch (NumberFormatException e) {
+            throw new SpendTrackException(
+                    "Invalid format. Usage: " + commandName + " <YYYY-MM> (e.g. 2026-03)");
+        }
+        if (month < 1 || month > 12) {
+            throw new SpendTrackException(
+                    "Invalid month. Use YYYY-MM with month between 01 and 12.");
+        }
+        return input;
+    }
+
     private static String normalizeCategory(String category) {
         if (category.isEmpty()) {
             return "Uncategorised";
@@ -359,13 +403,31 @@ public class Parser {
     private static Command parseFilterCommand(String args) throws SpendTrackException {
         LocalDate from = null;
         LocalDate to = null;
+        // @@author AfshalG
+        boolean seenFrom = false;
+        boolean seenTo = false;
+        // @@author
 
         String[] tokens = args.split(" ");
         for (String token : tokens) {
             token = token.trim();
             if (token.startsWith("from/")) {
+                // @@author AfshalG
+                if (seenFrom) {
+                    throw new SpendTrackException("Duplicate 'from/' detected. "
+                            + "Please provide only one start date.");
+                }
+                seenFrom = true;
+                // @@author
                 from = DateParser.parse(token.substring(5).trim());
             } else if (token.startsWith("to/")) {
+                // @@author AfshalG
+                if (seenTo) {
+                    throw new SpendTrackException("Duplicate 'to/' detected. "
+                            + "Please provide only one end date.");
+                }
+                seenTo = true;
+                // @@author
                 to = DateParser.parse(token.substring(3).trim());
             }
         }
@@ -392,6 +454,9 @@ public class Parser {
         }
         try {
             double amount = Double.parseDouble(args.trim());
+            if (!Double.isFinite(amount)) {
+                throw new SpendTrackException("Budget must be a finite number. Usage: budget <amount>");
+            }
             return new BudgetCommand(amount);
         } catch (NumberFormatException e) {
             throw new SpendTrackException("budget requires a number. Usage: budget <amount>");
@@ -410,6 +475,9 @@ public class Parser {
         String valueStr = trimmed.substring(2).trim();
         try {
             double amount = Double.parseDouble(valueStr);
+            if (!Double.isFinite(amount)) {
+                throw new SpendTrackException("Goal amount must be a finite number. Usage: goal g/<amount>");
+            }
             if (amount <= 0) {
                 throw new SpendTrackException("Goal amount must be greater than 0.");
             }
