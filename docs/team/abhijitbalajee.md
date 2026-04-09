@@ -73,4 +73,4 @@ SpendTrack is a CLI expense tracker for NUS students who prefer typing over clic
 
 ### Community
 
-Reviewed PRs: #31, #103, #110, #111, #112, #115, #124, #166, #170
+Reviewed PRs: #31, #103, #110, #111, #112, #115, #124, #166, #170, #174
