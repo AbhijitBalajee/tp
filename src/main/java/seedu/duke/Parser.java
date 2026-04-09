@@ -393,13 +393,31 @@ public class Parser {
     private static Command parseFilterCommand(String args) throws SpendTrackException {
         LocalDate from = null;
         LocalDate to = null;
+        // @@author AfshalG
+        boolean seenFrom = false;
+        boolean seenTo = false;
+        // @@author
 
         String[] tokens = args.split(" ");
         for (String token : tokens) {
             token = token.trim();
             if (token.startsWith("from/")) {
+                // @@author AfshalG
+                if (seenFrom) {
+                    throw new SpendTrackException("Duplicate 'from/' detected. "
+                            + "Please provide only one start date.");
+                }
+                seenFrom = true;
+                // @@author
                 from = DateParser.parse(token.substring(5).trim());
             } else if (token.startsWith("to/")) {
+                // @@author AfshalG
+                if (seenTo) {
+                    throw new SpendTrackException("Duplicate 'to/' detected. "
+                            + "Please provide only one end date.");
+                }
+                seenTo = true;
+                // @@author
                 to = DateParser.parse(token.substring(3).trim());
             }
         }
