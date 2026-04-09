@@ -204,6 +204,10 @@ public class Parser {
                     throw new SpendTrackException("Description cannot be empty. "
                             + "Please provide a valid description after d/");
                 }
+                if (description.contains("|")) {
+                    throw new SpendTrackException("Description cannot contain '|' "
+                            + "(reserved for save file format). Please use a different character.");
+                }
             } else if (token.startsWith("a/")) {
                 if (seenAmount) {
                     throw new SpendTrackException("Duplicate 'a/' detected. "
@@ -298,6 +302,12 @@ public class Parser {
                     throw new SpendTrackException("Description cannot be empty. "
                             + "Please provide a valid description after d/");
                 }
+                // @@author AfshalG
+                if (newDescription.contains("|")) {
+                    throw new SpendTrackException("Description cannot contain '|' "
+                            + "(reserved for save file format). Please use a different character.");
+                }
+                // @@author
 
             } else if (token.startsWith("a/")) {
                 if (seenAmount) {
