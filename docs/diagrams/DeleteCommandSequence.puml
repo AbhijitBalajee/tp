@@ -35,6 +35,22 @@ deactivate EL
 alt index < 1 or index > size
     DC -> DC : throw SpendTrackException\n("Index out of range...")
 else valid index
+    DC -> EL : getExpense(index - 1)
+    activate EL
+    EL --> DC : expense
+    deactivate EL
+    DC -> UI : confirmDelete(expense)
+    activate UI
+    UI --> User : "About to delete: ... Are you sure? (yes/no)"
+    User --> UI : response
+    deactivate UI
+    opt response != "yes"
+        DC -> UI : showMessage("Delete cancelled.")
+        activate UI
+        UI --> User : "Delete cancelled."
+        deactivate UI
+        DC --> ST
+    end
     DC -> EL : deleteExpense(index - 1)
     activate EL
     EL --> DC : removedExpense

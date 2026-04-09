@@ -45,9 +45,11 @@ delete INDEX
 2. `Parser.parse()` attempts to parse the second token as an integer. If it is missing or non-numeric, a `SpendTrackException` is thrown immediately.
 3. A `DeleteCommand(2)` is created and returned.
 4. `DeleteCommand.execute()` checks that the index is within bounds (1 to `expenseList.size()` inclusive). If not, a `SpendTrackException` is thrown with the valid range.
-5. The expense at `index - 1` (zero-based) is removed from `ExpenseList` via `deleteExpense()`.
-6. `Ui.showDeleteSuccess()` displays the deleted expense to confirm the action.
-7. Because `mutatesData()` returns `true`, `SpendTrack` calls `Storage.save()` after execution.
+5. `Ui.confirmDelete()` displays the expense details and prompts the user for `yes/no` confirmation.
+6. If the user does not type `yes`, the delete is cancelled and `Ui.showMessage("Delete cancelled.")` is displayed. The expense list is unchanged and no save is triggered.
+7. If confirmed, the expense at `index - 1` (zero-based) is removed from `ExpenseList` via `deleteExpense()`.
+8. `Ui.showDeleteSuccess()` displays the deleted expense to confirm the action.
+9. Because `mutatesData()` returns `true`, `SpendTrack` calls `Storage.save()` after execution.
 
 The following sequence diagram shows the full delete flow:
 
@@ -70,6 +72,16 @@ The following sequence diagram shows the full delete flow:
 **Aspect: Where to validate the index**
 
 Index range validation happens in `DeleteCommand.execute()`, not in `Parser`. The parser only checks that the input is a valid integer. This is because the list size is not known at parse time — `ExpenseList` is only available during execution.
+
+**Aspect: Delete confirmation**
+
+- **Current approach:** `DeleteCommand` calls `Ui.confirmDelete()` before deleting, requiring explicit `yes` input.
+    - Pros: Prevents accidental deletion — a mistyped index will not silently remove the wrong expense.
+    - Cons: Adds an extra step for power users who delete frequently.
+
+- **Alternative:** Delete immediately without confirmation.
+    - Pros: Faster for experienced users.
+    - Cons: Accidental deletions can only be recovered via `undo`, which is less obvious to new users.
 
 ### Add Expense Feature
 
@@ -284,7 +296,7 @@ The storage feature allows SpendTrack to persist expense data and budget across 
 2. `Storage` reads the Base64-encoded ciphertext from `data/spendtrack.txt`.
 3. The ciphertext is decrypted using the machine-derived key. If decryption fails (file tampered or from a different machine), the file is rejected entirely and the app starts fresh with a warning.
 4. The decrypted plain-text is scanned line by line using section markers (`---EXPENSES---`, `---BUDGET---`, etc.) to populate the `ExpenseList`.
-5. Malformed lines within the decrypted content are skipped with a warning.
+5. Each parsed expense is validated by `validateExpense()` — entries with a blank description, non-positive amount, amount exceeding $1,000,000, or a date before year 2000 are skipped with a warning. Remaining malformed lines (wrong column count, unparseable fields) are also skipped.
 6. If the file does not exist, the app starts silently with an empty list.
 
 The following sequence diagram shows the startup load flow, including the startup reminder:

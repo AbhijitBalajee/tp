@@ -280,7 +280,7 @@ public class Storage {
 
     private void parseLine(String line, ExpenseList expenses) {
         String[] parts = line.split("\\|");
-        if (parts.length != 4 && parts.length != 5) {
+        if (parts.length < 4 || parts.length > 5) {
             System.out.println("Warning: skipping malformed line: " + line);
             return;
         }
@@ -290,11 +290,53 @@ public class Storage {
             String category = parts[2];
             LocalDate date = LocalDate.parse(parts[3]);
             boolean recurring = parts.length == 5 && Boolean.parseBoolean(parts[4]);
+
+            // @@author Ariff1422
+            if (!validateExpense(description, amount, date)) {
+                return;
+            }
+            // @@author
+
             expenses.addExpense(new Expense(description, amount, category, date, recurring));
         } catch (Exception e) {
             System.out.println("Warning: skipping malformed line: " + line);
             logger.warning("Failed to parse line: " + line);
         }
     }
+
+    // @@author Ariff1422
+    /**
+     * Validates an expense's fields after parsing from the save file.
+     * Warns and returns false if any field is invalid, so the line is skipped.
+     *
+     * @param description the expense description
+     * @param amount      the expense amount
+     * @param date        the expense date
+     * @return true if all fields are valid, false otherwise
+     */
+    private boolean validateExpense(String description, double amount, LocalDate date) {
+        if (description == null || description.isBlank()) {
+            System.out.println("Warning: skipping expense with blank description.");
+            logger.warning("Skipping expense with blank description.");
+            return false;
+        }
+        if (amount <= 0) {
+            System.out.println("Warning: skipping expense with non-positive amount: " + amount);
+            logger.warning("Skipping expense with non-positive amount: " + amount);
+            return false;
+        }
+        if (amount > 1000000) {
+            System.out.println("Warning: skipping expense with unrealistic amount: " + amount);
+            logger.warning("Skipping expense with unrealistic amount: " + amount);
+            return false;
+        }
+        if (date != null && date.getYear() < 2000) {
+            System.out.println("Warning: skipping expense with implausible date: " + date);
+            logger.warning("Skipping expense with implausible date: " + date);
+            return false;
+        }
+        return true;
+    }
+    // @@author
 }
 // @@author
