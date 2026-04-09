@@ -177,18 +177,39 @@ public class Parser {
         LocalDate date = LocalDate.now();
         boolean isRecurring = false;
 
+        boolean seenDescription = false;
+        boolean seenAmount = false;
+        boolean seenCategory = false;
+        boolean seenDate = false;
+        boolean seenRecurring = false;
+
         String[] tokens = args.split(TOKEN_SPLIT_REGEX);
         for (String token : tokens) {
             token = token.trim();
             if (token.startsWith("date/")) {
+                if (seenDate) {
+                    throw new SpendTrackException("Duplicate 'date/' detected. "
+                            + "Please provide only one date.");
+                }
+                seenDate = true;
                 date = DateParser.parse(token.substring(5).trim());
             } else if (token.startsWith("d/")) {
+                if (seenDescription) {
+                    throw new SpendTrackException("Duplicate 'd/' detected. "
+                            + "Please provide only one description.");
+                }
+                seenDescription = true;
                 description = token.substring(2).trim();
                 if (description.isEmpty()) {
                     throw new SpendTrackException("Description cannot be empty. "
                             + "Please provide a valid description after d/");
                 }
             } else if (token.startsWith("a/")) {
+                if (seenAmount) {
+                    throw new SpendTrackException("Duplicate 'a/' detected. "
+                            + "Please provide only one amount.");
+                }
+                seenAmount = true;
                 try {
                     amount = Double.parseDouble(token.substring(2).trim());
                 } catch (NumberFormatException e) {
@@ -198,8 +219,18 @@ public class Parser {
                     throw new SpendTrackException("Amount must be a positive number. Usage: a/<amount>");
                 }
             } else if (token.startsWith("c/")) {
+                if (seenCategory) {
+                    throw new SpendTrackException("Duplicate 'c/' detected. "
+                            + "Please provide only one category.");
+                }
+                seenCategory = true;
                 category = normalizeCategory(token.substring(2).trim());
             } else if (token.startsWith("recurring/")) {
+                if (seenRecurring) {
+                    throw new SpendTrackException("Duplicate 'recurring/' detected. "
+                            + "Please provide only one recurring value.");
+                }
+                seenRecurring = true;
                 String val = token.substring(10).trim().toLowerCase();
                 if (!val.equals("true") && !val.equals("false")) {
                     throw new SpendTrackException("recurring/ must be 'true' or 'false'.");
