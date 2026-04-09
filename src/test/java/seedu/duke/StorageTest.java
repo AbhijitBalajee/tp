@@ -206,5 +206,29 @@ class StorageTest {
 
         assertEquals("Transport", loaded.getExpense(0).getCategory());
     }
+
+    @Test
+    void saveAndLoad_recurringExpense_flagPreserved() {
+        ExpenseList saved = new ExpenseList();
+        saved.addExpense(new Expense("Netflix", 15.00, "Entertainment", DATE_A, true));
+        storage.save(saved);
+
+        ExpenseList loaded = new ExpenseList();
+        storage.load(loaded);
+
+        assertTrue(loaded.getExpense(0).isRecurring());
+    }
+
+    @Test
+    void saveAndLoad_nonRecurringExpense_flagPreserved() {
+        ExpenseList saved = new ExpenseList();
+        saved.addExpense(new Expense("Coffee", 4.50, "Food", DATE_A, false));
+        storage.save(saved);
+
+        ExpenseList loaded = new ExpenseList();
+        storage.load(loaded);
+
+        assertFalse(loaded.getExpense(0).isRecurring());
+    }
 }
 // @@author

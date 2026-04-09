@@ -97,7 +97,7 @@ ____________________________________________________________
  > ____________________________________________________________
  Available Commands
 ____________________________________________________________
-  add (a) d/DESC a/AMT c/CAT [date/DATE]           -- add expense
+  add (a) d/DESC a/AMT c/CAT [date/DATE] [recurring/true] -- add expense
   delete (d) INDEX                                 -- delete expense
   list (l)                                         -- list all
   list recurring                                   -- list recurring only
@@ -107,7 +107,7 @@ ____________________________________________________________
   budget reset                                     -- reset budget
   budget history                                   -- view budget history
   remaining                                        -- show remaining
-  edit INDEX [d/DESC] [a/AMT] [c/CAT] [date/DATE]  -- edit expense
+  edit INDEX [d/DESC] [a/AMT] [c/CAT] [date/DATE] [recurring/true|false] -- edit expense
   filter from/DATE to/DATE                         -- filter by date
   find INDEX                                       -- view expense details
   search KEYWORD                                   -- search by keyword

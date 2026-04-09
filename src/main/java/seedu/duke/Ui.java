@@ -416,7 +416,7 @@ public class Ui {
         System.out.println(LINE);
         String format = "  %-48s -- %s";
         System.out.println(String.format(format,
-                "add (a) d/DESC a/AMT c/CAT [date/DATE]", "add expense"));
+                "add (a) d/DESC a/AMT c/CAT [date/DATE] [recurring/true]", "add expense"));
         System.out.println(String.format(format,
                 "delete (d) INDEX", "delete expense"));
         System.out.println(String.format(format,
@@ -436,7 +436,7 @@ public class Ui {
         System.out.println(String.format(format,
                 "remaining", "show remaining"));
         System.out.println(String.format(format,
-                "edit INDEX [d/DESC] [a/AMT] [c/CAT] [date/DATE]",
+                "edit INDEX [d/DESC] [a/AMT] [c/CAT] [date/DATE] [recurring/true|false]",
                 "edit expense"));
         System.out.println(String.format(format,
                 "filter from/DATE to/DATE", "filter by date"));

@@ -152,7 +152,8 @@ public class Storage {
             sb.append(e.getDescription()).append("|")
                     .append(e.getAmount()).append("|")
                     .append(e.getCategory()).append("|")
-                    .append(e.getDate()).append("\n");
+                    .append(e.getDate()).append("|")
+                    .append(e.isRecurring()).append("\n");
         }
         sb.append(BUDGET_MARKER).append("\n");
         sb.append(expenses.getBudget()).append("\n");
