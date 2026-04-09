@@ -4,6 +4,7 @@ package seedu.duke;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.format.ResolverStyle;
 
 /**
  * Parses date strings in multiple formats into LocalDate objects.
@@ -13,7 +14,7 @@ import java.time.format.DateTimeParseException;
 public class DateParser {
 
     private static final DateTimeFormatter SG_DATE_FORMAT =
-            DateTimeFormatter.ofPattern("dd-MM-yyyy");
+            DateTimeFormatter.ofPattern("dd-MM-uuuu").withResolverStyle(ResolverStyle.STRICT);
 
     /**
      * Parses a date string into a LocalDate.
