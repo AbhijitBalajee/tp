@@ -58,6 +58,16 @@ ____________________________________________________________
 ____________________________________________________________
 ```
 
+Error cases:
+- `add d/Coffee a/5` (missing category) behaves as if `c/Uncategorised` was provided — defaults are applied silently.
+- `add d/Coffee a/NaN c/Food` or `a/Infinity` → `Amount must be a finite number. Usage: a/<amount>`
+- `add d/Coffee a/-5 c/Food` → `Amount must be a positive number. Usage: a/<amount>`
+- `add d/Coffee a/abc c/Food` → `Amount must be a number. Usage: a/<amount>`
+- `add d/Coffee d/Tea a/5 c/Food` (duplicate flag) → `Duplicate 'd/' detected. Please provide only one description.`
+- `add d/Alice|Bob a/20 c/Food` → `Description cannot contain '|' (reserved for save file format). Please use a different character.`
+- `add d/T a/5 c/Food date/29-02-2025` (Feb 29 on a non-leap year) → `Invalid date format. Accepted: YYYY-MM-DD, DD-MM-YYYY, 'today', 'yesterday'.`
+- `add d/T a/5 c/Food date/31-04-2026` (April has 30 days) → same invalid date error.
+
 ### Deleting an expense: `delete`
 
 Removes an expense from the list by its index. SpendTrack will ask you to confirm before deleting.
@@ -255,6 +265,8 @@ If no expenses fall in the range:
 Error cases:
 - `filter from/2026-03-31 to/2026-03-01` → `Start date must be before end date.`
 - Missing `from/` or `to/` → `Usage: filter from/YYYY-MM-DD to/YYYY-MM-DD`
+- `filter from/2026-03-01 from/2026-03-05 to/2026-03-31` (duplicate `from/`) → `Duplicate 'from/' detected. Please provide only one start date.`
+- `filter from/2026-03-01 to/2026-03-05 to/2026-03-31` (duplicate `to/`) → `Duplicate 'to/' detected. Please provide only one end date.`
 
 ---
 
@@ -392,7 +404,10 @@ Error cases:
 - `edit 999 d/Test` — index out of range → error message with valid range
 - `edit 1` — no fields provided → `No fields provided to edit. Usage: edit <index> [d/<desc>] [a/<amount>] [c/<category>] [date/<YYYY-MM-DD>] [recurring/true|false]`
 - `edit 1 a/-5` — negative amount → `Amount must be greater than 0.`
+- `edit 1 a/NaN` or `a/Infinity` → `Amount must be a finite number. Usage: a/<amount>`
 - `edit 1 d/` — empty description → `Description cannot be empty. Please provide a valid description after d/`
+- `edit 1 d/Alice|Bob` — pipe character in description → `Description cannot contain '|' (reserved for save file format). Please use a different character.`
+- `edit 1 date/29-02-2025` — invalid calendar date → `Invalid date format. Accepted: YYYY-MM-DD, DD-MM-YYYY, 'today', 'yesterday'.`
 - `edit abc d/Latte` — non-integer index → `Index must be a whole number.`
 
 ---
@@ -431,6 +446,8 @@ Error cases:
 - `budget -10` → `Budget must be greater than $0.00.`
 - `budget abc` → `budget requires a number. Usage: budget <amount>`
 - `budget` → `budget requires a number. Usage: budget <amount>`
+- `budget 0.001` or any amount below one cent → `Budget must be at least $0.01.`
+- `budget NaN` or `budget Infinity` → `Budget must be a finite number. Usage: budget <amount>`
 
 ---
 
@@ -512,6 +529,7 @@ Format: `clear`
 
 - You must type `yes` (case-insensitive) to confirm. Any other input cancels.
 - If the expense list is already empty, shows a message without prompting.
+- A `clear` operation can be reversed with the `undo` command immediately after (undo restores the full expense list and budget state).
 
 Example:
 ```
@@ -701,6 +719,7 @@ ____________________________________________________________
 
 Error cases:
 - `report 03-2026` or `report abc` → `Usage: report <YYYY-MM>`
+- `report 2026-13` or `report 2026-00` (month out of range) → `Invalid month. Use YYYY-MM with month between 01 and 12.`
 
 ---
 
@@ -735,6 +754,7 @@ ____________________________________________________________
 
 Error cases:
 - `month abc` or `month 03-2026` → `Usage: month <YYYY-MM>`
+- `month 2026-13` or `month 2026-00` (month out of range) → `Invalid month. Use YYYY-MM with month between 01 and 12.`
 
 ---
 
@@ -823,6 +843,9 @@ ____________________________________________________________
  No matches found.
 ____________________________________________________________
 ```
+
+Error cases:
+- `search` (no keyword) or `search    ` (whitespace only) → `Please provide a search keyword. Usage: search <keyword>`
 
 ---
 
