@@ -28,7 +28,7 @@ SpendTrack is a command-line expense tracker for NUS students who prefer typing 
 
 Adds a new expense with a description, amount, category, and optional date.
 
-Format: `add d/DESCRIPTION a/AMOUNT c/CATEGORY [date/DATE]`
+Format: `add d/DESCRIPTION a/AMOUNT c/CATEGORY [date/DATE] [recurring/true|false]`
 
 - `AMOUNT` must be a positive number.
 - `CATEGORY` is automatically capitalised (e.g. `food` becomes `Food`, `public transport` becomes `Public Transport`).
@@ -38,6 +38,7 @@ Format: `add d/DESCRIPTION a/AMOUNT c/CATEGORY [date/DATE]`
   - `today` (e.g. `date/today`)
   - `yesterday` (e.g. `date/yesterday`)
 - If `date/` is omitted, defaults to today's date.
+- `recurring/true` marks the expense as recurring (shown with `[R]` tag in `list`). Defaults to `false` if omitted.
 
 Alias: `a`
 
@@ -46,6 +47,7 @@ Examples:
 - `add d/Coffee a/3.50 c/Food` — adds with today's date, category `Food`
 - `add d/Lunch a/12.00 c/food date/22-03-2026` — category normalised to `Food`, date parsed as 2026-03-22
 - `add d/Grab a/15.00 c/public transport date/yesterday` — category becomes `Public Transport`
+- `add d/Netflix a/18.00 c/Entertainment recurring/true` — marks as a recurring expense
 - `a d/Tea a/2.00 c/Food` — using alias
 
 Expected output:
