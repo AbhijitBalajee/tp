@@ -215,6 +215,9 @@ public class Parser {
                 } catch (NumberFormatException e) {
                     throw new SpendTrackException("Amount must be a number. Usage: a/<amount>");
                 }
+                if (!Double.isFinite(amount)) {
+                    throw new SpendTrackException("Amount must be a finite number. Usage: a/<amount>");
+                }
                 if (amount <= 0) {
                     throw new SpendTrackException("Amount must be a positive number. Usage: a/<amount>");
                 }
@@ -307,6 +310,9 @@ public class Parser {
                 } catch (NumberFormatException e) {
                     throw new SpendTrackException("Amount must be a number. Usage: a/<amount>");
                 }
+                if (!Double.isFinite(newAmount)) {
+                    throw new SpendTrackException("Amount must be a finite number. Usage: a/<amount>");
+                }
                 if (newAmount <= 0) {
                     throw new SpendTrackException("Amount must be greater than 0.");
                 }
@@ -392,6 +398,9 @@ public class Parser {
         }
         try {
             double amount = Double.parseDouble(args.trim());
+            if (!Double.isFinite(amount)) {
+                throw new SpendTrackException("Budget must be a finite number. Usage: budget <amount>");
+            }
             return new BudgetCommand(amount);
         } catch (NumberFormatException e) {
             throw new SpendTrackException("budget requires a number. Usage: budget <amount>");
@@ -410,6 +419,9 @@ public class Parser {
         String valueStr = trimmed.substring(2).trim();
         try {
             double amount = Double.parseDouble(valueStr);
+            if (!Double.isFinite(amount)) {
+                throw new SpendTrackException("Goal amount must be a finite number. Usage: goal g/<amount>");
+            }
             if (amount <= 0) {
                 throw new SpendTrackException("Goal amount must be greater than 0.");
             }
