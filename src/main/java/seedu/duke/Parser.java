@@ -466,6 +466,10 @@ public class Parser {
         }
         try {
             double amount = Double.parseDouble(trimmed);
+            if (!Double.isFinite(amount)) {
+                throw new SpendTrackException(
+                        "budget requires a number. Usage: budget <amount>");
+            }
             return new BudgetCommand(amount);
         } catch (NumberFormatException e) {
             throw new SpendTrackException(
