@@ -106,9 +106,13 @@ public class Parser {
         case "total":
             return new TotalCommand();
         case "list":
-            if (parts.length > 1
-                    && parts[1].trim().toLowerCase().startsWith("recurring")) {
-                return new ListCommand(true);
+            if (parts.length > 1) {
+                String listArg = parts[1].trim().toLowerCase();
+                if (listArg.equals("recurring")) {
+                    return new ListCommand(true);
+                }
+                throw new SpendTrackException(
+                        "Invalid list option. Usage: list OR list recurring");
             }
             return new ListCommand();
         case "budget":
@@ -443,23 +447,33 @@ public class Parser {
     }
 
     private static Command parseBudgetCommand(String args) throws SpendTrackException {
-        if (args.trim().equalsIgnoreCase("reset")) {
+        String trimmed = args.trim();
+        if (trimmed.equalsIgnoreCase("reset")) {
             return new BudgetResetCommand();
         }
-        if (args.trim().equalsIgnoreCase("history")) {
+        if (trimmed.equalsIgnoreCase("history")) {
             return new BudgetHistoryCommand();
         }
-        if (args.trim().isEmpty()) {
-            throw new SpendTrackException("budget requires a number. Usage: budget <amount>");
+        if (trimmed.isEmpty()) {
+            throw new SpendTrackException(
+                    "budget requires a number. Usage: budget <amount>");
+        }
+        if (trimmed.toLowerCase().startsWith("reset")) {
+            throw new SpendTrackException("Usage: budget reset");
+        }
+        if (trimmed.toLowerCase().startsWith("history")) {
+            throw new SpendTrackException("Usage: budget history");
         }
         try {
-            double amount = Double.parseDouble(args.trim());
+            double amount = Double.parseDouble(trimmed);
             if (!Double.isFinite(amount)) {
-                throw new SpendTrackException("Budget must be a finite number. Usage: budget <amount>");
+                throw new SpendTrackException(
+                        "budget requires a number. Usage: budget <amount>");
             }
             return new BudgetCommand(amount);
         } catch (NumberFormatException e) {
-            throw new SpendTrackException("budget requires a number. Usage: budget <amount>");
+            throw new SpendTrackException(
+                    "budget requires a number. Usage: budget <amount>");
         }
     }
 
