@@ -197,6 +197,11 @@ public class Parser {
                 }
                 seenDate = true;
                 date = DateParser.parse(token.substring(5).trim());
+                // @@author Ariff1422
+                if (date.getYear() < 2000) {
+                    throw new SpendTrackException("Date must be year 2000 or later.");
+                }
+                // @@author
             } else if (token.startsWith("d/")) {
                 if (seenDescription) {
                     throw new SpendTrackException("Duplicate 'd/' detected. "
@@ -229,6 +234,11 @@ public class Parser {
                 if (amount <= 0) {
                     throw new SpendTrackException("Amount must be a positive number. Usage: a/<amount>");
                 }
+                // @@author Ariff1422
+                if (amount > 1000000) {
+                    throw new SpendTrackException("Amount must not exceed $1,000,000.");
+                }
+                // @@author
             } else if (token.startsWith("c/")) {
                 if (seenCategory) {
                     throw new SpendTrackException("Duplicate 'c/' detected. "
@@ -236,6 +246,12 @@ public class Parser {
                 }
                 seenCategory = true;
                 category = normalizeCategory(token.substring(2).trim());
+                // @@author Ariff1422
+                if (category.contains("|")) {
+                    throw new SpendTrackException("Category cannot contain '|' "
+                            + "(reserved for save file format). Please use a different character.");
+                }
+                // @@author
             } else if (token.startsWith("recurring/")) {
                 if (seenRecurring) {
                     throw new SpendTrackException("Duplicate 'recurring/' detected. "
@@ -294,6 +310,11 @@ public class Parser {
                 }
                 seenDate = true;
                 newDate = DateParser.parse(token.substring(5).trim());
+                // @@author Ariff1422
+                if (newDate.getYear() < 2000) {
+                    throw new SpendTrackException("Date must be year 2000 or later.");
+                }
+                // @@author
 
             } else if (token.startsWith("d/")) {
                 if (seenDescription) {
@@ -330,6 +351,11 @@ public class Parser {
                 if (newAmount <= 0) {
                     throw new SpendTrackException("Amount must be greater than 0.");
                 }
+                // @@author Ariff1422
+                if (newAmount > 1000000) {
+                    throw new SpendTrackException("Amount must not exceed $1,000,000.");
+                }
+                // @@author
 
             } else if (token.startsWith("c/")) {
                 if (seenCategory) {
@@ -338,6 +364,12 @@ public class Parser {
                 }
                 seenCategory = true;
                 newCategory = normalizeCategory(token.substring(2).trim());
+                // @@author Ariff1422
+                if (newCategory.contains("|")) {
+                    throw new SpendTrackException("Category cannot contain '|' "
+                            + "(reserved for save file format). Please use a different character.");
+                }
+                // @@author
 
             } else if (token.startsWith("recurring/")) {
                 if (seenRecurring) {
