@@ -185,8 +185,8 @@ public class Storage {
 
     private void parseLine(String line, ExpenseList expenses) {
         String[] parts = line.split("\\|");
-        // Accept 5 fields (no checksum — legacy) or 6 fields (with checksum)
-        if (parts.length < 4 || parts.length > 6) {
+        // @@author Ariff1422
+        if (parts.length != 6) {
             System.out.println("Warning: skipping malformed line: " + line);
             return;
         }
@@ -195,18 +195,14 @@ public class Storage {
             double amount = Double.parseDouble(parts[1]);
             String category = parts[2];
             LocalDate date = LocalDate.parse(parts[3]);
-            boolean recurring = parts.length >= 5 && Boolean.parseBoolean(parts[4]);
+            boolean recurring = Boolean.parseBoolean(parts[4]);
 
-            // @@author Ariff1422
-            // Verify checksum if present (6-field format)
-            if (parts.length == 6) {
-                String data = parts[0] + "|" + parts[1] + "|" + parts[2] + "|" + parts[3] + "|" + parts[4];
-                String expected = checksum(data);
-                if (!expected.equals(parts[5])) {
-                    System.out.println("Warning: skipping tampered line (checksum mismatch): " + description);
-                    logger.warning("Checksum mismatch for line: " + line);
-                    return;
-                }
+            String data = parts[0] + "|" + parts[1] + "|" + parts[2] + "|" + parts[3] + "|" + parts[4];
+            String expected = checksum(data);
+            if (!expected.equals(parts[5])) {
+                System.out.println("Warning: skipping tampered line (checksum mismatch): " + description);
+                logger.warning("Checksum mismatch for line: " + line);
+                return;
             }
 
             if (!validateExpense(description, amount, date)) {
