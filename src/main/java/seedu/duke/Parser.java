@@ -10,6 +10,7 @@ import seedu.duke.command.DeleteCommand;
 import seedu.duke.command.EditCommand;
 import seedu.duke.command.FilterCommand;
 import seedu.duke.command.FindCommand;
+import seedu.duke.command.FindByKeywordCommand;
 import seedu.duke.command.TotalCommand;
 import seedu.duke.command.ListCommand;
 import seedu.duke.command.BudgetCommand;
@@ -97,13 +98,7 @@ public class Parser {
         case "filter":
             return parseFilterCommand(parts.length > 1 ? parts[1] : "");
         case "find":
-            try {
-                return new FindCommand(Integer.parseInt(parts[1].trim()));
-            } catch (NumberFormatException e) {
-                throw new SpendTrackException("Index must be a whole number. Usage: find <index>");
-            } catch (ArrayIndexOutOfBoundsException e) {
-                throw new SpendTrackException("find requires an index. Usage: find <index>");
-            }
+            return parseFindCommand(parts.length > 1 ? parts[1] : "");
         case "total":
             return new TotalCommand();
         case "list":
@@ -373,6 +368,12 @@ public class Parser {
                             + "Please provide only one category.");
                 }
                 seenCategory = true;
+                // @@author Ariff1422
+                if (token.substring(2).trim().isEmpty()) {
+                    throw new SpendTrackException("Category cannot be empty. "
+                            + "Please provide a valid category after c/");
+                }
+                // @@author
                 newCategory = normalizeCategory(token.substring(2).trim());
                 // @@author Ariff1422
                 if (newCategory.contains("|")) {
@@ -446,6 +447,49 @@ public class Parser {
     }
     // @@author
 
+    // @@author Ariff1422
+    /**
+     * Parses the find command argument.
+     * Supports two modes:
+     *   find INDEX     -- shows full details of the expense at that 1-based index
+     *   find d/KEYWORD -- lists all expenses whose description contains the keyword
+     *
+     * @param args the argument string after "find"
+     * @return a FindCommand (by index) or FindByKeywordCommand (by description keyword)
+     * @throws SpendTrackException if the argument is missing, malformed, or has trailing garbage
+     */
+    private static Command parseFindCommand(String args) throws SpendTrackException {
+        String trimmed = args.trim();
+        if (trimmed.isEmpty()) {
+            throw new SpendTrackException("find requires an index or keyword. "
+                    + "Usage: find <index> OR find d/<keyword>");
+        }
+        if (trimmed.startsWith("d/")) {
+            String keyword = trimmed.substring(2).trim();
+            if (keyword.isEmpty()) {
+                throw new SpendTrackException("Keyword cannot be empty after 'd/'.");
+            }
+            if (keyword.contains("|")) {
+                throw new SpendTrackException("Keyword cannot contain '|'.");
+            }
+            return new FindByKeywordCommand(keyword);
+        }
+        // Index mode — must be a single integer with no trailing tokens
+        String[] tokens = trimmed.split("\\s+");
+        if (tokens.length > 1) {
+            throw new SpendTrackException("Too many arguments for 'find'. "
+                    + "Usage: find <index> OR find d/<keyword>");
+        }
+        try {
+            int index = Integer.parseInt(tokens[0]);
+            return new FindCommand(index);
+        } catch (NumberFormatException e) {
+            throw new SpendTrackException("Index must be a whole number. "
+                    + "Usage: find <index> OR find d/<keyword>");
+        }
+    }
+    // @@author
+
     private static Command parseFilterCommand(String args) throws SpendTrackException {
         LocalDate from = null;
         LocalDate to = null;
@@ -453,10 +497,17 @@ public class Parser {
         boolean seenFrom = false;
         boolean seenTo = false;
         // @@author
+        // @@author Ariff1422
+        String category = null;
+        boolean seenCategory = false;
+        // @@author
 
-        String[] tokens = args.split(" ");
+        String[] tokens = args.trim().split("\\s+");
         for (String token : tokens) {
             token = token.trim();
+            if (token.isEmpty()) {
+                continue;
+            }
             if (token.startsWith("from/")) {
                 // @@author AfshalG
                 if (seenFrom) {
@@ -475,17 +526,37 @@ public class Parser {
                 seenTo = true;
                 // @@author
                 to = DateParser.parse(token.substring(3).trim());
+            // @@author Ariff1422
+            } else if (token.startsWith("cat/")) {
+                if (seenCategory) {
+                    throw new SpendTrackException("Duplicate 'cat/' detected. "
+                            + "Please provide only one category.");
+                }
+                seenCategory = true;
+                category = token.substring(4).trim();
+                if (category.isEmpty()) {
+                    throw new SpendTrackException("Category cannot be empty after 'cat/'.");
+                }
+                if (category.contains("|")) {
+                    throw new SpendTrackException("Category cannot contain '|'.");
+                }
+            } else {
+                throw new SpendTrackException("Unknown filter option: '" + token + "'. "
+                        + "Usage: filter from/YYYY-MM-DD to/YYYY-MM-DD [cat/CATEGORY]");
             }
+            // @@author
         }
 
         if (from == null || to == null) {
-            throw new SpendTrackException("Usage: filter from/YYYY-MM-DD to/YYYY-MM-DD");
+            throw new SpendTrackException("Usage: filter from/YYYY-MM-DD to/YYYY-MM-DD [cat/CATEGORY]");
         }
         if (from.isAfter(to)) {
             throw new SpendTrackException("Start date must be before end date.");
         }
 
-        return new FilterCommand(from, to);
+        // @@author Ariff1422
+        return new FilterCommand(from, to, category);
+        // @@author
     }
 
     private static Command parseBudgetCommand(String args) throws SpendTrackException {

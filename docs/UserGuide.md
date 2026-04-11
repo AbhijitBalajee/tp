@@ -233,76 +233,102 @@ This helps you avoid accidentally logging the same expense twice.
 
 ### Filtering expenses by date range: `filter`
 
-Shows only expenses whose date falls within the given range (inclusive).
+Shows only expenses whose date falls within the given range (inclusive), with an optional category filter.
 
-Format: `filter from/DATE to/DATE`
+Format: `filter from/DATE to/DATE [cat/CATEGORY]`
 
 - `DATE` accepts the same formats as the `add` command: `YYYY-MM-DD`, `DD-MM-YYYY`, `today`, `yesterday`.
 - The `from` date must not be after the `to` date.
+- `cat/CATEGORY` is optional. If provided, only expenses matching that category are shown (case-insensitive).
+- `CATEGORY` cannot contain `|`.
 - Filtering does not modify the expense list.
 - Recurring expenses are shown with `[R]` tag in filtered results.
+- Unknown tokens after the command are rejected with an error.
 
 Examples:
 
 - `filter from/2026-03-01 to/2026-03-31` — shows all expenses in March 2026
 - `filter from/today to/today` — shows only today's expenses
-- `filter from/2026-03-15 to/2026-03-22` — shows expenses between 15 and 22 March
+- `filter from/2026-03-15 to/2026-03-22 cat/Food` — shows only Food expenses between 15 and 22 March
 
-Expected output:
+Expected output (with category filter):
 ```
 ____________________________________________________________
- Expenses from 2026-03-15 to 2026-03-22
+ Expenses from 2026-03-15 to 2026-03-22 [Food]
 ____________________________________________________________
-  #    Category     Description  Date          Amount
-  ---  -----------  -----------  ----------    --------
-  1.   [Food]       Coffee       2026-03-15    $3.50
-  2.   [Transport]  Bus          2026-03-22    $1.80
+  #    Category  Description  Date          Amount
+  ---  --------  -----------  ----------    --------
+  1.   [Food]    Coffee       2026-03-15    $3.50
 ____________________________________________________________
- Total entries: 2
+ Total entries: 1
 ____________________________________________________________
 ```
 
 If no expenses fall in the range:
 ```
  No expenses found in the given date range.
+ Hint: Use 'filter from/YYYY-MM-DD to/YYYY-MM-DD [cat/CATEGORY]' to adjust the range.
 ```
 
 Error cases:
 - `filter from/2026-03-31 to/2026-03-01` → `Start date must be before end date.`
-- Missing `from/` or `to/` → `Usage: filter from/YYYY-MM-DD to/YYYY-MM-DD`
+- Missing `from/` or `to/` → `Usage: filter from/YYYY-MM-DD to/YYYY-MM-DD [cat/CATEGORY]`
 - `filter from/2026-03-01 from/2026-03-05 to/2026-03-31` (duplicate `from/`) → `Duplicate 'from/' detected. Please provide only one start date.`
 - `filter from/2026-03-01 to/2026-03-05 to/2026-03-31` (duplicate `to/`) → `Duplicate 'to/' detected. Please provide only one end date.`
+- `filter from/2026-03-01 to/2026-03-31 cat/Food cat/Transport` (duplicate `cat/`) → `Duplicate 'cat/' detected. Please provide only one category.`
+- `filter from/2026-03-01 to/2026-03-31 cat/Food|hack` → `Category cannot contain '|'.`
+- `filter from/2026-03-01 to/2026-03-31 garbage` → `Unknown filter option: 'garbage'.`
 
 ---
 
 ### Viewing a single expense: `find`
 
-Displays the full details of one expense by its index in the list.
+Displays the full details of one expense by its index, or lists all expenses whose description contains a keyword.
 
-Format: `find INDEX`
+Format: `find INDEX` or `find d/KEYWORD`
 
-- `INDEX` is 1-based (same numbering as `list`).
+- `INDEX` is 1-based (same numbering as `list`). No extra tokens are allowed after the index.
+- `KEYWORD` is case-insensitive and matched against the description. Cannot contain `|`.
 - Use `list` first to find the index of the expense you want.
 
 Examples:
 
 - `find 3` — shows full details of expense #3
+- `find d/coffee` — shows all expenses with "coffee" in the description (case-insensitive)
 
-Expected output:
+Expected output for `find 3`:
 ```
 ____________________________________________________________
- ===== Expense #3 =====
+ Expense #3 Details
+____________________________________________________________
  Description : Grab to airport
  Amount      : $24.50
  Category    : Transport
  Date        : 2026-03-15
+ Recurring   : No
+____________________________________________________________
+```
+
+Expected output for `find d/coffee`:
+```
+____________________________________________________________
+ Search results for: "coffee"
+____________________________________________________________
+  #    Category  Description  Date          Amount
+  ---  --------  -----------  ----------    --------
+  1.   [Food]    Coffee       2026-03-15    $3.50
+____________________________________________________________
+ Total entries: 1
 ____________________________________________________________
 ```
 
 Error cases:
 - `find 0` or `find 99` (out of range) → `Index X is out of range. There are Y expense(s).`
-- `find abc` → `Index must be a whole number. Usage: find <index>`
+- `find abc` → `Index must be a whole number. Usage: find <index> OR find d/<keyword>`
+- `find 1 extra` → `Too many arguments for 'find'.`
 - `find` on empty list → `No expenses recorded yet.`
+- `find d/` → `Keyword cannot be empty after 'd/'.`
+- `find d/coffee|hack` → `Keyword cannot contain '|'.`
 
 ---
 
@@ -943,8 +969,9 @@ ____________________________________________________________
   budget history                                   -- view budget history
   remaining                                        -- show remaining
   edit INDEX [d/DESC] [a/AMT] [c/CAT] [date/DATE]  -- edit expense
-  filter from/DATE to/DATE                         -- filter by date
+  filter from/DATE to/DATE [cat/CAT]               -- filter by date/category
   find INDEX                                       -- view expense details
+  find d/KEYWORD                                   -- find by description keyword
   search KEYWORD                                   -- search by keyword
   sort                                             -- sort by amount
   top N                                            -- top N expenses
@@ -1007,8 +1034,9 @@ ____________________________________________________________
 | Edit expense      | `edit INDEX [d/DESC] [a/AMT] [c/CAT] [date/DATE] [recurring/true&#124;false]` | — |
 | List expenses     | `list` | `l` |
 | List recurring    | `list recurring` | — |
-| Filter by date    | `filter from/DATE to/DATE` | — |
+| Filter by date/category | `filter from/DATE to/DATE [cat/CATEGORY]` | — |
 | Find by index     | `find INDEX` | — |
+| Find by keyword   | `find d/KEYWORD` | — |
 | Summary           | `summary` | `s` |
 | Total             | `total` | — |
 | Set budget        | `budget AMOUNT` | `b` |
