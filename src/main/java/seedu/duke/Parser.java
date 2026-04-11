@@ -37,7 +37,7 @@ import seedu.duke.command.MonthCommand;
 public class Parser {
 
     private static final Logger logger = Logger.getLogger(Parser.class.getName());
-    private static final String TOKEN_SPLIT_REGEX = " (?=(?:d|a|c|date|recurring)/)";
+    private static final String TOKEN_SPLIT_REGEX = " (?=(?:d/|a/[^a-zA-Z]|c/|date/|recurring/))";
     // @@author AfshalG
     private static final Map<String, String> ALIASES = new HashMap<>();
 
