@@ -28,7 +28,9 @@ SpendTrack is a command-line expense tracker for NUS students who prefer typing 
 
 Adds a new expense with a description, amount, category, and optional date.
 
-Format: `add d/DESCRIPTION a/AMOUNT c/CATEGORY [date/DATE] [recurring/true|false]`
+Format: `add d/DESCRIPTION a/AMOUNT [c/CATEGORY] [date/DATE] [recurring/true|false]`
+
+- If `c/` is omitted, category defaults to `Uncategorised`.
 
 - `AMOUNT` must be a positive number.
 - `CATEGORY` is automatically capitalised (e.g. `food` becomes `Food`, `public transport` becomes `Public Transport`).
@@ -365,7 +367,7 @@ If no recurring expenses exist:
 
 To mark an expense as recurring, add `recurring/true` to the `add` command.
 
-Format: `add d/DESCRIPTION a/AMOUNT c/CATEGORY [date/DATE] [recurring/true|false]`
+Format: `add d/DESCRIPTION a/AMOUNT [c/CATEGORY] [date/DATE] [recurring/true|false]`
 
 - `recurring/` accepts only `true` or `false`. Any other value shows an error.
 - If omitted, defaults to `false`.
@@ -997,9 +999,9 @@ ____________________________________________________________
 
 | Action            | Format | Alias |
 |-------------------|--------|-------|
-| Add expense       | `add d/DESC a/AMT c/CAT [date/DATE] [recurring/true\|false]` | `a` |
+| Add expense       | `add d/DESC a/AMT [c/CAT] [date/DATE] [recurring/true&#124;false]` | `a` |
 | Delete expense    | `delete INDEX` | `d` |
-| Edit expense      | `edit INDEX [d/DESC] [a/AMT] [c/CAT] [date/DATE] [recurring/true\|false]` | — |
+| Edit expense      | `edit INDEX [d/DESC] [a/AMT] [c/CAT] [date/DATE] [recurring/true&#124;false]` | — |
 | List expenses     | `list` | `l` |
 | List recurring    | `list recurring` | — |
 | Filter by date    | `filter from/DATE to/DATE` | — |
