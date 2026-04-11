@@ -264,5 +264,57 @@ public class InputValidationTest {
         assertDoesNotThrow(() -> Parser.parse("foobar"));
     }
 
+    // ── Add: amount cap, date before 2000, pipe in category ──────────────────
+
+    @Test
+    void parse_addAmountOverMax_throwsException() {
+        assertThrows(SpendTrackException.class, () ->
+                Parser.parse("add d/Thing a/1000001 c/Food"));
+    }
+
+    @Test
+    void parse_addAmountAtMax_doesNotThrow() {
+        assertDoesNotThrow(() ->
+                Parser.parse("add d/Thing a/1000000 c/Food"));
+    }
+
+    @Test
+    void parse_addDateBefore2000_throwsException() {
+        assertThrows(SpendTrackException.class, () ->
+                Parser.parse("add d/Thing a/5 c/Food date/1999-12-31"));
+    }
+
+    @Test
+    void parse_addPipeInCategory_throwsException() {
+        assertThrows(SpendTrackException.class, () ->
+                Parser.parse("add d/Thing a/5 c/Food|hack"));
+    }
+
+    // ── Edit: amount cap, date before 2000, pipe in category, empty category ──
+
+    @Test
+    void parse_editAmountOverMax_throwsException() {
+        assertThrows(SpendTrackException.class, () ->
+                Parser.parse("edit 1 a/1000001"));
+    }
+
+    @Test
+    void parse_editDateBefore2000_throwsException() {
+        assertThrows(SpendTrackException.class, () ->
+                Parser.parse("edit 1 date/1999-01-01"));
+    }
+
+    @Test
+    void parse_editPipeInCategory_throwsException() {
+        assertThrows(SpendTrackException.class, () ->
+                Parser.parse("edit 1 c/Food|hack"));
+    }
+
+    @Test
+    void parse_editEmptyCategory_throwsException() {
+        assertThrows(SpendTrackException.class, () ->
+                Parser.parse("edit 1 c/"));
+    }
+
     // @@author
 }

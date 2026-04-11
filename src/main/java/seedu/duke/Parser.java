@@ -373,6 +373,12 @@ public class Parser {
                             + "Please provide only one category.");
                 }
                 seenCategory = true;
+                // @@author Ariff1422
+                if (token.substring(2).trim().isEmpty()) {
+                    throw new SpendTrackException("Category cannot be empty. "
+                            + "Please provide a valid category after c/");
+                }
+                // @@author
                 newCategory = normalizeCategory(token.substring(2).trim());
                 // @@author Ariff1422
                 if (newCategory.contains("|")) {
