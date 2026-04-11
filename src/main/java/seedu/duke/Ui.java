@@ -558,6 +558,9 @@ public class Ui {
         System.out.printf(" Amount      : $%.2f%n", expense.getAmount());
         System.out.printf(" Category    : %s%n", expense.getCategory());
         System.out.printf(" Date        : %s%n", expense.getDate());
+        // @@author Ariff1422
+        System.out.printf(" Recurring   : %s%n", expense.isRecurring() ? "Yes" : "No");
+        // @@author
         System.out.println(LINE);
     }
     // @@author
@@ -593,8 +596,11 @@ public class Ui {
                     ? "Uncategorised" : e.getCategory();
             String description = (e.getDescription() == null || e.getDescription().isBlank())
                     ? "(no description)" : e.getDescription();
+            // @@author Ariff1422
+            String recurringTag = e.isRecurring() ? " [R]" : "";
+            // @@author
             catWidth = Math.max(catWidth, category.length() + 2);
-            descWidth = Math.max(descWidth, description.length());
+            descWidth = Math.max(descWidth, description.length() + recurringTag.length());
         }
 
         String headerFormat = "  %-3s  %-" + catWidth + "s  %-" + descWidth + "s  %-12s  %s%n";
@@ -614,12 +620,15 @@ public class Ui {
                     ? "Uncategorised" : e.getCategory();
             String description = (e.getDescription() == null || e.getDescription().isBlank())
                     ? "(no description)" : e.getDescription();
+            // @@author Ariff1422
+            String recurringTag = e.isRecurring() ? " [R]" : "";
+            // @@author
             String date = (e.getDate() != null) ? e.getDate().toString() : "-";
 
             System.out.printf(rowFormat,
                     (i + 1) + ".",
                     "[" + category + "]",
-                    description,
+                    description + recurringTag,
                     date,
                     e.getAmount());
         }
