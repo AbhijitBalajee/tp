@@ -4,12 +4,12 @@ skinparam backgroundColor BGCOLOR
 skinparam sequenceMessageAlign center
 
 actor User
-participant ":SpendTrack" as ST
+participant "<u>:SpendTrack</u>" as ST
 participant "<<class>>\nParser" as P
-participant ":Command" as CMD
-participant ":ExpenseList" as EL
-participant ":Storage" as S
-participant ":Ui" as UI
+participant "<u>:Command</u>" as CMD
+participant "<u>:ExpenseList</u>" as EL
+participant "<u>:Storage</u>" as S
+participant "<u>:Ui</u>" as UI
 
 User -> ST : launch app
 activate ST

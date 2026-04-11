@@ -1257,7 +1257,6 @@ SpendTrack helps students track expenses faster than a typical GUI app. Users ca
 
 | Version | As a ... | I want to ... | So that I can ... |
 |---------|----------|---------------|-------------------|
-| v1.0 | new user | see usage instructions | refer to them when I forget how to use the application |
 | v1.0 | student | add an expense with description, amount, and category | keep track of my spending |
 | v1.0 | student | delete an expense by index | remove entries I added by mistake |
 | v1.0 | student | list all my expenses | see everything I have spent |
