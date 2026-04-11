@@ -223,8 +223,17 @@ public class Parser {
                             + "Please provide only one amount.");
                 }
                 seenAmount = true;
+                String amountStr = token.substring(2).trim();
+
+                // Explicitly reject NaN and Infinity before parseDouble
+                if (amountStr.equalsIgnoreCase("nan")
+                        || amountStr.equalsIgnoreCase("infinity")
+                        || amountStr.equalsIgnoreCase("-infinity")) {
+                    throw new SpendTrackException("Amount must be a finite number. Usage: a/<amount>");
+                }
+
                 try {
-                    amount = Double.parseDouble(token.substring(2).trim());
+                    amount = Double.parseDouble(amountStr);
                 } catch (NumberFormatException e) {
                     throw new SpendTrackException("Amount must be a number. Usage: a/<amount>");
                 }
