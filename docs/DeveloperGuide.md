@@ -425,6 +425,10 @@ Only the fields provided are updated — all other fields remain unchanged.
 5. A new `EditCommand` is created with the index and the parsed fields (`null` for unchanged fields).
 6. `EditCommand.execute()` validates the index and fields, retrieves the existing `Expense` from `ExpenseList`, constructs an updated `Expense` by substituting `null` fields with the original expense's values, and replaces it via `ExpenseList.setExpense()`.
 7. `Ui.showEditSuccess()` displays the before and after state of the expense.
+8. `BudgetChecker.check()` runs automatically after editing — if the updated
+   total meets or exceeds 90% of the budget, a warning or alert is shown.
+9. Because `mutatesData()` returns `true`, `SpendTrack` calls `Storage.save()`
+   after execution, persisting the changes across sessions.
 
 The following sequence diagram illustrates the full flow of the edit command:
 
@@ -924,7 +928,10 @@ As part of v2.0, all commands were audited to ensure no user input can cause an 
 | `add` | Missing `d/` throws error; missing `a/` throws error; zero/negative amount throws error; non-numeric amount throws error |
 | `delete` | Non-integer index throws error; missing index throws error |
 | `edit` | Non-integer index; empty/blank description; zero/negative amount; no fields provided; duplicate flags all throw errors |
-| `budget` | Empty input throws error; non-numeric amount throws error |
+| `budget` | Empty input throws error; non-numeric amount throws error | | `list` | Extra tokens after `list` or unrecognised sub-command throws error |
+| `budget reset` | Extra tokens after `reset` throws error |
+| `budget history` | Extra tokens after `history` throws error |
+| `budget` | `Infinity` and `NaN` values now rejected as invalid amounts |
 
 #### Design considerations
 

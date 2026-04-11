@@ -240,6 +240,7 @@ Format: `filter from/DATE to/DATE`
 - `DATE` accepts the same formats as the `add` command: `YYYY-MM-DD`, `DD-MM-YYYY`, `today`, `yesterday`.
 - The `from` date must not be after the `to` date.
 - Filtering does not modify the expense list.
+- Recurring expenses are shown with `[R]` tag in filtered results.
 
 Examples:
 
@@ -369,7 +370,7 @@ To mark an expense as recurring, add `recurring/true` to the `add` command.
 
 Format: `add d/DESCRIPTION a/AMOUNT [c/CATEGORY] [date/DATE] [recurring/true|false]`
 
-- `recurring/` accepts only `true` or `false`. Any other value shows an error.
+- `recurring/` accepts `true` or `false` (case-insensitive — `TRUE`, `True` also work). Any other value shows an error.
 - If omitted, defaults to `false`.
 - Recurring expenses are shown with `[R]` in the list.
 
@@ -388,6 +389,8 @@ Format: `edit INDEX [d/DESCRIPTION] [a/AMOUNT] [c/CATEGORY] [date/DATE] [recurri
 - `INDEX` is 1-based (same numbering as `list`).
 - At least one field must be provided.
 - Duplicate flags (e.g. `d/Latte d/Coffee`) are not allowed.
+- Changes are saved automatically after editing.
+- If the updated total meets or exceeds 90% of your budget, a warning is shown after editing.
 
 Examples:
 - `edit 1 d/Latte` — updates description only
@@ -999,7 +1002,7 @@ ____________________________________________________________
 
 | Action            | Format | Alias |
 |-------------------|--------|-------|
-| Add expense       | `add d/DESC a/AMT [c/CAT] [date/DATE] [recurring/true&#124;false]` | `a` |
+| Add expense       | `add d/DESC a/AMT c/CAT [date/DATE] [recurring/true|false]` | `a` |
 | Delete expense    | `delete INDEX` | `d` |
 | Edit expense      | `edit INDEX [d/DESC] [a/AMT] [c/CAT] [date/DATE] [recurring/true&#124;false]` | — |
 | List expenses     | `list` | `l` |

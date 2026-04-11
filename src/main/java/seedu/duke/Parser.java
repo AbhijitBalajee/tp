@@ -37,7 +37,8 @@ import seedu.duke.command.MonthCommand;
 public class Parser {
 
     private static final Logger logger = Logger.getLogger(Parser.class.getName());
-    private static final String TOKEN_SPLIT_REGEX = " (?=(?:d|a|c|date|recurring)/)";
+    private static final String TOKEN_SPLIT_REGEX = " (?=(?:d/|a/(?:[^a-zA-Z]|NaN|Infinity|"
+        + "-Infinity)|c/|date/|recurring/))";
     // @@author AfshalG
     private static final Map<String, String> ALIASES = new HashMap<>();
 
@@ -223,8 +224,17 @@ public class Parser {
                             + "Please provide only one amount.");
                 }
                 seenAmount = true;
+                String amountStr = token.substring(2).trim();
+
+                // Explicitly reject NaN and Infinity before parseDouble
+                if (amountStr.equalsIgnoreCase("nan")
+                        || amountStr.equalsIgnoreCase("infinity")
+                        || amountStr.equalsIgnoreCase("-infinity")) {
+                    throw new SpendTrackException("Amount must be a finite number. Usage: a/<amount>");
+                }
+
                 try {
-                    amount = Double.parseDouble(token.substring(2).trim());
+                    amount = Double.parseDouble(amountStr);
                 } catch (NumberFormatException e) {
                     throw new SpendTrackException("Amount must be a number. Usage: a/<amount>");
                 }

@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import seedu.duke.BudgetChecker;
 import seedu.duke.Expense;
 import seedu.duke.ExpenseList;
 import seedu.duke.SpendTrackException;
@@ -36,6 +37,7 @@ public class EditCommand extends Command {
      * @param newAmount      the new amount, or null to keep existing
      * @param newCategory    the new category, or null to keep existing
      * @param newDate        the new date, or null to keep existing
+     * @param newRecurring   the new recurring flag, or null to keep existing
      */
     public EditCommand(int index, String newDescription, Double newAmount,
                        String newCategory, LocalDate newDate, Boolean newRecurring) {
@@ -84,7 +86,7 @@ public class EditCommand extends Command {
         double updatedAmount      = (newAmount != null) ? newAmount : old.getAmount();
         String updatedCategory    = (newCategory != null) ? newCategory : old.getCategory();
         LocalDate updatedDate     = (newDate != null) ? newDate : old.getDate();
-        boolean updatedRecurring = (newRecurring != null) ? newRecurring : old.isRecurring();
+        boolean updatedRecurring  = (newRecurring != null) ? newRecurring : old.isRecurring();
 
         Expense updated = new Expense(updatedDescription, updatedAmount,
                 updatedCategory, updatedDate, updatedRecurring);
@@ -93,5 +95,11 @@ public class EditCommand extends Command {
 
         logger.log(Level.INFO, "Expense at index {0} edited.", index);
         ui.showEditSuccess(index, old, updated);
+        BudgetChecker.check(expenses, ui);
+    }
+
+    @Override
+    public boolean mutatesData() {
+        return true;
     }
 }
