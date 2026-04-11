@@ -201,15 +201,17 @@ Each expense is validated on load — entries with a blank description, non-posi
 
 You do not need to run any save or load command. It happens automatically.
 
-**File encryption**
+**File format and integrity**
 
-The save file is encrypted using AES-128-CBC with a key derived from your machine (OS name and username). This means:
-- The file is not human-readable and cannot be manually edited.
-- If the file is tampered with, SpendTrack will detect this on startup, reject the file, and start fresh with a warning:
-  ```
-  Warning: save file could not be decrypted. It may have been tampered with or created on a different machine. Starting fresh.
-  ```
-- The save file is tied to your machine — it cannot be transferred to another computer.
+The save file (`data/spendtrack.txt`) is a human-readable, human-editable plain-text file. You can open it in any text editor.
+
+Each expense line includes a CRC32 checksum as the last field to detect accidental corruption:
+```
+Coffee|4.5|Food|2026-03-22|false|a3f2c1b4
+```
+- If a line is accidentally corrupted, the checksum mismatch causes only that line to be skipped with a warning. All other lines load normally.
+- If you manually edit a line, the checksum for that line will no longer match and it will be skipped on load.
+- The file can be freely copied to another computer.
 
 **Startup reminder**
 
@@ -981,7 +983,7 @@ ____________________________________________________________
 
 **Q**: How do I transfer my data to another computer?
 
-**A**: The save file is encrypted with a machine-specific key, so it cannot be transferred directly to another computer. You will need to re-enter your expenses on the new machine.
+**A**: Copy `data/spendtrack.txt` to the same location on the new computer. The file is plain text and is not tied to any specific machine.
 
 **Q**: What date formats are accepted?
 

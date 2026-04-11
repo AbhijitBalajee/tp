@@ -138,21 +138,28 @@ class StorageTest {
     // --- Tamper detection ---
 
     @Test
-    void load_tamperedFile_startsEmpty() throws IOException {
+    void load_tamperedLine_skippedOtherLinesLoad() throws IOException {
+        // Save two valid expenses
         ExpenseList saved = new ExpenseList();
         saved.addExpense(new Expense("Coffee", 4.50, "Food", DATE_A));
+        saved.addExpense(new Expense("Bus", 2.00, "Transport", DATE_A));
         storage.save(saved);
 
-        // Overwrite the encrypted file with plain text (simulates tampering)
+        // Read the saved file and corrupt only the first expense line's checksum
         File file = new File(TEST_FILE);
+        String content = new String(java.nio.file.Files.readAllBytes(file.toPath()));
+        // Replace the first expense line's checksum with a bad value
+        content = content.replaceFirst("(Coffee\\|4\\.5\\|Food\\|[^|]+\\|false\\|)([0-9a-f]+)", "$1badcheck");
         try (FileWriter fw = new FileWriter(file)) {
-            fw.write("---EXPENSES---\nFree Money|99999.99|Food|2026-04-06\n---BUDGET---\n0.0\n---BUDGET-HISTORY---\n");
+            fw.write(content);
         }
 
         ExpenseList loaded = new ExpenseList();
         storage.load(loaded);
 
-        assertEquals(0, loaded.size());
+        // Only the untampered line should load
+        assertEquals(1, loaded.size());
+        assertEquals("Bus", loaded.getExpense(0).getDescription());
     }
 
     @Test
@@ -160,7 +167,7 @@ class StorageTest {
         File file = new File(TEST_FILE);
         file.getParentFile().mkdirs();
         try (FileWriter fw = new FileWriter(file)) {
-            fw.write("this is not valid base64 or encrypted content!!!");
+            fw.write("this is not a valid save file!!!");
         }
 
         ExpenseList loaded = new ExpenseList();
