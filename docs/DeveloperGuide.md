@@ -358,42 +358,54 @@ The following class diagram shows the relationships between `Storage`, `ExpenseL
 
 ### Filter and Find Features
 
-#### Filter expenses by date range
+#### Filter expenses by date range and optional category
 
-The `filter` command allows users to view expenses within an inclusive date range:
+The `filter` command allows users to view expenses within an inclusive date range, with an optional category filter:
 
 ```
-filter from/DATE to/DATE
+filter from/DATE to/DATE [cat/CATEGORY]
 ```
 
 **How it works:**
 
-1. The user enters `filter from/2026-03-01 to/2026-03-31`.
+1. The user enters `filter from/2026-03-01 to/2026-03-31` (optionally with `cat/Food`).
 2. `Parser.parse()` delegates to `Parser.parseFilterCommand()`.
-3. `parseFilterCommand()` extracts the `from/` and `to/` values and passes each to `DateParser.parse()`.
+3. `parseFilterCommand()` iterates over each space-delimited token:
+   - `from/` and `to/` are passed to `DateParser.parse()`. Duplicates throw an exception.
+   - `cat/` sets an optional category string. Duplicates, empty values, and values containing `|` throw an exception.
+   - Any unrecognised token throws: `Unknown filter option: '<token>'`.
 4. If either date is missing, or `from` is after `to`, a `SpendTrackException` is thrown.
-5. A `FilterCommand(from, to)` is created and returned.
-6. `FilterCommand.execute()` iterates over all expenses and collects those whose date falls within the range (inclusive).
-7. `Ui.showFilteredExpenses()` displays the results in the same table format as `list`.
+5. A `FilterCommand(from, to, category)` is created and returned (`category` may be `null`).
+6. `FilterCommand.execute()` iterates over all expenses, keeping those whose date is within range and (if `category` is set) whose category matches case-insensitively.
+7. `Ui.showFilteredExpenses()` displays the results in a table. The header shows `[CATEGORY]` when a category filter is active.
 8. The original `ExpenseList` is not modified — filtering is display-only.
 
-#### Find expense by index
+#### Find expense by index or keyword
 
-The `find` command displays the full details of a single expense:
+The `find` command supports two modes:
 
 ```
 find INDEX
+find d/KEYWORD
 ```
 
-**How it works:**
+**How it works (index mode):**
 
 1. The user enters `find 2`.
-2. `Parser.parse()` parses the index as an integer and creates a `FindCommand(2)`.
-3. `FindCommand.execute()` checks that the list is non-empty and the index is within bounds (1-based).
-4. The expense at `index - 1` is retrieved from `ExpenseList`.
-5. `Ui.showExpenseDetail()` displays a labelled detail view with all fields.
+2. `Parser.parseFindCommand()` checks that the argument is a single token — trailing garbage (e.g. `find 1 extra`) throws an error.
+3. The integer is parsed and a `FindCommand(2)` is created.
+4. `FindCommand.execute()` checks that the list is non-empty and the index is within bounds (1-based).
+5. `Ui.showExpenseDetail()` displays a labelled detail view including the `Recurring` field.
 
-The following sequence diagram shows the execution flow for both `filter` and `find`:
+**How it works (keyword mode):**
+
+1. The user enters `find d/coffee`.
+2. `Parser.parseFindCommand()` detects the `d/` prefix, extracts the keyword, and validates it is non-empty and does not contain `|`.
+3. A `FindByKeywordCommand("coffee")` is created and returned.
+4. `FindByKeywordCommand.execute()` scans all expenses for descriptions containing the keyword (case-insensitive).
+5. `Ui.showExpensesByKeyword()` displays matching expenses in a table with their original list indices, so the user can chain into `delete INDEX` or `find INDEX`.
+
+The following sequence diagram shows the execution flow for `filter` and `find`:
 
 ![Sequence diagram for filter and find commands](images/FilterFindSequence.png)
 
@@ -406,6 +418,14 @@ The following sequence diagram shows the execution flow for both `filter` and `f
 **Aspect: Index validation in FindCommand**
 
 `FindCommand` validates the index at execute time rather than parse time. This follows the same pattern as `DeleteCommand` — the parser only checks that the index is a valid integer, while the command checks that it is within the current list bounds. This is necessary because the list size is not known at parse time.
+
+**Aspect: find d/ vs search**
+
+`find d/KEYWORD` and `search KEYWORD` both search by description keyword. The key difference is that `find d/` shows original list indices in the results table, making it easy to chain into `delete INDEX` or `find INDEX`. `search` is a separate feature.
+
+**Aspect: Pipe character rejection in filter and find**
+
+Both `cat/` in `filter` and `d/` in `find` reject values containing `|`. This is consistent with `add` and `edit`, which apply the same restriction. The pipe character is the field delimiter in the save file, so allowing it in any user input would corrupt stored data or cause checksum mismatches on load.
 
 ### Edit Expense Feature
 

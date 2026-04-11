@@ -573,17 +573,34 @@ public class Ui {
      * @param to the end date of the filter range
      */
     public void showFilteredExpenses(ArrayList<Expense> filtered, LocalDate from, LocalDate to) {
+        showFilteredExpenses(filtered, from, to, null);
+    }
+
+    // @@author Ariff1422
+    /**
+     * Displays expenses filtered by date range and optional category.
+     *
+     * @param filtered the list of matching expenses
+     * @param from     the start date of the filter range
+     * @param to       the end date of the filter range
+     * @param category the category filter applied, or null if none
+     */
+    public void showFilteredExpenses(ArrayList<Expense> filtered, LocalDate from, LocalDate to, String category) {
         assert filtered != null : "Filtered list should not be null";
 
         System.out.println(LINE);
-        System.out.println(" Expenses from " + from + " to " + to);
+        if (category != null) {
+            System.out.println(" Expenses from " + from + " to " + to + " [" + category + "]");
+        } else {
+            System.out.println(" Expenses from " + from + " to " + to);
+        }
         System.out.println(LINE);
 
         if (filtered.isEmpty()) {
-            System.out.println(" No expenses found in the given date range.");
-            // @@author Ariff1422
-            System.out.println(" Hint: Use 'filter from/YYYY-MM-DD to/YYYY-MM-DD' to adjust the range.");
-            // @@author
+            System.out.println(" No expenses found in the given date range"
+                    + (category != null ? " for category '" + category + "'" : "") + ".");
+            System.out.println(" Hint: Use 'filter from/YYYY-MM-DD to/YYYY-MM-DD [cat/CATEGORY]'"
+                    + " to adjust the range.");
             System.out.println(LINE);
             return;
         }
@@ -592,15 +609,15 @@ public class Ui {
         int descWidth = "Description".length();
 
         for (Expense e : filtered) {
-            String category = (e.getCategory() == null || e.getCategory().isBlank())
+            String expCat = (e.getCategory() == null || e.getCategory().isBlank())
                     ? "Uncategorised" : e.getCategory();
-            String description = (e.getDescription() == null || e.getDescription().isBlank())
+            String expDesc = (e.getDescription() == null || e.getDescription().isBlank())
                     ? "(no description)" : e.getDescription();
             // @@author Ariff1422
             String recurringTag = e.isRecurring() ? " [R]" : "";
             // @@author
-            catWidth = Math.max(catWidth, category.length() + 2);
-            descWidth = Math.max(descWidth, description.length() + recurringTag.length());
+            catWidth = Math.max(catWidth, expCat.length() + 2);
+            descWidth = Math.max(descWidth, expDesc.length() + recurringTag.length());
         }
 
         String headerFormat = "  %-3s  %-" + catWidth + "s  %-" + descWidth + "s  %-12s  %s%n";
@@ -616,9 +633,9 @@ public class Ui {
 
         for (int i = 0; i < filtered.size(); i++) {
             Expense e = filtered.get(i);
-            String category = (e.getCategory() == null || e.getCategory().isBlank())
+            String expCat = (e.getCategory() == null || e.getCategory().isBlank())
                     ? "Uncategorised" : e.getCategory();
-            String description = (e.getDescription() == null || e.getDescription().isBlank())
+            String expDesc = (e.getDescription() == null || e.getDescription().isBlank())
                     ? "(no description)" : e.getDescription();
             // @@author Ariff1422
             String recurringTag = e.isRecurring() ? " [R]" : "";
@@ -627,8 +644,8 @@ public class Ui {
 
             System.out.printf(rowFormat,
                     (i + 1) + ".",
-                    "[" + category + "]",
-                    description + recurringTag,
+                    "[" + expCat + "]",
+                    expDesc + recurringTag,
                     date,
                     e.getAmount());
         }
@@ -637,8 +654,78 @@ public class Ui {
         System.out.println(" Total entries: " + filtered.size());
         System.out.println(LINE);
     }
+    // @@author
 
     // @@author Ariff1422
+    /**
+     * Displays all expenses whose description contains the given keyword (case-insensitive).
+     *
+     * @param matches the list of matching expenses with their original 1-based indices
+     * @param keyword the keyword that was searched
+     */
+    public void showExpensesByKeyword(ArrayList<int[]> matchIndices,
+            ArrayList<Expense> matches, String keyword) {
+        assert matches != null : "Matches list should not be null";
+        assert keyword != null : "Keyword should not be null";
+
+        System.out.println(LINE);
+        System.out.println(" Search results for: \"" + keyword + "\"");
+        System.out.println(LINE);
+
+        if (matches.isEmpty()) {
+            System.out.println(" No expenses found matching '" + keyword + "'.");
+            System.out.println(" Hint: Use 'find d/<keyword>' to search by description.");
+            System.out.println(LINE);
+            return;
+        }
+
+        int catWidth = "Category".length();
+        int descWidth = "Description".length();
+
+        for (Expense e : matches) {
+            String category = (e.getCategory() == null || e.getCategory().isBlank())
+                    ? "Uncategorised" : e.getCategory();
+            String description = (e.getDescription() == null || e.getDescription().isBlank())
+                    ? "(no description)" : e.getDescription();
+            String recurringTag = e.isRecurring() ? " [R]" : "";
+            catWidth = Math.max(catWidth, category.length() + 2);
+            descWidth = Math.max(descWidth, description.length() + recurringTag.length());
+        }
+
+        String headerFormat = "  %-3s  %-" + catWidth + "s  %-" + descWidth + "s  %-12s  %s%n";
+        String rowFormat    = "  %-3s  %-" + catWidth + "s  %-" + descWidth + "s  %-12s  $%.2f%n";
+
+        System.out.printf(headerFormat, "#", "Category", "Description", "Date", "Amount");
+        System.out.printf("  %-3s  %-" + catWidth + "s  %-" + descWidth + "s  %-12s  %s%n",
+                "---",
+                "-".repeat(catWidth),
+                "-".repeat(descWidth),
+                "----------",
+                "--------");
+
+        for (int i = 0; i < matches.size(); i++) {
+            Expense e = matches.get(i);
+            int originalIndex = matchIndices.get(i)[0];
+            String category = (e.getCategory() == null || e.getCategory().isBlank())
+                    ? "Uncategorised" : e.getCategory();
+            String description = (e.getDescription() == null || e.getDescription().isBlank())
+                    ? "(no description)" : e.getDescription();
+            String recurringTag = e.isRecurring() ? " [R]" : "";
+            String date = (e.getDate() != null) ? e.getDate().toString() : "-";
+
+            System.out.printf(rowFormat,
+                    originalIndex + ".",
+                    "[" + category + "]",
+                    description + recurringTag,
+                    date,
+                    e.getAmount());
+        }
+
+        System.out.println(LINE);
+        System.out.println(" Total entries: " + matches.size());
+        System.out.println(LINE);
+    }
+
     /**
      * Displays the most recently recorded expense as a startup reminder.
      *

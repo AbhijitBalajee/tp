@@ -12,6 +12,7 @@ import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -128,5 +129,78 @@ class FilterCommandTest {
         Command cmd = Parser.parse("filter from/2026-01-15 to/2026-01-15");
         assertTrue(cmd instanceof FilterCommand);
     }
+
+    // @@author Ariff1422
+
+    // --- Category filter ---
+
+    @Test
+    void execute_categoryFilter_returnsOnlyMatchingCategory() throws SpendTrackException {
+        FilterCommand cmd = new FilterCommand(JAN_01, MAR_10, "Food");
+        // Does not throw — full behaviour verified by not mutating the list
+        assertDoesNotThrow(() -> cmd.execute(expenses, ui));
+        assertEquals(5, expenses.size()); // original list unchanged
+    }
+
+    @Test
+    void execute_categoryFilter_nonMatchingCategory_doesNotThrow() {
+        FilterCommand cmd = new FilterCommand(JAN_01, MAR_10, "Utilities");
+        assertDoesNotThrow(() -> cmd.execute(expenses, ui));
+    }
+
+    @Test
+    void execute_categoryFilterCaseInsensitive_doesNotThrow() {
+        // "food" should match "Food"
+        FilterCommand cmd = new FilterCommand(JAN_01, MAR_10, "food");
+        assertDoesNotThrow(() -> cmd.execute(expenses, ui));
+    }
+
+    // --- Parser: cat/ flag ---
+
+    @Test
+    void parser_withCatFlag_returnsFilterCommand() throws SpendTrackException {
+        Command cmd = Parser.parse("filter from/2026-01-01 to/2026-03-31 cat/Food");
+        assertInstanceOf(FilterCommand.class, cmd);
+    }
+
+    @Test
+    void parser_duplicateCatFlag_throwsException() {
+        assertThrows(SpendTrackException.class,
+                () -> Parser.parse("filter from/2026-01-01 to/2026-03-31 cat/Food cat/Transport"));
+    }
+
+    @Test
+    void parser_emptyCatFlag_throwsException() {
+        assertThrows(SpendTrackException.class,
+                () -> Parser.parse("filter from/2026-01-01 to/2026-03-31 cat/"));
+    }
+
+    @Test
+    void parser_pipeInCatFlag_throwsException() {
+        assertThrows(SpendTrackException.class,
+                () -> Parser.parse("filter from/2026-01-01 to/2026-03-31 cat/Food|hack"));
+    }
+
+    // --- Reject unknown/garbage tokens ---
+
+    @Test
+    void parser_unknownToken_throwsException() {
+        assertThrows(SpendTrackException.class,
+                () -> Parser.parse("filter from/2026-01-01 to/2026-03-31 garbage"));
+    }
+
+    @Test
+    void parser_duplicateFromFlag_throwsException() {
+        assertThrows(SpendTrackException.class,
+                () -> Parser.parse("filter from/2026-01-01 from/2026-02-01 to/2026-03-31"));
+    }
+
+    @Test
+    void parser_duplicateToFlag_throwsException() {
+        assertThrows(SpendTrackException.class,
+                () -> Parser.parse("filter from/2026-01-01 to/2026-02-28 to/2026-03-31"));
+    }
+
+    // @@author
 }
 // @@author

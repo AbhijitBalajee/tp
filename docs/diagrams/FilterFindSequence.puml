@@ -8,21 +8,23 @@ participant "<u>:SpendTrack</u>" as ST
 participant "<<class>>\nParser" as P
 participant "<u>:FilterCommand</u>" as FC
 participant "<u>:FindCommand</u>" as FNC
+participant "<u>:FindByKeywordCommand</u>" as FKC
 participant "<u>:ExpenseList</u>" as EL
 participant "<u>:Ui</u>" as UI
 
-User -> ST : "filter from/2026-03-01 to/2026-03-31"
+User -> ST : "filter from/2026-03-01 to/2026-03-31 [cat/Food]"
 activate ST
 
 ST -> P : parse(input)
 activate P
 P -> P : parseFilterCommand(args)
 note right of P
-  Extracts from/ and to/ dates
+  Extracts from/, to/, cat/ tokens
   via DateParser.parse()
+  Rejects unknown tokens and '|' in cat/
   Validates from <= to
 end note
-P --> ST : :FilterCommand(from, to)
+P --> ST : :FilterCommand(from, to, category)
 deactivate P
 
 ST -> FC : execute(expenseList, ui)
@@ -34,9 +36,12 @@ loop for each expense in expenseList
     EL --> FC : expense
     deactivate EL
     FC -> FC : check date in [from, to]
+    opt category filter set
+        FC -> FC : check category matches (case-insensitive)
+    end
 end
 
-FC -> UI : showFilteredExpenses(filtered, from, to)
+FC -> UI : showFilteredExpenses(filtered, from, to, category)
 activate UI
 UI --> User : filtered expense table
 deactivate UI
@@ -48,6 +53,11 @@ activate ST
 
 ST -> P : parse(input)
 activate P
+P -> P : parseFindCommand(args)
+note right of P
+  Single token only — rejects trailing garbage
+  Integer parsed -> FindCommand
+end note
 P --> ST : :FindCommand(2)
 deactivate P
 
@@ -59,19 +69,50 @@ activate EL
 EL --> FNC : size
 deactivate EL
 
-alt index out of range or list empty
+opt index out of range or list empty
     FNC -> FNC : throw SpendTrackException
-else valid index
-    FNC -> EL : getExpense(index - 1)
-    activate EL
-    EL --> FNC : expense
-    deactivate EL
-    FNC -> UI : showExpenseDetail(index, expense)
-    activate UI
-    UI --> User : detailed expense view
-    deactivate UI
 end
 
+FNC -> EL : getExpense(index - 1)
+activate EL
+EL --> FNC : expense
+deactivate EL
+FNC -> UI : showExpenseDetail(index, expense)
+activate UI
+UI --> User : detailed expense view (incl. Recurring)
+deactivate UI
+
 deactivate FNC
+deactivate ST
+
+User -> ST : "find d/coffee"
+activate ST
+
+ST -> P : parse(input)
+activate P
+P -> P : parseFindCommand(args)
+note right of P
+  Detects d/ prefix
+  Validates keyword non-empty, no '|'
+end note
+P --> ST : :FindByKeywordCommand("coffee")
+deactivate P
+
+ST -> FKC : execute(expenseList, ui)
+activate FKC
+
+loop for each expense in expenseList
+    FKC -> EL : getExpense(i)
+    activate EL
+    EL --> FKC : expense
+    deactivate EL
+    FKC -> FKC : check description contains keyword (case-insensitive)
+end
+
+FKC -> UI : showExpensesByKeyword(matchIndices, matches, keyword)
+activate UI
+UI --> User : keyword search results table
+deactivate UI
+deactivate FKC
 deactivate ST
 @enduml
