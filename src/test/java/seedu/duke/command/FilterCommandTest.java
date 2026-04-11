@@ -143,7 +143,7 @@ class FilterCommandTest {
     }
 
     @Test
-    void execute_categoryFilter_nonMatchingCategory_doesNotThrow() {
+    void execute_categoryFilterNoMatch_doesNotThrow() {
         FilterCommand cmd = new FilterCommand(JAN_01, MAR_10, "Utilities");
         assertDoesNotThrow(() -> cmd.execute(expenses, ui));
     }

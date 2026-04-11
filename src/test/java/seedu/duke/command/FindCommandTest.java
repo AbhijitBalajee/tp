@@ -7,8 +7,6 @@ import seedu.duke.ExpenseList;
 import seedu.duke.Parser;
 import seedu.duke.SpendTrackException;
 import seedu.duke.Ui;
-import seedu.duke.command.FindByKeywordCommand;
-
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -163,19 +161,19 @@ class FindCommandTest {
     }
 
     @Test
-    void execute_keyword_caseInsensitive_matchesDescription() throws SpendTrackException {
+    void execute_keywordCaseInsensitive_matchesDescription() throws SpendTrackException {
         FindByKeywordCommand cmd = new FindByKeywordCommand("COFFEE");
         assertDoesNotThrow(() -> cmd.execute(expenses, ui));
     }
 
     @Test
-    void execute_keyword_noMatch_doesNotThrow() {
+    void execute_keywordNoMatch_doesNotThrow() {
         FindByKeywordCommand cmd = new FindByKeywordCommand("xyz_no_match");
         assertDoesNotThrow(() -> cmd.execute(expenses, ui));
     }
 
     @Test
-    void execute_keyword_partialMatch_doesNotThrow() {
+    void execute_keywordPartialMatch_doesNotThrow() {
         // "Bus" contains "bu"
         FindByKeywordCommand cmd = new FindByKeywordCommand("bu");
         assertDoesNotThrow(() -> cmd.execute(expenses, ui));
