@@ -525,7 +525,7 @@ ____________________________________________________________
 
 If no budget has ever been set:
 ```
- No budget history recorded.
+ No budget history recorded. 
 ```
 
 ---
