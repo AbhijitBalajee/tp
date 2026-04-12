@@ -45,9 +45,11 @@ delete INDEX
 2. `Parser.parse()` attempts to parse the second token as an integer. If it is missing or non-numeric, a `SpendTrackException` is thrown immediately.
 3. A `DeleteCommand(2)` is created and returned.
 4. `DeleteCommand.execute()` checks that the index is within bounds (1 to `expenseList.size()` inclusive). If not, a `SpendTrackException` is thrown with the valid range.
-5. The expense at `index - 1` (zero-based) is removed from `ExpenseList` via `deleteExpense()`.
-6. `Ui.showDeleteSuccess()` displays the deleted expense to confirm the action.
-7. Because `mutatesData()` returns `true`, `SpendTrack` calls `Storage.save()` after execution.
+5. `Ui.confirmDelete()` displays the expense details and prompts the user for `yes/no` confirmation.
+6. If the user does not type `yes`, the delete is cancelled and `Ui.showMessage("Delete cancelled.")` is displayed. The expense list is unchanged and no save is triggered.
+7. If confirmed, the expense at `index - 1` (zero-based) is removed from `ExpenseList` via `deleteExpense()`.
+8. `Ui.showDeleteSuccess()` displays the deleted expense to confirm the action.
+9. Because `mutatesData()` returns `true`, `SpendTrack` calls `Storage.save()` after execution.
 
 The following sequence diagram shows the full delete flow:
 
@@ -70,6 +72,16 @@ The following sequence diagram shows the full delete flow:
 **Aspect: Where to validate the index**
 
 Index range validation happens in `DeleteCommand.execute()`, not in `Parser`. The parser only checks that the input is a valid integer. This is because the list size is not known at parse time — `ExpenseList` is only available during execution.
+
+**Aspect: Delete confirmation**
+
+- **Current approach:** `DeleteCommand` calls `Ui.confirmDelete()` before deleting, requiring explicit `yes` input.
+    - Pros: Prevents accidental deletion — a mistyped index will not silently remove the wrong expense.
+    - Cons: Adds an extra step for power users who delete frequently.
+
+- **Alternative:** Delete immediately without confirmation.
+    - Pros: Faster for experienced users.
+    - Cons: Accidental deletions can only be recovered via `undo`, which is less obvious to new users.
 
 ### Add Expense Feature
 
@@ -265,48 +277,39 @@ The alias map is defined as a static `HashMap<String, String>` initialised in a 
 
 ### Storage Feature
 
-The storage feature allows SpendTrack to persist expense data and budget across sessions. Expenses are saved to `data/spendtrack.txt` automatically after every mutating command (`add`, `delete`, `edit`), and loaded back on startup. The file is encrypted so it cannot be read or tampered with outside the application.
+The storage feature allows SpendTrack to persist expense data and budget across sessions. Expenses are saved to `data/spendtrack.txt` automatically after every mutating command (`add`, `delete`, `edit`), and loaded back on startup. The file is plain-text and human-editable as required by the course constraint `Constraint-Human-Editable-File`.
 
 #### How it works
 
 **Saving:**
 
 1. After every mutating command executes, `SpendTrack` calls `Storage.save(expenseList)`.
-2. `Storage` serialises all data (expenses, budget, budget history, goal) into a pipe-delimited plain-text string with section markers.
-3. The plain-text string is encrypted using AES-128-CBC with a machine-derived key and a random IV.
-4. The resulting Base64-encoded ciphertext is written to `data/spendtrack.txt`.
+2. `Storage` serialises all data (expenses, budget, budget history, goal) into a pipe-delimited plain-text file with section markers.
+3. Each expense line has a CRC32 checksum appended as the last field to detect accidental corruption.
+4. The file is written to `data/spendtrack.txt`.
 5. If the `data/` directory does not exist, it is created automatically before writing.
 6. Any write failure prints a warning — the app does not crash.
 
 **Loading:**
 
 1. On startup, `SpendTrack` calls `Storage.load(expenseList)` before the main command loop.
-2. `Storage` reads the Base64-encoded ciphertext from `data/spendtrack.txt`.
-3. The ciphertext is decrypted using the machine-derived key. If decryption fails (file tampered or from a different machine), the file is rejected entirely and the app starts fresh with a warning.
-4. The decrypted plain-text is scanned line by line using section markers (`---EXPENSES---`, `---BUDGET---`, etc.) to populate the `ExpenseList`.
-5. Malformed lines within the decrypted content are skipped with a warning.
-6. If the file does not exist, the app starts silently with an empty list.
+2. `Storage` reads `data/spendtrack.txt` line by line using section markers (`---EXPENSES---`, `---BUDGET---`, etc.) to populate the `ExpenseList`.
+3. Each expense line's CRC32 checksum is verified. If the checksum does not match, that line is skipped with a warning and the rest of the file continues to load normally.
+4. Each parsed expense is validated by `validateExpense()` — entries with a blank description, non-positive amount, amount exceeding $1,000,000, or a date before year 2000 are skipped with a warning. Remaining malformed lines (wrong column count, unparseable fields) are also skipped.
+5. If the file does not exist, the app starts silently with an empty list.
 
 The following sequence diagram shows the startup load flow, including the startup reminder:
 
 ![Sequence diagram for storage load](images/StorageLoadSequence.png)
 
-#### Encryption design
+#### Internal file format
 
-The key is derived at runtime using `SHA-256(os.name + "|" + user.name)`, truncated to 128 bits. This means:
-- The key is never stored anywhere — not in the file, not in the JAR.
-- Even with access to the source code, an attacker on a different machine cannot reproduce the key.
-- A random IV is generated for every save, so the ciphertext differs each time even for identical data.
-
-#### Internal file format (before encryption)
-
-The plain-text content before encryption follows this structure:
+The save file follows this structure:
 
 ```
 ---EXPENSES---
-DESCRIPTION|AMOUNT|CATEGORY|DATE
-Coffee|3.50|Food|2026-03-22
-Bus fare|1.80|Transport|2026-03-22
+Coffee|4.5|Food|2026-03-22|false|a3f2c1b4
+Bus fare|1.8|Transport|2026-03-22|false|d4e5f678
 ---BUDGET---
 500.00
 ---BUDGET-HISTORY---
@@ -315,6 +318,8 @@ Set budget: $500.00
 ---GOAL---
 0.0
 ```
+
+Each expense line has 6 pipe-delimited fields: `DESCRIPTION|AMOUNT|CATEGORY|DATE|RECURRING|CHECKSUM`. The checksum is the CRC32 of the first 5 fields joined by `|`.
 
 #### Design considerations
 
@@ -328,20 +333,20 @@ Set budget: $500.00
     - Pros: Fewer writes.
     - Cons: Data loss if the app is closed unexpectedly.
 
-**Aspect: Encryption key derivation**
+**Aspect: Tamper detection**
 
-- **Current approach:** Machine-derived key from OS name and username.
-    - Pros: Key is never stored; cannot be forged from source code alone; prevents tampering by PE testers who have access to the source code.
-    - Cons: Save file is not portable across machines.
+- **Current approach:** CRC32 checksum per expense line.
+    - Pros: Detects accidental file corruption; only the affected line is skipped, the rest of the data is preserved. File remains human-readable and portable.
+    - Cons: A determined user who knows the format can recompute the checksum after editing. CRC32 is not a cryptographic hash.
 
-- **Alternative:** Hardcoded key in source code.
-    - Pros: File is portable.
-    - Cons: Anyone with source code access can decrypt and forge the file.
+- **Alternative:** AES encryption of the entire file.
+    - Pros: Prevents casual tampering.
+    - Cons: Violates `Constraint-Human-Editable-File`; file is not portable across machines if a machine-derived key is used.
 
 **Aspect: File format**
 
 - Pipe (`|`) delimiter was chosen over CSV because expense descriptions may contain commas.
-- All file I/O is encapsulated inside `Storage` — no `FileWriter` or encryption logic exists in command classes, keeping the separation of concerns clean.
+- All file I/O is encapsulated inside `Storage` — no `FileWriter` logic exists in command classes, keeping the separation of concerns clean.
 
 #### Class structure
 
@@ -353,42 +358,54 @@ The following class diagram shows the relationships between `Storage`, `ExpenseL
 
 ### Filter and Find Features
 
-#### Filter expenses by date range
+#### Filter expenses by date range and optional category
 
-The `filter` command allows users to view expenses within an inclusive date range:
+The `filter` command allows users to view expenses within an inclusive date range, with an optional category filter:
 
 ```
-filter from/DATE to/DATE
+filter from/DATE to/DATE [cat/CATEGORY]
 ```
 
 **How it works:**
 
-1. The user enters `filter from/2026-03-01 to/2026-03-31`.
+1. The user enters `filter from/2026-03-01 to/2026-03-31` (optionally with `cat/Food`).
 2. `Parser.parse()` delegates to `Parser.parseFilterCommand()`.
-3. `parseFilterCommand()` extracts the `from/` and `to/` values and passes each to `DateParser.parse()`.
+3. `parseFilterCommand()` iterates over each space-delimited token:
+   - `from/` and `to/` are passed to `DateParser.parse()`. Duplicates throw an exception.
+   - `cat/` sets an optional category string. Duplicates, empty values, and values containing `|` throw an exception.
+   - Any unrecognised token throws: `Unknown filter option: '<token>'`.
 4. If either date is missing, or `from` is after `to`, a `SpendTrackException` is thrown.
-5. A `FilterCommand(from, to)` is created and returned.
-6. `FilterCommand.execute()` iterates over all expenses and collects those whose date falls within the range (inclusive).
-7. `Ui.showFilteredExpenses()` displays the results in the same table format as `list`.
+5. A `FilterCommand(from, to, category)` is created and returned (`category` may be `null`).
+6. `FilterCommand.execute()` iterates over all expenses, keeping those whose date is within range and (if `category` is set) whose category matches case-insensitively.
+7. `Ui.showFilteredExpenses()` displays the results in a table. The header shows `[CATEGORY]` when a category filter is active.
 8. The original `ExpenseList` is not modified — filtering is display-only.
 
-#### Find expense by index
+#### Find expense by index or keyword
 
-The `find` command displays the full details of a single expense:
+The `find` command supports two modes:
 
 ```
 find INDEX
+find d/KEYWORD
 ```
 
-**How it works:**
+**How it works (index mode):**
 
 1. The user enters `find 2`.
-2. `Parser.parse()` parses the index as an integer and creates a `FindCommand(2)`.
-3. `FindCommand.execute()` checks that the list is non-empty and the index is within bounds (1-based).
-4. The expense at `index - 1` is retrieved from `ExpenseList`.
-5. `Ui.showExpenseDetail()` displays a labelled detail view with all fields.
+2. `Parser.parseFindCommand()` checks that the argument is a single token — trailing garbage (e.g. `find 1 extra`) throws an error.
+3. The integer is parsed and a `FindCommand(2)` is created.
+4. `FindCommand.execute()` checks that the list is non-empty and the index is within bounds (1-based).
+5. `Ui.showExpenseDetail()` displays a labelled detail view including the `Recurring` field.
 
-The following sequence diagram shows the execution flow for both `filter` and `find`:
+**How it works (keyword mode):**
+
+1. The user enters `find d/coffee`.
+2. `Parser.parseFindCommand()` detects the `d/` prefix, extracts the keyword, and validates it is non-empty and does not contain `|`.
+3. A `FindByKeywordCommand("coffee")` is created and returned.
+4. `FindByKeywordCommand.execute()` scans all expenses for descriptions containing the keyword (case-insensitive).
+5. `Ui.showExpensesByKeyword()` displays matching expenses in a table with their original list indices, so the user can chain into `delete INDEX` or `find INDEX`.
+
+The following sequence diagram shows the execution flow for `filter` and `find`:
 
 ![Sequence diagram for filter and find commands](images/FilterFindSequence.png)
 
@@ -401,6 +418,14 @@ The following sequence diagram shows the execution flow for both `filter` and `f
 **Aspect: Index validation in FindCommand**
 
 `FindCommand` validates the index at execute time rather than parse time. This follows the same pattern as `DeleteCommand` — the parser only checks that the index is a valid integer, while the command checks that it is within the current list bounds. This is necessary because the list size is not known at parse time.
+
+**Aspect: find d/ vs search**
+
+`find d/KEYWORD` and `search KEYWORD` both search by description keyword. The key difference is that `find d/` shows original list indices in the results table, making it easy to chain into `delete INDEX` or `find INDEX`. `search` is a separate feature.
+
+**Aspect: Pipe character rejection in filter and find**
+
+Both `cat/` in `filter` and `d/` in `find` reject values containing `|`. This is consistent with `add` and `edit`, which apply the same restriction. The pipe character is the field delimiter in the save file, so allowing it in any user input would corrupt stored data or cause checksum mismatches on load.
 
 ### Edit Expense Feature
 
@@ -420,6 +445,10 @@ Only the fields provided are updated — all other fields remain unchanged.
 5. A new `EditCommand` is created with the index and the parsed fields (`null` for unchanged fields).
 6. `EditCommand.execute()` validates the index and fields, retrieves the existing `Expense` from `ExpenseList`, constructs an updated `Expense` by substituting `null` fields with the original expense's values, and replaces it via `ExpenseList.setExpense()`.
 7. `Ui.showEditSuccess()` displays the before and after state of the expense.
+8. `BudgetChecker.check()` runs automatically after editing — if the updated
+   total meets or exceeds 90% of the budget, a warning or alert is shown.
+9. Because `mutatesData()` returns `true`, `SpendTrack` calls `Storage.save()`
+   after execution, persisting the changes across sessions.
 
 The following sequence diagram illustrates the full flow of the edit command:
 
@@ -919,7 +948,10 @@ As part of v2.0, all commands were audited to ensure no user input can cause an 
 | `add` | Missing `d/` throws error; missing `a/` throws error; zero/negative amount throws error; non-numeric amount throws error |
 | `delete` | Non-integer index throws error; missing index throws error |
 | `edit` | Non-integer index; empty/blank description; zero/negative amount; no fields provided; duplicate flags all throw errors |
-| `budget` | Empty input throws error; non-numeric amount throws error |
+| `budget` | Empty input throws error; non-numeric amount throws error | | `list` | Extra tokens after `list` or unrecognised sub-command throws error |
+| `budget reset` | Extra tokens after `reset` throws error |
+| `budget history` | Extra tokens after `history` throws error |
+| `budget` | `Infinity` and `NaN` values now rejected as invalid amounts |
 
 #### Design considerations
 
@@ -1245,7 +1277,6 @@ SpendTrack helps students track expenses faster than a typical GUI app. Users ca
 
 | Version | As a ... | I want to ... | So that I can ... |
 |---------|----------|---------------|-------------------|
-| v1.0 | new user | see usage instructions | refer to them when I forget how to use the application |
 | v1.0 | student | add an expense with description, amount, and category | keep track of my spending |
 | v1.0 | student | delete an expense by index | remove entries I added by mistake |
 | v1.0 | student | list all my expenses | see everything I have spent |

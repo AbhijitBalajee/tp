@@ -28,7 +28,9 @@ SpendTrack is a command-line expense tracker for NUS students who prefer typing 
 
 Adds a new expense with a description, amount, category, and optional date.
 
-Format: `add d/DESCRIPTION a/AMOUNT c/CATEGORY [date/DATE]`
+Format: `add d/DESCRIPTION a/AMOUNT [c/CATEGORY] [date/DATE] [recurring/true|false]`
+
+- If `c/` is omitted, category defaults to `Uncategorised`.
 
 - `AMOUNT` must be a positive number.
 - `CATEGORY` is automatically capitalised (e.g. `food` becomes `Food`, `public transport` becomes `Public Transport`).
@@ -38,6 +40,7 @@ Format: `add d/DESCRIPTION a/AMOUNT c/CATEGORY [date/DATE]`
   - `today` (e.g. `date/today`)
   - `yesterday` (e.g. `date/yesterday`)
 - If `date/` is omitted, defaults to today's date.
+- `recurring/true` marks the expense as recurring (shown with `[R]` tag in `list`). Defaults to `false` if omitted.
 
 Alias: `a`
 
@@ -46,6 +49,7 @@ Examples:
 - `add d/Coffee a/3.50 c/Food` — adds with today's date, category `Food`
 - `add d/Lunch a/12.00 c/food date/22-03-2026` — category normalised to `Food`, date parsed as 2026-03-22
 - `add d/Grab a/15.00 c/public transport date/yesterday` — category becomes `Public Transport`
+- `add d/Netflix a/18.00 c/Entertainment recurring/true` — marks as a recurring expense
 - `a d/Tea a/2.00 c/Food` — using alias
 
 Expected output:
@@ -56,26 +60,56 @@ ____________________________________________________________
 ____________________________________________________________
 ```
 
+Error cases:
+- `add d/Coffee a/5` (missing category) behaves as if `c/Uncategorised` was provided — defaults are applied silently.
+- `add d/Coffee a/NaN c/Food` or `a/Infinity` → `Amount must be a finite number. Usage: a/<amount>`
+- `add d/Coffee a/-5 c/Food` → `Amount must be a positive number. Usage: a/<amount>`
+- `add d/Coffee a/abc c/Food` → `Amount must be a number. Usage: a/<amount>`
+- `add d/Coffee d/Tea a/5 c/Food` (duplicate flag) → `Duplicate 'd/' detected. Please provide only one description.`
+- `add d/Alice|Bob a/20 c/Food` → `Description cannot contain '|' (reserved for save file format). Please use a different character.`
+- `add d/T a/5 c/Food date/29-02-2025` (Feb 29 on a non-leap year) → `Invalid date format. Accepted: YYYY-MM-DD, DD-MM-YYYY, 'today', 'yesterday'.`
+- `add d/T a/5 c/Food date/31-04-2026` (April has 30 days) → same invalid date error.
+
 ### Deleting an expense: `delete`
 
-Removes an expense from the list by its index.
+Removes an expense from the list by its index. SpendTrack will ask you to confirm before deleting.
 
 Format: `delete INDEX`
 
 - `INDEX` is 1-based (same numbering as `list`).
 - Use `list` first to find the index of the expense you want to delete.
+- Type `yes` to confirm deletion, or anything else to cancel.
 
 Alias: `d`
 
 Examples:
-- `delete 1` — removes the first expense
+- `delete 1` — prompts for confirmation, then removes the first expense
 - `d 2` — using alias, removes the second expense
 
-Expected output:
+Expected output (confirmed):
 ```
+____________________________________________________________
+ About to delete:
+   [Food] Coffee - $3.50 (2026-03-22)
+ Are you sure? (yes/no)
+ > yes
+____________________________________________________________
 ____________________________________________________________
  Expense deleted:
    [Food] Coffee - $3.50 (2026-03-22)
+____________________________________________________________
+```
+
+Expected output (cancelled):
+```
+____________________________________________________________
+ About to delete:
+   [Food] Coffee - $3.50 (2026-03-22)
+ Are you sure? (yes/no)
+ > no
+____________________________________________________________
+____________________________________________________________
+ Delete cancelled.
 ____________________________________________________________
 ```
 
@@ -165,17 +199,21 @@ SpendTrack automatically saves your expenses and budget to `data/spendtrack.txt`
 
 On startup, SpendTrack loads your saved data before accepting commands. If the save file is missing, the app starts with an empty list silently.
 
+Each expense is validated on load — entries with a blank description, non-positive amount, amount exceeding $1,000,000, or a date before the year 2000 are skipped with a warning. The rest of your data is still loaded normally.
+
 You do not need to run any save or load command. It happens automatically.
 
-**File encryption**
+**File format and integrity**
 
-The save file is encrypted using AES-128-CBC with a key derived from your machine (OS name and username). This means:
-- The file is not human-readable and cannot be manually edited.
-- If the file is tampered with, SpendTrack will detect this on startup, reject the file, and start fresh with a warning:
-  ```
-  Warning: save file could not be decrypted. It may have been tampered with or created on a different machine. Starting fresh.
-  ```
-- The save file is tied to your machine — it cannot be transferred to another computer.
+The save file (`data/spendtrack.txt`) is a human-readable, human-editable plain-text file. You can open it in any text editor.
+
+Each expense line includes a CRC32 checksum as the last field to detect accidental corruption:
+```
+Coffee|4.5|Food|2026-03-22|false|a3f2c1b4
+```
+- If a line is accidentally corrupted, the checksum mismatch causes only that line to be skipped with a warning. All other lines load normally.
+- If you manually edit a line, the checksum for that line will no longer match and it will be skipped on load.
+- The file can be freely copied to another computer.
 
 **Startup reminder**
 
@@ -195,73 +233,102 @@ This helps you avoid accidentally logging the same expense twice.
 
 ### Filtering expenses by date range: `filter`
 
-Shows only expenses whose date falls within the given range (inclusive).
+Shows only expenses whose date falls within the given range (inclusive), with an optional category filter.
 
-Format: `filter from/DATE to/DATE`
+Format: `filter from/DATE to/DATE [cat/CATEGORY]`
 
 - `DATE` accepts the same formats as the `add` command: `YYYY-MM-DD`, `DD-MM-YYYY`, `today`, `yesterday`.
 - The `from` date must not be after the `to` date.
+- `cat/CATEGORY` is optional. If provided, only expenses matching that category are shown (case-insensitive).
+- `CATEGORY` cannot contain `|`.
 - Filtering does not modify the expense list.
+- Recurring expenses are shown with `[R]` tag in filtered results.
+- Unknown tokens after the command are rejected with an error.
 
 Examples:
 
 - `filter from/2026-03-01 to/2026-03-31` — shows all expenses in March 2026
 - `filter from/today to/today` — shows only today's expenses
-- `filter from/2026-03-15 to/2026-03-22` — shows expenses between 15 and 22 March
+- `filter from/2026-03-15 to/2026-03-22 cat/Food` — shows only Food expenses between 15 and 22 March
 
-Expected output:
+Expected output (with category filter):
 ```
 ____________________________________________________________
- Expenses from 2026-03-15 to 2026-03-22
+ Expenses from 2026-03-15 to 2026-03-22 [Food]
 ____________________________________________________________
-  #    Category     Description  Date          Amount
-  ---  -----------  -----------  ----------    --------
-  1.   [Food]       Coffee       2026-03-15    $3.50
-  2.   [Transport]  Bus          2026-03-22    $1.80
+  #    Category  Description  Date          Amount
+  ---  --------  -----------  ----------    --------
+  1.   [Food]    Coffee       2026-03-15    $3.50
 ____________________________________________________________
- Total entries: 2
+ Total entries: 1
 ____________________________________________________________
 ```
 
 If no expenses fall in the range:
 ```
  No expenses found in the given date range.
+ Hint: Use 'filter from/YYYY-MM-DD to/YYYY-MM-DD [cat/CATEGORY]' to adjust the range.
 ```
 
 Error cases:
 - `filter from/2026-03-31 to/2026-03-01` → `Start date must be before end date.`
-- Missing `from/` or `to/` → `Usage: filter from/YYYY-MM-DD to/YYYY-MM-DD`
+- Missing `from/` or `to/` → `Usage: filter from/YYYY-MM-DD to/YYYY-MM-DD [cat/CATEGORY]`
+- `filter from/2026-03-01 from/2026-03-05 to/2026-03-31` (duplicate `from/`) → `Duplicate 'from/' detected. Please provide only one start date.`
+- `filter from/2026-03-01 to/2026-03-05 to/2026-03-31` (duplicate `to/`) → `Duplicate 'to/' detected. Please provide only one end date.`
+- `filter from/2026-03-01 to/2026-03-31 cat/Food cat/Transport` (duplicate `cat/`) → `Duplicate 'cat/' detected. Please provide only one category.`
+- `filter from/2026-03-01 to/2026-03-31 cat/Food|hack` → `Category cannot contain '|'.`
+- `filter from/2026-03-01 to/2026-03-31 garbage` → `Unknown filter option: 'garbage'.`
 
 ---
 
 ### Viewing a single expense: `find`
 
-Displays the full details of one expense by its index in the list.
+Displays the full details of one expense by its index, or lists all expenses whose description contains a keyword.
 
-Format: `find INDEX`
+Format: `find INDEX` or `find d/KEYWORD`
 
-- `INDEX` is 1-based (same numbering as `list`).
+- `INDEX` is 1-based (same numbering as `list`). No extra tokens are allowed after the index.
+- `KEYWORD` is case-insensitive and matched against the description. Cannot contain `|`.
 - Use `list` first to find the index of the expense you want.
 
 Examples:
 
 - `find 3` — shows full details of expense #3
+- `find d/coffee` — shows all expenses with "coffee" in the description (case-insensitive)
 
-Expected output:
+Expected output for `find 3`:
 ```
 ____________________________________________________________
- ===== Expense #3 =====
+ Expense #3 Details
+____________________________________________________________
  Description : Grab to airport
  Amount      : $24.50
  Category    : Transport
  Date        : 2026-03-15
+ Recurring   : No
+____________________________________________________________
+```
+
+Expected output for `find d/coffee`:
+```
+____________________________________________________________
+ Search results for: "coffee"
+____________________________________________________________
+  #    Category  Description  Date          Amount
+  ---  --------  -----------  ----------    --------
+  1.   [Food]    Coffee       2026-03-15    $3.50
+____________________________________________________________
+ Total entries: 1
 ____________________________________________________________
 ```
 
 Error cases:
 - `find 0` or `find 99` (out of range) → `Index X is out of range. There are Y expense(s).`
-- `find abc` → `Index must be a whole number. Usage: find <index>`
+- `find abc` → `Index must be a whole number. Usage: find <index> OR find d/<keyword>`
+- `find 1 extra` → `Too many arguments for 'find'.`
 - `find` on empty list → `No expenses recorded yet.`
+- `find d/` → `Keyword cannot be empty after 'd/'.`
+- `find d/coffee|hack` → `Keyword cannot contain '|'.`
 
 ---
 
@@ -319,6 +386,7 @@ If no recurring expenses exist:
 ```
  No recurring expenses found.
 ```
+- The sub-command is case-insensitive: `list RECURRING` and `list Recurring` both work.
 
 ---
 
@@ -326,9 +394,9 @@ If no recurring expenses exist:
 
 To mark an expense as recurring, add `recurring/true` to the `add` command.
 
-Format: `add d/DESCRIPTION a/AMOUNT c/CATEGORY [date/DATE] [recurring/true|false]`
+Format: `add d/DESCRIPTION a/AMOUNT [c/CATEGORY] [date/DATE] [recurring/true|false]`
 
-- `recurring/` accepts only `true` or `false`. Any other value shows an error.
+- `recurring/` accepts `true` or `false` (case-insensitive — `TRUE`, `True` also work). Any other value shows an error.
 - If omitted, defaults to `false`.
 - Recurring expenses are shown with `[R]` in the list.
 
@@ -347,6 +415,8 @@ Format: `edit INDEX [d/DESCRIPTION] [a/AMOUNT] [c/CATEGORY] [date/DATE] [recurri
 - `INDEX` is 1-based (same numbering as `list`).
 - At least one field must be provided.
 - Duplicate flags (e.g. `d/Latte d/Coffee`) are not allowed.
+- Changes are saved automatically after editing.
+- If the updated total meets or exceeds 90% of your budget, a warning is shown after editing.
 
 Examples:
 - `edit 1 d/Latte` — updates description only
@@ -367,7 +437,10 @@ Error cases:
 - `edit 999 d/Test` — index out of range → error message with valid range
 - `edit 1` — no fields provided → `No fields provided to edit. Usage: edit <index> [d/<desc>] [a/<amount>] [c/<category>] [date/<YYYY-MM-DD>] [recurring/true|false]`
 - `edit 1 a/-5` — negative amount → `Amount must be greater than 0.`
+- `edit 1 a/NaN` or `a/Infinity` → `Amount must be a finite number. Usage: a/<amount>`
 - `edit 1 d/` — empty description → `Description cannot be empty. Please provide a valid description after d/`
+- `edit 1 d/Alice|Bob` — pipe character in description → `Description cannot contain '|' (reserved for save file format). Please use a different character.`
+- `edit 1 date/29-02-2025` — invalid calendar date → `Invalid date format. Accepted: YYYY-MM-DD, DD-MM-YYYY, 'today', 'yesterday'.`
 - `edit abc d/Latte` — non-integer index → `Index must be a whole number.`
 
 ---
@@ -406,6 +479,8 @@ Error cases:
 - `budget -10` → `Budget must be greater than $0.00.`
 - `budget abc` → `budget requires a number. Usage: budget <amount>`
 - `budget` → `budget requires a number. Usage: budget <amount>`
+- `budget 0.001` or any amount below one cent → `Budget must be at least $0.01.`
+- `budget NaN` or `budget Infinity` → `Budget must be a finite number. Usage: budget <amount>`
 
 ---
 
@@ -430,7 +505,7 @@ Error cases:
 
 ### Viewing budget history: `budget history`
 
-Displays all previously set budgets in reverse chronological order (most recent first).
+Displays all previously set budgets in reverse chronological order (most recent first). Budget history is preserved after `budget reset` — resetting only clears the active limit, not the log.
 
 Format: `budget history`
 
@@ -487,6 +562,7 @@ Format: `clear`
 
 - You must type `yes` (case-insensitive) to confirm. Any other input cancels.
 - If the expense list is already empty, shows a message without prompting.
+- A `clear` operation can be reversed with the `undo` command immediately after (undo restores the full expense list and budget state).
 
 Example:
 ```
@@ -676,6 +752,7 @@ ____________________________________________________________
 
 Error cases:
 - `report 03-2026` or `report abc` → `Usage: report <YYYY-MM>`
+- `report 2026-13` or `report 2026-00` (month out of range) → `Invalid month. Use YYYY-MM with month between 01 and 12.`
 
 ---
 
@@ -710,6 +787,7 @@ ____________________________________________________________
 
 Error cases:
 - `month abc` or `month 03-2026` → `Usage: month <YYYY-MM>`
+- `month 2026-13` or `month 2026-00` (month out of range) → `Invalid month. Use YYYY-MM with month between 01 and 12.`
 
 ---
 
@@ -798,6 +876,9 @@ ____________________________________________________________
  No matches found.
 ____________________________________________________________
 ```
+
+Error cases:
+- `search` (no keyword) or `search    ` (whitespace only) → `Please provide a search keyword. Usage: search <keyword>`
 
 ---
 
@@ -933,7 +1014,7 @@ ____________________________________________________________
 
 **Q**: How do I transfer my data to another computer?
 
-**A**: The save file is encrypted with a machine-specific key, so it cannot be transferred directly to another computer. You will need to re-enter your expenses on the new machine.
+**A**: Copy `data/spendtrack.txt` to the same location on the new computer. The file is plain text and is not tied to any specific machine.
 
 **Q**: What date formats are accepted?
 
@@ -947,13 +1028,14 @@ ____________________________________________________________
 
 | Action            | Format | Alias |
 |-------------------|--------|-------|
-| Add expense       | `add d/DESC a/AMT c/CAT [date/DATE] [recurring/true\|false]` | `a` |
+| Add expense       | `add d/DESC a/AMT c/CAT [date/DATE] [recurring/true|false]` | `a` |
 | Delete expense    | `delete INDEX` | `d` |
-| Edit expense      | `edit INDEX [d/DESC] [a/AMT] [c/CAT] [date/DATE] [recurring/true\|false]` | — |
+| Edit expense      | `edit INDEX [d/DESC] [a/AMT] [c/CAT] [date/DATE] [recurring/true&#124;false]` | — |
 | List expenses     | `list` | `l` |
 | List recurring    | `list recurring` | — |
-| Filter by date    | `filter from/DATE to/DATE` | — |
+| Filter by date/category | `filter from/DATE to/DATE [cat/CATEGORY]` | — |
 | Find by index     | `find INDEX` | — |
+| Find by keyword   | `find d/KEYWORD` | — |
 | Summary           | `summary` | `s` |
 | Total             | `total` | — |
 | Set budget        | `budget AMOUNT` | `b` |

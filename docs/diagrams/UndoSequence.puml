@@ -12,8 +12,6 @@ participant ":UndoCommand" as UC
 participant ":ExpenseList" as EL
 participant ":Ui" as UI
 
-== User adds an expense ==
-
 User -> ST : "add d/Mistake a/999 c/Oops"
 activate ST
 ST -> P : parse(input, undoManager)
@@ -46,8 +44,6 @@ deactivate AC
 
 ST -> ST : storage.save(expenses)
 deactivate ST
-
-== User undoes the add ==
 
 User -> ST : "undo"
 activate ST
