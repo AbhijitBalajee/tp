@@ -51,11 +51,12 @@ SpendTrack is a CLI expense tracker for NUS students who prefer typing over clic
 - Filter and Find feature section with design considerations (list immutability, index validation)
 - User stories for save/load, filter, find, and startup reminder features
 - UML diagrams:
-  - Sequence diagram: full SpendTrack runtime architecture (`ArchitectureSequence`)
-  - Sequence diagram: delete command flow with index validation and auto-save (`DeleteCommandSequence`)
-  - Sequence diagram: Storage startup load flow including startup reminder (`StorageLoadSequence`)
-  - Class diagram: Storage, ExpenseList, Expense, SpendTrack relationships (`StorageClassDiagram`)
-  - Sequence diagram: filter and find command execution flows (`FilterFindSequence`)
+    - Sequence diagram: full SpendTrack runtime architecture (`ArchitectureSequence`)
+    - Sequence diagram: delete command flow with index validation and auto-save (`DeleteCommandSequence`)
+    - Sequence diagram: Storage startup load flow including startup reminder (`StorageLoadSequence`)
+    - Class diagram: Storage, ExpenseList, Expense, SpendTrack relationships (`StorageClassDiagram`)
+    - Sequence diagram: filter and find command execution flows (`FilterFindSequence`)
+
 
 ### Contributions to team-based tasks
 

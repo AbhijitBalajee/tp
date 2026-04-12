@@ -875,35 +875,35 @@ Example: `help` or `h`
 
 Expected output:
 ```
-____________________________________________________________
+________________________________________________________________________________________________________
  Here are the commands you can use:
-  add (a) d/DESC a/AMT c/CAT [date/DATE]           -- add expense
-  delete (d) INDEX                                 -- delete expense
-  list (l)                                         -- list all
-  list recurring                                   -- list recurring only
-  summary (s)                                      -- category breakdown
-  total                                            -- show total
-  budget (b) AMOUNT                                -- set budget
-  budget reset                                     -- reset budget
-  budget history                                   -- view budget history
-  remaining                                        -- show remaining
-  edit INDEX [d/DESC] [a/AMT] [c/CAT] [date/DATE]  -- edit expense
-  filter from/DATE to/DATE                         -- filter by date
-  find INDEX                                       -- view expense details
-  search KEYWORD                                   -- search by keyword
-  sort                                             -- sort by amount
-  top N                                            -- top N expenses
-  last N                                           -- last N added
-  report YYYY-MM                                   -- monthly report
-  month YYYY-MM                                    -- list by month
-  clear                                            -- clear all
-  undo                                             -- undo last
-  export csv                                       -- export to CSV
-  goal g/AMOUNT                                    -- set savings goal
-  goal status                                      -- check goal
-  help (h)                                         -- show this help
-  bye                                              -- exit
-____________________________________________________________
+  add (a) d/DESC a/AMT c/CAT [date/DATE] [recurring/true]                     -- add expense
+  delete (d) INDEX                                                            -- delete expense
+  list (l)                                                                    -- list all
+  list recurring                                                              -- list recurring only
+  summary (s)                                                                 -- category breakdown
+  total                                                                       -- show total
+  budget (b) AMOUNT                                                           -- set budget
+  budget reset                                                                -- reset budget
+  budget history                                                              -- view budget history
+  remaining                                                                   -- show remaining
+  edit INDEX [d/DESC] [a/AMT] [c/CAT] [date/DATE] [recurring/true|false]      -- edit expense
+  filter from/DATE to/DATE                                                    -- filter by date
+  find INDEX                                                                  -- view expense details
+  search KEYWORD                                                              -- search by keyword
+  sort                                                                        -- sort by amount
+  top N                                                                       -- top N expenses
+  last N                                                                      -- last N added
+  report YYYY-MM                                                              -- monthly report
+  month YYYY-MM                                                               -- list by month
+  clear                                                                       -- clear all
+  undo                                                                        -- undo last
+  export csv                                                                  -- export to CSV
+  goal g/AMOUNT                                                               -- set savings goal
+  goal status                                                                 -- check goal
+  help (h)                                                                    -- show this help
+  bye                                                                         -- exit
+________________________________________________________________________________________________________
 ```
 
 ---
