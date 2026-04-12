@@ -48,9 +48,7 @@ SpendTrack is a CLI expense tracker for NUS students who prefer typing over clic
 - Setting a monthly budget section with examples, expected output, and error cases
 - Budget reset section
 - Budget history section
-- Delete expense section
-- Total and remaining balance sections
-- Updated command summary table with all commands including edit, list recurring, budget reset, budget history
+- Updated command summary table to include edit, list recurring, budget reset, budget history
 - Undo section updates (v2.1): documented all mutating commands that consume the undo slot (including `budget` / `b` and `budget reset`), and that undo restores **budget history** together with expenses and current budget
 - Error cases for invalid `list` arguments and for extra tokens after `budget reset` / `budget history`
 
