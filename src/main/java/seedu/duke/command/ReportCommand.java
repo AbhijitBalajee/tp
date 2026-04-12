@@ -79,10 +79,10 @@ public class ReportCommand extends Command {
             sb.append(" Total spent: $").append(String.format("%.2f", total)).append("\n");
             sb.append(" Breakdown by category:\n");
 
-            for (Map.Entry<String, Double> entry : categoryTotals.entrySet()) {
-                sb.append("  - ").append(entry.getKey()).append(": $")
-                        .append(String.format("%.2f", entry.getValue())).append("\n");
-            }
+            categoryTotals.entrySet().stream()
+                    .sorted(Map.Entry.<String, Double>comparingByValue().reversed())
+                    .forEach(entry -> sb.append("  - ").append(entry.getKey()).append(": $")
+                            .append(String.format("%.2f", entry.getValue())).append("\n"));
 
             // Display result
             ui.showMessage(sb.toString().trim());
