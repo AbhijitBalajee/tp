@@ -4,10 +4,10 @@ skinparam backgroundColor BGCOLOR
 skinparam sequenceMessageAlign center
 
 actor User
-participant ":SpendTrack" as ST
-participant "Parser" as P
-participant ":ExpenseList" as EL
-participant ":Ui" as UI
+participant "<u>:SpendTrack</u>" as ST
+participant "<<class>>\nParser" as P
+participant "<u>:ExpenseList</u>" as EL
+participant "<u>:Ui</u>" as UI
 
 User -> ST : "list" or "list recurring"
 activate ST
@@ -15,7 +15,7 @@ ST -> P : parse(input)
 activate P
 P -> P : check for "recurring" token
 
-create participant ":ListCommand" as LC
+create participant "<u>:ListCommand</u>" as LC
 P -> LC : new ListCommand(recurringOnly)
 activate LC
 LC --> P
@@ -38,7 +38,7 @@ alt recurringOnly == false
         Calculates dynamic column
         widths before printing rows
     end note
-    UI --> User : formatted expense table
+    UI --> LC : formatted expense table
     deactivate UI
 else recurringOnly == true
     LC -> UI : showRecurringList(expenses)
@@ -51,10 +51,12 @@ else recurringOnly == true
         Filters to isRecurring == true
         then prints with dynamic widths
     end note
-    UI --> User : recurring expense table
+    UI --> LC : recurring expense table
     deactivate UI
 end
 
+LC --> ST
 deactivate LC
+ST --> User : expense table
 deactivate ST
 @enduml

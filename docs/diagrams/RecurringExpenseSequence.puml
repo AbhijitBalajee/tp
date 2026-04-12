@@ -4,10 +4,10 @@ skinparam backgroundColor BGCOLOR
 skinparam sequenceMessageAlign center
 
 actor User
-participant ":SpendTrack" as ST
-participant "Parser" as P
-participant ":ExpenseList" as EL
-participant ":Ui" as UI
+participant "<u>:SpendTrack</u>" as ST
+participant "<<class>>\nParser" as P
+participant "<u>:ExpenseList</u>" as EL
+participant "<u>:Ui</u>" as UI
 
 note over ST, UI : Add recurring expense
 
@@ -21,7 +21,7 @@ note right of P
     validates value is true or false
 end note
 
-create participant ":AddCommand" as AC
+create participant "<u>:AddCommand</u>" as AC
 P -> AC : new AddCommand(..., isRecurring=true)
 activate AC
 AC --> P
@@ -32,16 +32,18 @@ deactivate P
 
 ST -> AC : execute(expenseList, ui)
 activate AC
-AC -> ":Expense" as E ** : new Expense(..., isRecurring=true)
+AC -> "<u>:Expense</u>" as E ** : new Expense(..., isRecurring=true)
 AC -> EL : addExpense(expense)
 activate EL
 EL --> AC
 deactivate EL
 AC -> UI : showAddSuccess(expense)
 activate UI
-UI --> User : "New expense added: ... [R]"
+UI --> AC
 deactivate UI
+AC --> ST : "New expense added: ... [R]"
 deactivate AC
+ST --> User : "New expense added: ... [R]"
 deactivate ST
 
 note over ST, UI : List recurring expenses
@@ -51,7 +53,7 @@ activate ST
 ST -> P : parse("list recurring")
 activate P
 
-create participant ":ListCommand" as LC
+create participant "<u>:ListCommand</u>" as LC
 P -> LC : new ListCommand(recurringOnly=true)
 activate LC
 LC --> P
@@ -72,8 +74,10 @@ note right of UI
     Filters expenses where
     isRecurring == true
 end note
-UI --> User : recurring expense table
+UI --> LC : recurring expense table
 deactivate UI
+LC --> ST
 deactivate LC
+ST --> User : recurring expense table
 deactivate ST
 @enduml
