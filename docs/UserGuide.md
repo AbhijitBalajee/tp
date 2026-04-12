@@ -69,6 +69,8 @@ Error cases:
 - `add d/Alice|Bob a/20 c/Food` → `Description cannot contain '|' (reserved for save file format). Please use a different character.`
 - `add d/T a/5 c/Food date/29-02-2025` (Feb 29 on a non-leap year) → `Invalid date format. Accepted: YYYY-MM-DD, DD-MM-YYYY, 'today', 'yesterday'.`
 - `add d/T a/5 c/Food date/31-04-2026` (April has 30 days) → same invalid date error.
+- `add d/Coffee a/5 da/today` (invalid prefix) → `Unrecognised token: 'da/today'. Valid flags are: d/, a/, c/, date/, recurring/`
+- `add d/buy a/c adapter a/50 c/Electronics` (flag prefix in description) → `Description contains flag-like pattern 'a/'. Please remove or rephrase to avoid ambiguity.`
 
 ### Deleting an expense: `delete`
 
@@ -157,9 +159,9 @@ Expected output:
 ```
 ____________________________________________________________
  ===== Spending Summary =====
- Food            : $15.50    (48%)  | 2 txns  | avg $7.75  | max $12.00
- Public Transport: $15.00    (46%)  | 1 txn  | avg $15.00  | max $15.00
- Transport       : $1.80     (6%)  | 1 txn  | avg $1.80  | max $1.80
+ Food            : $15.50    ( 48%)  | 2 txns  | avg $7.75  | max $12.00
+ Public Transport: $15.00    ( 46%)  | 1 txn  | avg $15.00  | max $15.00
+ Transport       : $1.80     (  6%)  | 1 txn  | avg $1.80  | max $1.80
  ----------------------------
  Total           : $32.30
 ____________________________________________________________
@@ -191,7 +193,7 @@ Most commands have single-letter shortcuts for faster input:
 
 Aliases work exactly like the full command. For example, `a d/Coffee a/3.50 c/Food` is identical to `add d/Coffee a/3.50 c/Food`.
 
-Commands are case-insensitive: `ADD`, `Add`, and `add` all work.
+Commands and flags are case-insensitive: `ADD D/Coffee A/5 C/Food` works the same as `add d/Coffee a/5 c/Food`.
 
 ### Saving and loading data: auto-save
 
