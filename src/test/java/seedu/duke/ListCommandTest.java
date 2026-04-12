@@ -16,6 +16,11 @@ public class ListCommandTest {
     }
 
     @Test
+    public void listCommand_recurringMode_isNotExit() {
+        assertFalse(new ListCommand(true).isExit());
+    }
+
+    @Test
     public void listCommand_executesOnEmptyList() {
         ExpenseList expenses = new ExpenseList();
         // Just checks it doesn't throw on empty list

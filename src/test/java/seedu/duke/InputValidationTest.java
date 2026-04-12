@@ -103,6 +103,30 @@ public class InputValidationTest {
                 Parser.parse("budget 500"));
     }
 
+    @Test
+    void parse_budgetNaN_throwsException() {
+        assertThrows(SpendTrackException.class, () ->
+                Parser.parse("budget NaN"));
+    }
+
+    @Test
+    void parse_budgetInfinity_throwsException() {
+        assertThrows(SpendTrackException.class, () ->
+                Parser.parse("budget Infinity"));
+    }
+
+    @Test
+    void parse_budgetResetWithExtra_throwsException() {
+        assertThrows(SpendTrackException.class, () ->
+                Parser.parse("budget reset now"));
+    }
+
+    @Test
+    void parse_budgetHistoryWithExtra_throwsException() {
+        assertThrows(SpendTrackException.class, () ->
+                Parser.parse("budget history all"));
+    }
+
     // @@author
 
     // ── Edit command validation ───────────────────────────────────────────────
@@ -244,6 +268,12 @@ public class InputValidationTest {
     @Test
     void parse_listAliasL_returnsListCommand() throws SpendTrackException {
         assertTrue(Parser.parse("l") instanceof ListCommand);
+    }
+
+    @Test
+    void parse_listInvalidSubcommand_throwsException() {
+        assertThrows(SpendTrackException.class, () ->
+                Parser.parse("list foo"));
     }
 
     // @@author
