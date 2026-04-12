@@ -195,17 +195,22 @@ public class ExpenseList {
     }
 
     /**
-     * Replaces the current expenses and budget with the given snapshot data.
+     * Replaces the current expenses, budget, and budget history with the given snapshot data.
      * Used by UndoManager to restore a previous state.
      *
      * @param restoredExpenses the list of expenses to restore
      * @param restoredBudget the budget amount to restore
+     * @param restoredBudgetHistory budget history entries to restore (copied defensively)
      */
-    public void restoreFrom(ArrayList<Expense> restoredExpenses, double restoredBudget) {
+    public void restoreFrom(ArrayList<Expense> restoredExpenses, double restoredBudget,
+            ArrayList<String> restoredBudgetHistory) {
         assert restoredExpenses != null : "Restored expenses should not be null";
+        assert restoredBudgetHistory != null : "Restored budget history should not be null";
         this.expenses = new ArrayList<>(restoredExpenses);
         this.budget = restoredBudget;
-        logger.info("Expenses restored: " + expenses.size() + " entries, budget=" + budget);
+        this.budgetHistory = new ArrayList<>(restoredBudgetHistory);
+        logger.info("Expenses restored: " + expenses.size() + " entries, budget=" + budget
+                + ", budgetHistoryEntries=" + budgetHistory.size());
     }
 
     // @@author pranavjana
