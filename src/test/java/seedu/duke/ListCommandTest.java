@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import seedu.duke.command.ListCommand;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
+// @@author AbhijitBalajee
 public class ListCommandTest {
 
     @Test
@@ -31,3 +32,4 @@ public class ListCommandTest {
         cmd.execute(expenses, new Ui());
     }
 }
+// @@author

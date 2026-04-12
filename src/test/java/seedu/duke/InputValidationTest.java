@@ -83,6 +83,7 @@ public class InputValidationTest {
     }
 
     // ── Budget command validation ─────────────────────────────────────────────
+    // @@author AbhijitBalajee
 
     @Test
     void parse_budgetNonNumeric_throwsException() {
@@ -101,6 +102,8 @@ public class InputValidationTest {
         assertDoesNotThrow(() ->
                 Parser.parse("budget 500"));
     }
+
+    // @@author
 
     // ── Edit command validation ───────────────────────────────────────────────
 
@@ -226,6 +229,7 @@ public class InputValidationTest {
     }
 
     // ── List command validation ───────────────────────────────────────────────
+    // @@author AbhijitBalajee
 
     @Test
     void parse_listPlain_returnsListCommand() throws SpendTrackException {
@@ -241,6 +245,8 @@ public class InputValidationTest {
     void parse_listAliasL_returnsListCommand() throws SpendTrackException {
         assertTrue(Parser.parse("l") instanceof ListCommand);
     }
+
+    // @@author
 
     // ── Alias resolution ─────────────────────────────────────────────────────
 

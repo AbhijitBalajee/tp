@@ -170,6 +170,7 @@ public class Ui {
      * @param old     the original expense before editing
      * @param updated the updated expense after editing
      */
+    // @@author AbhijitBalajee
     public void showEditSuccess(int index, Expense old, Expense updated) {
         assert old != null : "Old expense should not be null";
         assert updated != null : "Updated expense should not be null";
@@ -179,12 +180,14 @@ public class Ui {
         System.out.println("   After:  " + updated);
         System.out.println(LINE);
     }
+    // @@author
 
     /**
      * Displays all expenses in a formatted table.
      *
      * @param expenses the list of expenses to display
      */
+    // @@author AbhijitBalajee
     public void showExpenseList(ExpenseList expenses) {
         assert expenses != null : "ExpenseList passed to showExpenseList should not be null";
 
@@ -250,12 +253,14 @@ public class Ui {
         System.out.println(" Total entries: " + expenses.size());
         System.out.println(LINE);
     }
+    // @@author
 
     /**
      * Displays only recurring expenses.
      *
      * @param expenses the full expense list to filter from
      */
+    // @@author AbhijitBalajee
     public void showRecurringList(ExpenseList expenses) {
         assert expenses != null : "ExpenseList should not be null";
 
@@ -321,6 +326,7 @@ public class Ui {
         System.out.println(" Total recurring: " + recurring.size());
         System.out.println(LINE);
     }
+    // @@author
 
     /**
      * Displays the total sum of all expenses.
@@ -341,6 +347,7 @@ public class Ui {
      * @param budget     the budget amount set
      * @param totalSpent the current total spent
      */
+    // @@author AbhijitBalajee
     public void showBudgetSet(double budget, double totalSpent) {
         assert budget > 0 : "Budget should be positive when showing budget set message";
         System.out.println(LINE);
@@ -414,6 +421,7 @@ public class Ui {
 
         System.out.println(LINE);
     }
+    // @@author
 
     /**
      * Displays the remaining balance against the set budget.
@@ -617,7 +625,7 @@ public class Ui {
                     ? "Uncategorised" : e.getCategory();
             String expDesc = (e.getDescription() == null || e.getDescription().isBlank())
                     ? "(no description)" : e.getDescription();
-            // @@author Ariff1422
+            // @@author AbhijitBalajee
             String recurringTag = e.isRecurring() ? " [R]" : "";
             // @@author
             catWidth = Math.max(catWidth, expCat.length() + 2);
@@ -641,7 +649,7 @@ public class Ui {
                     ? "Uncategorised" : e.getCategory();
             String expDesc = (e.getDescription() == null || e.getDescription().isBlank())
                     ? "(no description)" : e.getDescription();
-            // @@author Ariff1422
+            // @@author AbhijitBalajee
             String recurringTag = e.isRecurring() ? " [R]" : "";
             // @@author
             String date = (e.getDate() != null) ? e.getDate().toString() : "-";

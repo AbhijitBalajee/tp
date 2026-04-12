@@ -25,7 +25,9 @@ public class AddCommand extends Command {
     private final double amount;
     private final String category;
     private final LocalDate date;
+    // @@author AbhijitBalajee
     private final boolean isRecurring;
+    // @@author
 
     /**
      * Constructs an AddCommand without recurring flag (defaults to false).
@@ -40,7 +42,9 @@ public class AddCommand extends Command {
         this.amount = amount;
         this.category = category;
         this.date = date;
+        // @@author AbhijitBalajee
         this.isRecurring = false;
+        // @@author
     }
 
     /**
@@ -52,6 +56,7 @@ public class AddCommand extends Command {
      * @param date the date of the expense
      * @param isRecurring whether the expense is recurring
      */
+    // @@author AbhijitBalajee
     public AddCommand(String description, double amount, String category,
                       LocalDate date, boolean isRecurring) {
         this.description = description;
@@ -60,6 +65,7 @@ public class AddCommand extends Command {
         this.date = date;
         this.isRecurring = isRecurring;
     }
+    // @@author
 
     /**
      * Executes the add command by creating and storing a new expense.
@@ -74,10 +80,12 @@ public class AddCommand extends Command {
         assert ui != null : "Ui should not be null";
         assert amount > 0 : "Amount must be greater than 0";
 
+        // @@author AbhijitBalajee
         logger.info("Adding expense: " + description + ", amount: " + amount
                 + ", category: " + category + ", date: " + date
                 + ", recurring: " + isRecurring);
         Expense expense = new Expense(description, amount, category, date, isRecurring);
+        // @@author
         expenses.addExpense(expense);
         ui.showAddSuccess(expense);
         // @@author pranavjana
