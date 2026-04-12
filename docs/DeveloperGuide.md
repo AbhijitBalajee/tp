@@ -88,10 +88,10 @@ Index range validation happens in `DeleteCommand.execute()`, not in `Parser`. Th
 The add expense feature allows users to record a new expense with a description, amount, category, and optional date using the command:
 
 ```
-add d/DESCRIPTION a/AMOUNT c/CATEGORY [date/DATE]
+add d/DESCRIPTION a/AMOUNT [c/CATEGORY] [date/DATE] [recurring/true|false]
 ```
 
-The `date/` parameter accepts multiple formats: `YYYY-MM-DD`, `DD-MM-YYYY`, `today`, or `yesterday`. If omitted, the expense is tagged with today's date. Categories are automatically normalised to title case (e.g., `food` becomes `Food`, `public transport` becomes `Public Transport`).
+The `date/` parameter accepts multiple formats: `YYYY-MM-DD`, `DD-MM-YYYY`, `today`, or `yesterday`. If omitted, the expense is tagged with today's date. Categories are automatically normalised to title case (e.g., `food` becomes `Food`, `public transport` becomes `Public Transport`). All flags are case-insensitive (`D/`, `A/`, `C/`, `DATE/`, `RECURRING/` work the same as their lowercase equivalents).
 
 #### How it works
 
@@ -100,7 +100,7 @@ The add mechanism follows the Command pattern used throughout SpendTrack. The fo
 1. The user enters `add d/Coffee a/3.50 c/food date/22-03-2026`.
 2. `SpendTrack.run()` passes the raw input to `Parser.parse()`.
 3. `Parser.parse()` lowercases the command word and checks the `ALIASES` map (e.g., `a` resolves to `add`). It then delegates to `Parser.parseAddCommand()`.
-4. `parseAddCommand()` uses a regex lookahead to split the arguments into tokens. Each token starts with a flag prefix (`d/`, `a/`, `c/`, `date/`, or `recurring/`), allowing the user to enter them in any order.
+4. `parseAddCommand()` uses a case-insensitive regex lookahead to split the arguments into tokens. Each token starts with a flag prefix (`d/`, `a/`, `c/`, `date/`, or `recurring/`), allowing the user to enter them in any order and in any case. Tokens that do not match any recognised flag prefix are rejected with an error message. Descriptions containing flag-like patterns (e.g., `a/c`) are also rejected to prevent ambiguous parsing.
 5. The `c/` value is passed through `normalizeCategory()`, which capitalises the first letter of each word.
 6. The `date/` value is passed to `DateParser.parse()`, which tries multiple date formats in sequence (see [Flexible Date Parsing](#flexible-date-parsing-dateparser) below).
 7. The extracted values are used to create a new `AddCommand` object.
