@@ -159,6 +159,7 @@ public class ExpenseList {
      */
     public void resetBudget() {
         this.budget = 0.0;
+        this.budgetHistory.add(LocalDate.now() + "|" + 0.0);
         logger.info("Budget reset to 0.0");
     }
   
