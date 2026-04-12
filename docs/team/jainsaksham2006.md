@@ -69,11 +69,11 @@ SpendTrack is a CLI expense tracker for NUS students who prefer typing over clic
 - Ensured all features follow modular command-based architecture and adhere to separation of concerns.
 
 - UML diagrams:
-    - Activity diagram: search command execution flow with keyword matching and result display
-    - Activity diagram: report command aggregation logic with monthly filtering and category totals
-    - Activity diagram: top command execution flow including validation, sorting, and capped output
-    - Sequence diagram: remaining command execution flow with budget validation and balance calculation
-    - Class diagram: command hierarchy and interactions between Command, ExpenseList, and Ui
+    - Activity diagram: Search command execution flow
+    - Activity diagram: Report command aggregation logic
+    - Activity diagram: Top/Last command execution flow
+    - Sequence diagram: Remaining command execution flow
+    - Class diagram: Command hierarchy and interactions with ExpenseList and Ui
 
 - Explained trade-offs between simplicity, performance, and correctness across implemented features
 - Ensured alignment with overall architecture and maintained separation of concerns across commands
@@ -90,3 +90,4 @@ SpendTrack is a CLI expense tracker for NUS students who prefer typing over clic
 
 - Participated in PR reviews and debugging discussions
 - Suggested improvements in command design and validation handling
+
