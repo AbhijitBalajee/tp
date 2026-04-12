@@ -18,6 +18,7 @@ public class UndoManager {
 
     private ArrayList<Expense> snapshot;
     private double snapshotBudget;
+    private ArrayList<String> snapshotBudgetHistory;
     private boolean hasSnapshot;
 
     /**
@@ -26,11 +27,12 @@ public class UndoManager {
     public UndoManager() {
         this.snapshot = null;
         this.snapshotBudget = 0.0;
+        this.snapshotBudgetHistory = null;
         this.hasSnapshot = false;
     }
 
     /**
-     * Saves a deep copy of the current expense list and budget as a snapshot.
+     * Saves a deep copy of the current expense list, budget, and budget history as a snapshot.
      * Overwrites any previously stored snapshot.
      *
      * @param expenses the expense list to snapshot
@@ -40,8 +42,10 @@ public class UndoManager {
 
         snapshot = deepCopyExpenses(expenses.getExpenses());
         snapshotBudget = expenses.getBudget();
+        snapshotBudgetHistory = new ArrayList<>(expenses.getBudgetHistory());
         hasSnapshot = true;
-        logger.info("Snapshot saved: " + snapshot.size() + " expenses, budget=" + snapshotBudget);
+        logger.info("Snapshot saved: " + snapshot.size() + " expenses, budget=" + snapshotBudget
+                + ", budgetHistoryEntries=" + snapshotBudgetHistory.size());
     }
 
     /**
@@ -59,9 +63,10 @@ public class UndoManager {
             return false;
         }
 
-        expenses.restoreFrom(snapshot, snapshotBudget);
+        expenses.restoreFrom(snapshot, snapshotBudget, snapshotBudgetHistory);
         hasSnapshot = false;
         snapshot = null;
+        snapshotBudgetHistory = null;
         logger.info("Snapshot restored successfully.");
         return true;
     }
