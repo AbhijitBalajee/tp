@@ -4,11 +4,11 @@ skinparam backgroundColor BGCOLOR
 skinparam sequenceMessageAlign center
 
 actor User
-participant ":SpendTrack" as ST
-participant ":Storage" as S
-participant ":ExpenseList" as EL
-participant ":Expense" as E
-participant ":Ui" as UI
+participant "<u>:SpendTrack</u>" as ST
+participant "<u>:Storage</u>" as S
+participant "<u>:ExpenseList</u>" as EL
+participant "<u>:Expense</u>" as E
+participant "<u>:Ui</u>" as UI
 
 User -> ST : launch app
 activate ST
@@ -17,41 +17,40 @@ ST -> S : load(expenseList)
 activate S
 
 alt save file exists
-    S -> S : readAllBytes(file)
-    S -> S : decrypt(ciphertext)
-
-    alt decryption fails (tampered or wrong machine)
-        S -> S : print tamper warning
-        S --> ST
-    else decryption succeeds (valid file)
-        loop for each line in plainText
-            alt line is EXPENSES marker
-                S -> S : set mode = EXPENSES
-            else line is BUDGET marker
-                S -> S : set mode = BUDGET
-            else line is BUDGET-HISTORY marker
-                S -> S : set mode = HISTORY
-            else mode = EXPENSES
-                S -> S : parseLine(line)
-                S -> E ** : new Expense(desc, amt, cat, date)
-                S -> EL : addExpense(expense)
-                activate EL
-                EL --> S
-                deactivate EL
-            else mode = BUDGET
-                S -> EL : setBudgetDirectly(amount)
-                activate EL
-                EL --> S
-                deactivate EL
-            else mode = HISTORY
-                S -> EL : addBudgetHistory(entry)
-                activate EL
-                EL --> S
-                deactivate EL
+    loop for each line in file
+        alt line is EXPENSES marker
+            S -> S : set mode = EXPENSES
+        else line is BUDGET marker
+            S -> S : set mode = BUDGET
+        else line is BUDGET-HISTORY marker
+            S -> S : set mode = HISTORY
+        else mode = EXPENSES
+            S -> S : parseLine(line)
+            opt checksum mismatch
+                S -> S : print tamper warning, skip line
             end
+            S -> S : validateExpense(desc, amt, date)
+            opt validation fails
+                S -> S : print warning, skip line
+            end
+            S -> E ** : new Expense(desc, amt, cat, date, recurring)
+            S -> EL : addExpense(expense)
+            activate EL
+            EL --> S
+            deactivate EL
+        else mode = BUDGET
+            S -> EL : setBudgetDirectly(amount)
+            activate EL
+            EL --> S
+            deactivate EL
+        else mode = HISTORY
+            S -> EL : addBudgetHistory(entry)
+            activate EL
+            EL --> S
+            deactivate EL
         end
-        S --> ST
     end
+    S --> ST
 else save file missing
     S -> S : log "No save file found. Starting fresh."
     S --> ST

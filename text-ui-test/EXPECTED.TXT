@@ -18,6 +18,11 @@ ____________________________________________________________
    [Transport] MRT top-up - $10.00 (2026-03-22)
 ____________________________________________________________
  > ____________________________________________________________
+ About to delete:
+   [Food] Coffee - $4.50 (2026-03-22)
+ Are you sure? (yes/no)
+ > ____________________________________________________________
+____________________________________________________________
  Expense deleted:
    [Food] Coffee - $4.50 (2026-03-22)
 ____________________________________________________________
@@ -65,6 +70,7 @@ ____________________________________________________________
  Amount      : $10.00
  Category    : Transport
  Date        : 2026-03-22
+ Recurring   : No
 ____________________________________________________________
  > ____________________________________________________________
  Error: Index 99 is out of range. There are 2 expense(s).
@@ -84,7 +90,7 @@ ____________________________________________________________
  Expenses from 2026-01-01 to 2026-01-31
 ____________________________________________________________
  No expenses found in the given date range.
- Hint: Use 'filter from/YYYY-MM-DD to/YYYY-MM-DD' to adjust the range.
+ Hint: Use 'filter from/YYYY-MM-DD to/YYYY-MM-DD [cat/CATEGORY]' to adjust the range.
 ____________________________________________________________
  > ____________________________________________________________
  Error: Start date must be before end date.
@@ -92,7 +98,7 @@ ____________________________________________________________
  > ____________________________________________________________
  Available Commands
 ____________________________________________________________
-  add (a) d/DESC a/AMT c/CAT [date/DATE]           -- add expense
+  add (a) d/DESC a/AMT c/CAT [date/DATE] [recurring/true] -- add expense
   delete (d) INDEX                                 -- delete expense
   list (l)                                         -- list all
   list recurring                                   -- list recurring only
@@ -102,7 +108,7 @@ ____________________________________________________________
   budget reset                                     -- reset budget
   budget history                                   -- view budget history
   remaining                                        -- show remaining
-  edit INDEX [d/DESC] [a/AMT] [c/CAT] [date/DATE]  -- edit expense
+  edit INDEX [d/DESC] [a/AMT] [c/CAT] [date/DATE] [recurring/true|false] -- edit expense
   filter from/DATE to/DATE                         -- filter by date
   find INDEX                                       -- view expense details
   search KEYWORD                                   -- search by keyword
@@ -140,9 +146,9 @@ ____________________________________________________________
 ____________________________________________________________
  > ____________________________________________________________
  ===== Spending Summary =====
- Transport       : $12.00    (47%)  | 2 txns  | avg $6.00  | max $10.00
- Food            : $8.50     (33%)  | 3 txns  | avg $2.83  | max $3.50
- Events          : $5.00     (20%)  | 1 txn  | avg $5.00  | max $5.00
+ Transport       : $12.00    ( 47%)  | 2 txns  | avg $6.00  | max $10.00
+ Food            : $8.50     ( 33%)  | 3 txns  | avg $2.83  | max $3.50
+ Events          : $5.00     ( 20%)  | 1 txn  | avg $5.00  | max $5.00
  ----------------------------
  Total           : $25.50
 ____________________________________________________________

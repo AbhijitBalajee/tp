@@ -1,3 +1,4 @@
+// @@author AbhijitBalajee
 package seedu.duke.command;
 
 import java.util.logging.Level;
@@ -64,6 +65,11 @@ public class BudgetCommand extends Command {
         if (amount <= 0) {
             throw new SpendTrackException("Budget must be greater than $0.00.");
         }
+        // @@author AfshalG
+        if (amount < 0.01) {
+            throw new SpendTrackException("Budget must be at least $0.01.");
+        }
+        // @@author
         if (amount > MAX_BUDGET) {
             throw new SpendTrackException("Budget cannot exceed $1,000,000.00.");
         }
@@ -74,3 +80,4 @@ public class BudgetCommand extends Command {
         return true;
     }
 }
+// @@author

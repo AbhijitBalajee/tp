@@ -4,10 +4,10 @@ skinparam backgroundColor BGCOLOR
 skinparam sequenceMessageAlign center
 
 actor User
-participant ":SpendTrack" as ST
-participant "Parser" as P
-participant ":ExpenseList" as EL
-participant ":Ui" as UI
+participant "<u>:SpendTrack</u>" as ST
+participant "<<class>>\nParser" as P
+participant "<u>:ExpenseList</u>" as EL
+participant "<u>:Ui</u>" as UI
 
 note over ST, UI : Set budget
 
@@ -17,7 +17,7 @@ ST -> P : parse("budget 500")
 activate P
 P -> P : parseBudgetCommand("500")
 
-create participant ":BudgetCommand" as BC
+create participant "<u>:BudgetCommand</u>" as BC
 P -> BC : new BudgetCommand(500.0)
 activate BC
 BC --> P
@@ -40,9 +40,11 @@ EL --> BC : totalSpent
 deactivate EL
 BC -> UI : showBudgetSet(500.0, totalSpent)
 activate UI
-UI --> User : budget confirmation
+UI --> BC
 deactivate UI
+BC --> ST : budget confirmation
 deactivate BC
+ST --> User : budget confirmation
 deactivate ST
 
 note over ST, UI : Reset budget
@@ -52,7 +54,7 @@ activate ST
 ST -> P : parse("budget reset")
 activate P
 
-create participant ":BudgetResetCommand" as BRC
+create participant "<u>:BudgetResetCommand</u>" as BRC
 P -> BRC : new BudgetResetCommand()
 activate BRC
 BRC --> P
@@ -69,13 +71,16 @@ EL --> BRC : true
 deactivate EL
 BRC -> EL : resetBudget()
 activate EL
+EL -> EL : budgetHistory.add(date|0.0)
 EL --> BRC
 deactivate EL
 BRC -> UI : showBudgetReset()
 activate UI
-UI --> User : reset confirmation
+UI --> BRC
 deactivate UI
+BRC --> ST : reset confirmation
 deactivate BRC
+ST --> User : reset confirmation
 deactivate ST
 
 note over ST, UI : View budget history
@@ -85,7 +90,7 @@ activate ST
 ST -> P : parse("budget history")
 activate P
 
-create participant ":BudgetHistoryCommand" as BHC
+create participant "<u>:BudgetHistoryCommand</u>" as BHC
 P -> BHC : new BudgetHistoryCommand()
 activate BHC
 BHC --> P
@@ -102,8 +107,10 @@ EL --> BHC : history list
 deactivate EL
 BHC -> UI : showBudgetHistory(history)
 activate UI
-UI --> User : history table
+UI --> BHC
 deactivate UI
+BHC --> ST : history table
 deactivate BHC
+ST --> User : history table
 deactivate ST
 @enduml

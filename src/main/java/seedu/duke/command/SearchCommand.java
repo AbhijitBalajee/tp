@@ -34,6 +34,11 @@ public class SearchCommand extends Command {
      */
     @Override
     public void execute(ExpenseList expenses, Ui ui) throws SpendTrackException {
+        // @@author AfshalG
+        if (keyword == null || keyword.trim().isEmpty()) {
+            throw new SpendTrackException("Please provide a search keyword. Usage: search <keyword>");
+        }
+        // @@author
 
         int count = 0;
         StringBuilder sb = new StringBuilder();

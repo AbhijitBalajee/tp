@@ -172,9 +172,11 @@ class ExpenseListTest {
 
     @Test
     void resetBudget_budgetHistoryPreserved() {
-        list.setBudget(500.00);
+        list.setBudget(500.0);
         list.resetBudget();
-        assertEquals(1, list.getBudgetHistory().size());
+        assertEquals(2, list.getBudgetHistory().size());
+        String resetEntry = list.getBudgetHistory().get(1);
+        assertTrue(resetEntry.endsWith("|0.0"));
     }
 
     // --- Budget History ---

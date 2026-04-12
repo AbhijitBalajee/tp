@@ -6,12 +6,18 @@ import org.junit.jupiter.api.Test;
 import seedu.duke.command.ListCommand;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
+// @@author AbhijitBalajee
 public class ListCommandTest {
 
     @Test
     public void listCommand_isNotExit() {
         ListCommand cmd = new ListCommand();
         assertFalse(cmd.isExit());
+    }
+
+    @Test
+    public void listCommand_recurringMode_isNotExit() {
+        assertFalse(new ListCommand(true).isExit());
     }
 
     @Test
@@ -31,3 +37,4 @@ public class ListCommandTest {
         cmd.execute(expenses, new Ui());
     }
 }
+// @@author

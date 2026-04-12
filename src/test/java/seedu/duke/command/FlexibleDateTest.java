@@ -92,10 +92,10 @@ class FlexibleDateTest {
     }
 
     @Test
-    void parser_dateNonLeapYear_adjustsToLastValidDay() throws SpendTrackException {
-        Command cmd = Parser.parse("add d/Coffee a/3.50 c/Food date/29-02-2025");
-        cmd.execute(expenses, ui);
-        assertEquals(LocalDate.of(2025, 2, 28), expenses.getExpense(0).getDate());
+    void parser_dateNonLeapYear_rejectsInvalidFeb29() {
+        // 2025 is not a leap year — Feb 29 must be rejected, not silently rounded
+        assertThrows(SpendTrackException.class, () ->
+                Parser.parse("add d/Coffee a/3.50 c/Food date/29-02-2025"));
     }
 
     @Test

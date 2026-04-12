@@ -16,8 +16,10 @@ public class ExpenseList {
     }
 
     private ArrayList<Expense> expenses;
+    // @@author AbhijitBalajee
     private double budget;
     private ArrayList<String> budgetHistory;
+    // @@author
     private double goal;
 
     /**
@@ -25,8 +27,10 @@ public class ExpenseList {
      */
     public ExpenseList() {
         this.expenses = new ArrayList<>();
+        // @@author AbhijitBalajee
         this.budget = 0.0;
         this.budgetHistory = new ArrayList<>();
+        // @@author
         this.goal = 0.0;
     }
 
@@ -58,12 +62,14 @@ public class ExpenseList {
      * @param index   the zero-based index
      * @param expense the new expense to set
      */
+    // @@author AbhijitBalajee
     public void setExpense(int index, Expense expense) {
         assert index >= 0 && index < expenses.size() : "Set index out of bounds: " + index;
         assert expense != null : "Replacement expense should not be null";
         expenses.set(index, expense);
         logger.info("Expense at index " + index + " replaced: " + expense);
     }
+    // @@author
 
     /**
      * Returns the number of expenses in the list.
@@ -124,6 +130,7 @@ public class ExpenseList {
         return total;
     }
 
+    // @@author AbhijitBalajee
     /**
      * Sets the monthly budget limit.
      *
@@ -159,9 +166,10 @@ public class ExpenseList {
      */
     public void resetBudget() {
         this.budget = 0.0;
+        this.budgetHistory.add(LocalDate.now() + "|" + 0.0);
         logger.info("Budget reset to 0.0");
     }
-  
+
     /**
      * Returns the budget history list.
      *
@@ -192,20 +200,28 @@ public class ExpenseList {
         this.budget = budget;
         logger.info("Budget restored to: " + budget);
     }
+    // @@author
 
     /**
-     * Replaces the current expenses and budget with the given snapshot data.
+     * Replaces the current expenses, budget, and budget history with the given snapshot data.
      * Used by UndoManager to restore a previous state.
      *
      * @param restoredExpenses the list of expenses to restore
      * @param restoredBudget the budget amount to restore
+     * @param restoredBudgetHistory budget history entries to restore (copied defensively)
      */
-    public void restoreFrom(ArrayList<Expense> restoredExpenses, double restoredBudget) {
+    // @@author AbhijitBalajee
+    public void restoreFrom(ArrayList<Expense> restoredExpenses, double restoredBudget,
+            ArrayList<String> restoredBudgetHistory) {
         assert restoredExpenses != null : "Restored expenses should not be null";
+        assert restoredBudgetHistory != null : "Restored budget history should not be null";
         this.expenses = new ArrayList<>(restoredExpenses);
         this.budget = restoredBudget;
-        logger.info("Expenses restored: " + expenses.size() + " entries, budget=" + budget);
+        this.budgetHistory = new ArrayList<>(restoredBudgetHistory);
+        logger.info("Expenses restored: " + expenses.size() + " entries, budget=" + budget
+                + ", budgetHistoryEntries=" + budgetHistory.size());
     }
+    // @@author
 
     // @@author pranavjana
     /**

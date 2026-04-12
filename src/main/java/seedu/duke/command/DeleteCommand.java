@@ -48,6 +48,12 @@ public class DeleteCommand extends Command {
             throw new SpendTrackException("Index " + index + " is out of range. "
                     + "There are " + expenses.size() + " expense(s).");
         }
+        Expense toDelete = expenses.getExpense(index - 1);
+        if (!ui.confirmDelete(toDelete)) {
+            logger.info("Delete cancelled by user for index: " + index);
+            ui.showMessage("Delete cancelled.");
+            return;
+        }
         Expense removed = expenses.deleteExpense(index - 1);
         logger.info("Expense deleted: " + removed);
         ui.showDeleteSuccess(removed);

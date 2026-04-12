@@ -10,8 +10,6 @@ participant ":GoalCommand" as GC
 participant ":ExpenseList" as EL
 participant ":Ui" as UI
 
-== Setting a goal ==
-
 User -> ST : "goal g/200"
 activate ST
 
@@ -37,8 +35,6 @@ deactivate GC
 
 ST -> ST : storage.save(expenses)
 deactivate ST
-
-== Viewing goal status ==
 
 User -> ST : "goal status"
 activate ST

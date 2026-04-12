@@ -10,6 +10,7 @@ import seedu.duke.command.DeleteCommand;
 import seedu.duke.command.EditCommand;
 import seedu.duke.command.FilterCommand;
 import seedu.duke.command.FindCommand;
+import seedu.duke.command.FindByKeywordCommand;
 import seedu.duke.command.TotalCommand;
 import seedu.duke.command.ListCommand;
 import seedu.duke.command.BudgetCommand;
@@ -37,7 +38,12 @@ import seedu.duke.command.MonthCommand;
 public class Parser {
 
     private static final Logger logger = Logger.getLogger(Parser.class.getName());
-    private static final String TOKEN_SPLIT_REGEX = " (?=(?:d|a|c|date|recurring)/)";
+    // @@author AbhijitBalajee
+    // @@author AfshalG
+    private static final String TOKEN_SPLIT_REGEX = " (?=(?i)(?:d/|a/(?:[^a-zA-Z]|NaN|Infinity|"
+        + "-Infinity)|c/|date/|recurring/))";
+    private static final String[] FLAG_PREFIXES = {"d/", "a/", "c/", "date/", "recurring/"};
+    // @@author
     // @@author AfshalG
     private static final Map<String, String> ALIASES = new HashMap<>();
 
@@ -96,23 +102,27 @@ public class Parser {
         case "filter":
             return parseFilterCommand(parts.length > 1 ? parts[1] : "");
         case "find":
-            try {
-                return new FindCommand(Integer.parseInt(parts[1].trim()));
-            } catch (NumberFormatException e) {
-                throw new SpendTrackException("Index must be a whole number. Usage: find <index>");
-            } catch (ArrayIndexOutOfBoundsException e) {
-                throw new SpendTrackException("find requires an index. Usage: find <index>");
-            }
+            return parseFindCommand(parts.length > 1 ? parts[1] : "");
         case "total":
             return new TotalCommand();
+        // @@author AbhijitBalajee
         case "list":
-            if (parts.length > 1 && parts[1].trim().equalsIgnoreCase("recurring")) {
-                return new ListCommand(true);
+            if (parts.length > 1) {
+                String listArg = parts[1].trim().toLowerCase();
+                if (listArg.equals("recurring")) {
+                    return new ListCommand(true);
+                }
+                throw new SpendTrackException(
+                        "Invalid list option. Usage: list OR list recurring");
             }
             return new ListCommand();
         case "budget":
             return parseBudgetCommand(parts.length > 1 ? parts[1] : "");
+        // @@author
         case "remaining":
+            if (parts.length > 1) {
+                throw new SpendTrackException("Usage: remaining");
+            }
             return new RemainingCommand();
         // @@author pranavjana
         case "goal":
@@ -130,11 +140,19 @@ public class Parser {
                 throw new SpendTrackException("Undo is not available.");
             }
             return new UndoCommand(undoManager);
+        // @@author AfshalG
         case "summary":
+            if (parts.length > 1) {
+                throw new SpendTrackException("Usage: summary");
+            }
             return new SummaryCommand();
+        // @@author
         case "search":
             return new SearchCommand(parts.length > 1 ? parts[1] : "");
         case "sort":
+            if (parts.length > 1) {
+                throw new SpendTrackException("Usage: sort");
+            }
             return new SortCommand();
         case "top":
             try {
@@ -152,15 +170,21 @@ public class Parser {
             if (parts.length < 2 || parts[1].trim().isEmpty()) {
                 throw new SpendTrackException("Usage: report <YYYY-MM>");
             }
-            return new ReportCommand(parts[1].trim());
+            return new ReportCommand(validateYearMonth(parts[1].trim(), "report"));
         case "month":
             if (parts.length < 2 || parts[1].trim().isEmpty()) {
                 throw new SpendTrackException("Usage: month <YYYY-MM>");
             }
-            return new MonthCommand(parts[1].trim());
+            return new MonthCommand(validateYearMonth(parts[1].trim(), "month"));
         case "help":
+            if (parts.length > 1) {
+                throw new SpendTrackException("Usage: help");
+            }
             return new HelpCommand();
         case "bye":
+            if (parts.length > 1) {
+                throw new SpendTrackException("Usage: bye");
+            }
             return new ExitCommand();
         default:
             logger.warning("Unknown command: " + commandWord);
@@ -174,37 +198,117 @@ public class Parser {
         double amount = 0.0;
         String category = "Uncategorised";
         LocalDate date = LocalDate.now();
+        // @@author AbhijitBalajee
         boolean isRecurring = false;
+
+        boolean seenDescription = false;
+        boolean seenAmount = false;
+        boolean seenCategory = false;
+        boolean seenDate = false;
+        boolean seenRecurring = false;
+        // @@author
 
         String[] tokens = args.split(TOKEN_SPLIT_REGEX);
         for (String token : tokens) {
             token = token.trim();
-            if (token.startsWith("date/")) {
+            String lower = token.toLowerCase();
+            if (lower.startsWith("date/")) {
+                if (seenDate) {
+                    throw new SpendTrackException("Duplicate 'date/' detected. "
+                            + "Please provide only one date.");
+                }
+                seenDate = true;
                 date = DateParser.parse(token.substring(5).trim());
-            } else if (token.startsWith("d/")) {
+                // @@author Ariff1422
+                if (date.getYear() < 2000) {
+                    throw new SpendTrackException("Date must be year 2000 or later.");
+                }
+                // @@author
+            } else if (lower.startsWith("d/")) {
+                if (seenDescription) {
+                    throw new SpendTrackException("Duplicate 'd/' detected. "
+                            + "Please provide only one description.");
+                }
+                seenDescription = true;
                 description = token.substring(2).trim();
                 if (description.isEmpty()) {
                     throw new SpendTrackException("Description cannot be empty. "
                             + "Please provide a valid description after d/");
                 }
-            } else if (token.startsWith("a/")) {
+                if (description.contains("|")) {
+                    throw new SpendTrackException("Description cannot contain '|' "
+                            + "(reserved for save file format). Please use a different character.");
+                }
+            } else if (lower.startsWith("a/")) {
+                if (seenAmount) {
+                    throw new SpendTrackException("Duplicate 'a/' detected. "
+                            + "Please provide only one amount.");
+                }
+                seenAmount = true;
+                String amountStr = token.substring(2).trim();
+
+                // @@author AfshalG
+                // Check for trailing unrecognised content (e.g. "5 da/today")
+                if (amountStr.contains(" ")) {
+                    String trailing = amountStr.substring(amountStr.indexOf(' ')).trim();
+                    throw new SpendTrackException("Unrecognised token: '" + trailing
+                            + "'. Valid flags are: d/, a/, c/, date/, recurring/");
+                }
+                // @@author
+
+                // Explicitly reject NaN and Infinity before parseDouble
+                if (amountStr.equalsIgnoreCase("nan")
+                        || amountStr.equalsIgnoreCase("infinity")
+                        || amountStr.equalsIgnoreCase("-infinity")) {
+                    throw new SpendTrackException("Amount must be a finite number. Usage: a/<amount>");
+                }
+
                 try {
-                    amount = Double.parseDouble(token.substring(2).trim());
+                    amount = Double.parseDouble(amountStr);
                 } catch (NumberFormatException e) {
                     throw new SpendTrackException("Amount must be a number. Usage: a/<amount>");
+                }
+                if (!Double.isFinite(amount)) {
+                    throw new SpendTrackException("Amount must be a finite number. Usage: a/<amount>");
                 }
                 if (amount <= 0) {
                     throw new SpendTrackException("Amount must be a positive number. Usage: a/<amount>");
                 }
-            } else if (token.startsWith("c/")) {
+                // @@author Ariff1422
+                if (amount > 1000000) {
+                    throw new SpendTrackException("Amount must not exceed $1,000,000.");
+                }
+                // @@author
+            } else if (lower.startsWith("c/")) {
+                if (seenCategory) {
+                    throw new SpendTrackException("Duplicate 'c/' detected. "
+                            + "Please provide only one category.");
+                }
+                seenCategory = true;
                 category = normalizeCategory(token.substring(2).trim());
-            } else if (token.startsWith("recurring/")) {
+                // @@author Ariff1422
+                if (category.contains("|")) {
+                    throw new SpendTrackException("Category cannot contain '|' "
+                            + "(reserved for save file format). Please use a different character.");
+                }
+                // @@author
+            // @@author AbhijitBalajee
+            } else if (lower.startsWith("recurring/")) {
+                if (seenRecurring) {
+                    throw new SpendTrackException("Duplicate 'recurring/' detected. "
+                            + "Please provide only one recurring value.");
+                }
+                seenRecurring = true;
                 String val = token.substring(10).trim().toLowerCase();
                 if (!val.equals("true") && !val.equals("false")) {
                     throw new SpendTrackException("recurring/ must be 'true' or 'false'.");
                 }
                 isRecurring = val.equals("true");
+            } else if (!token.isEmpty()) {
+                throw new SpendTrackException("Unrecognised token: '" + token
+                        + "'. Valid flags are: d/, a/, c/, date/, recurring/");
             }
+            // @@author
         }
 
         if (description.isEmpty()) {
@@ -214,7 +318,13 @@ public class Parser {
             throw new SpendTrackException("Amount is required and must be greater than 0. Usage: a/<amount>");
         }
 
+        // @@author AfshalG
+        validateDescriptionFlags(description);
+        // @@author
+
+        // @@author AbhijitBalajee
         return new AddCommand(description, amount, category, date, isRecurring);
+        // @@author
     }
     // @@author
 
@@ -233,6 +343,7 @@ public class Parser {
         Double newAmount = null;
         String newCategory = null;
         LocalDate newDate = null;
+        // @@author AbhijitBalajee
         Boolean newRecurring = null;
 
         boolean seenDescription = false;
@@ -240,19 +351,28 @@ public class Parser {
         boolean seenCategory = false;
         boolean seenDate = false;
         boolean seenRecurring = false;
+        // @@author
 
         String[] tokens = remaining.split(TOKEN_SPLIT_REGEX);
         for (String token : tokens) {
             token = token.trim();
-            if (token.startsWith("date/")) {
+            // @@author AfshalG
+            String lower = token.toLowerCase();
+            // @@author
+            if (lower.startsWith("date/")) {
                 if (seenDate) {
                     throw new SpendTrackException("Duplicate 'date/' detected. "
                             + "Please provide only one date.");
                 }
                 seenDate = true;
                 newDate = DateParser.parse(token.substring(5).trim());
+                // @@author Ariff1422
+                if (newDate.getYear() < 2000) {
+                    throw new SpendTrackException("Date must be year 2000 or later.");
+                }
+                // @@author
 
-            } else if (token.startsWith("d/")) {
+            } else if (lower.startsWith("d/")) {
                 if (seenDescription) {
                     throw new SpendTrackException("Duplicate 'd/' detected. "
                             + "Please provide only one description.");
@@ -263,8 +383,14 @@ public class Parser {
                     throw new SpendTrackException("Description cannot be empty. "
                             + "Please provide a valid description after d/");
                 }
+                // @@author AfshalG
+                if (newDescription.contains("|")) {
+                    throw new SpendTrackException("Description cannot contain '|' "
+                            + "(reserved for save file format). Please use a different character.");
+                }
+                // @@author
 
-            } else if (token.startsWith("a/")) {
+            } else if (lower.startsWith("a/")) {
                 if (seenAmount) {
                     throw new SpendTrackException("Duplicate 'a/' detected. "
                             + "Please provide only one amount.");
@@ -275,19 +401,40 @@ public class Parser {
                 } catch (NumberFormatException e) {
                     throw new SpendTrackException("Amount must be a number. Usage: a/<amount>");
                 }
+                if (!Double.isFinite(newAmount)) {
+                    throw new SpendTrackException("Amount must be a finite number. Usage: a/<amount>");
+                }
                 if (newAmount <= 0) {
                     throw new SpendTrackException("Amount must be greater than 0.");
                 }
+                // @@author Ariff1422
+                if (newAmount > 1000000) {
+                    throw new SpendTrackException("Amount must not exceed $1,000,000.");
+                }
+                // @@author
 
-            } else if (token.startsWith("c/")) {
+            } else if (lower.startsWith("c/")) {
                 if (seenCategory) {
                     throw new SpendTrackException("Duplicate 'c/' detected. "
                             + "Please provide only one category.");
                 }
                 seenCategory = true;
+                // @@author Ariff1422
+                if (token.substring(2).trim().isEmpty()) {
+                    throw new SpendTrackException("Category cannot be empty. "
+                            + "Please provide a valid category after c/");
+                }
+                // @@author
                 newCategory = normalizeCategory(token.substring(2).trim());
+                // @@author Ariff1422
+                if (newCategory.contains("|")) {
+                    throw new SpendTrackException("Category cannot contain '|' "
+                            + "(reserved for save file format). Please use a different character.");
+                }
+                // @@author
 
-            } else if (token.startsWith("recurring/")) {
+            // @@author AbhijitBalajee
+            } else if (lower.startsWith("recurring/")) {
                 if (seenRecurring) {
                     throw new SpendTrackException("Duplicate 'recurring/' detected. "
                             + "Please provide only one recurring value.");
@@ -298,13 +445,54 @@ public class Parser {
                     throw new SpendTrackException("recurring/ must be 'true' or 'false'.");
                 }
                 newRecurring = val.equals("true");
+            // @@author AfshalG
+            } else if (!token.isEmpty()) {
+                throw new SpendTrackException("Unrecognised token: '" + token
+                        + "'. Valid flags are: d/, a/, c/, date/, recurring/");
             }
+            // @@author
         }
 
+        // @@author AfshalG
+        if (newDescription != null) {
+            validateDescriptionFlags(newDescription);
+        }
+        // @@author
+
+        // @@author AbhijitBalajee
         return new EditCommand(index, newDescription, newAmount, newCategory, newDate, newRecurring);
+        // @@author
     }
 
     // @@author AfshalG
+    /**
+     * Validates that the given string is a valid YYYY-MM format with month 1-12.
+     * Used by month and report commands for strict format enforcement.
+     *
+     * @param input the user-provided year-month string
+     * @param commandName the calling command, used in the usage error message
+     * @return the validated input (unchanged) if valid
+     * @throws SpendTrackException if format is wrong or month is out of range
+     */
+    private static String validateYearMonth(String input, String commandName) throws SpendTrackException {
+        if (!input.matches("\\d{4}-\\d{2}")) {
+            throw new SpendTrackException(
+                    "Invalid format. Usage: " + commandName + " <YYYY-MM> (e.g. 2026-03)");
+        }
+        int month;
+        try {
+            month = Integer.parseInt(input.substring(5));
+        } catch (NumberFormatException e) {
+            throw new SpendTrackException(
+                    "Invalid format. Usage: " + commandName + " <YYYY-MM> (e.g. 2026-03)");
+        }
+        if (month < 1 || month > 12) {
+            throw new SpendTrackException(
+                    "Invalid month. Use YYYY-MM with month between 01 and 12.");
+        }
+        return input;
+    }
+
     private static String normalizeCategory(String category) {
         if (category.isEmpty()) {
             return "Uncategorised";
@@ -322,49 +510,162 @@ public class Parser {
         }
         return normalized.toString();
     }
+
+    private static void validateDescriptionFlags(String description) throws SpendTrackException {
+        String lower = description.toLowerCase();
+        for (String flag : FLAG_PREFIXES) {
+            if (lower.contains(flag)) {
+                throw new SpendTrackException("Description contains flag-like pattern '" + flag
+                        + "'. Please remove or rephrase to avoid ambiguity.");
+            }
+        }
+    }
+    // @@author
+
+    // @@author Ariff1422
+    /**
+     * Parses the find command argument.
+     * Supports two modes:
+     *   find INDEX     -- shows full details of the expense at that 1-based index
+     *   find d/KEYWORD -- lists all expenses whose description contains the keyword
+     *
+     * @param args the argument string after "find"
+     * @return a FindCommand (by index) or FindByKeywordCommand (by description keyword)
+     * @throws SpendTrackException if the argument is missing, malformed, or has trailing garbage
+     */
+    private static Command parseFindCommand(String args) throws SpendTrackException {
+        String trimmed = args.trim();
+        if (trimmed.isEmpty()) {
+            throw new SpendTrackException("find requires an index or keyword. "
+                    + "Usage: find <index> OR find d/<keyword>");
+        }
+        if (trimmed.startsWith("d/")) {
+            String keyword = trimmed.substring(2).trim();
+            if (keyword.isEmpty()) {
+                throw new SpendTrackException("Keyword cannot be empty after 'd/'.");
+            }
+            if (keyword.contains("|")) {
+                throw new SpendTrackException("Keyword cannot contain '|'.");
+            }
+            return new FindByKeywordCommand(keyword);
+        }
+        // Index mode — must be a single integer with no trailing tokens
+        String[] tokens = trimmed.split("\\s+");
+        if (tokens.length > 1) {
+            throw new SpendTrackException("Too many arguments for 'find'. "
+                    + "Usage: find <index> OR find d/<keyword>");
+        }
+        try {
+            int index = Integer.parseInt(tokens[0]);
+            return new FindCommand(index);
+        } catch (NumberFormatException e) {
+            throw new SpendTrackException("Index must be a whole number. "
+                    + "Usage: find <index> OR find d/<keyword>");
+        }
+    }
     // @@author
 
     private static Command parseFilterCommand(String args) throws SpendTrackException {
         LocalDate from = null;
         LocalDate to = null;
+        // @@author AfshalG
+        boolean seenFrom = false;
+        boolean seenTo = false;
+        // @@author
+        // @@author Ariff1422
+        String category = null;
+        boolean seenCategory = false;
+        // @@author
 
-        String[] tokens = args.split(" ");
+        String[] tokens = args.trim().split("\\s+");
         for (String token : tokens) {
             token = token.trim();
+            if (token.isEmpty()) {
+                continue;
+            }
             if (token.startsWith("from/")) {
+                // @@author AfshalG
+                if (seenFrom) {
+                    throw new SpendTrackException("Duplicate 'from/' detected. "
+                            + "Please provide only one start date.");
+                }
+                seenFrom = true;
+                // @@author
                 from = DateParser.parse(token.substring(5).trim());
             } else if (token.startsWith("to/")) {
+                // @@author AfshalG
+                if (seenTo) {
+                    throw new SpendTrackException("Duplicate 'to/' detected. "
+                            + "Please provide only one end date.");
+                }
+                seenTo = true;
+                // @@author
                 to = DateParser.parse(token.substring(3).trim());
+            // @@author Ariff1422
+            } else if (token.startsWith("cat/")) {
+                if (seenCategory) {
+                    throw new SpendTrackException("Duplicate 'cat/' detected. "
+                            + "Please provide only one category.");
+                }
+                seenCategory = true;
+                category = token.substring(4).trim();
+                if (category.isEmpty()) {
+                    throw new SpendTrackException("Category cannot be empty after 'cat/'.");
+                }
+                if (category.contains("|")) {
+                    throw new SpendTrackException("Category cannot contain '|'.");
+                }
+            } else {
+                throw new SpendTrackException("Unknown filter option: '" + token + "'. "
+                        + "Usage: filter from/YYYY-MM-DD to/YYYY-MM-DD [cat/CATEGORY]");
             }
+            // @@author
         }
 
         if (from == null || to == null) {
-            throw new SpendTrackException("Usage: filter from/YYYY-MM-DD to/YYYY-MM-DD");
+            throw new SpendTrackException("Usage: filter from/YYYY-MM-DD to/YYYY-MM-DD [cat/CATEGORY]");
         }
         if (from.isAfter(to)) {
             throw new SpendTrackException("Start date must be before end date.");
         }
 
-        return new FilterCommand(from, to);
+        // @@author Ariff1422
+        return new FilterCommand(from, to, category);
+        // @@author
     }
 
+    // @@author AbhijitBalajee
     private static Command parseBudgetCommand(String args) throws SpendTrackException {
-        if (args.trim().equalsIgnoreCase("reset")) {
+        String trimmed = args.trim();
+        if (trimmed.equalsIgnoreCase("reset")) {
             return new BudgetResetCommand();
         }
-        if (args.trim().equalsIgnoreCase("history")) {
+        if (trimmed.equalsIgnoreCase("history")) {
             return new BudgetHistoryCommand();
         }
-        if (args.trim().isEmpty()) {
-            throw new SpendTrackException("budget requires a number. Usage: budget <amount>");
+        if (trimmed.isEmpty()) {
+            throw new SpendTrackException(
+                    "budget requires a number. Usage: budget <amount>");
+        }
+        if (trimmed.toLowerCase().startsWith("reset")) {
+            throw new SpendTrackException("Usage: budget reset");
+        }
+        if (trimmed.toLowerCase().startsWith("history")) {
+            throw new SpendTrackException("Usage: budget history");
         }
         try {
-            double amount = Double.parseDouble(args.trim());
+            double amount = Double.parseDouble(trimmed);
+            if (!Double.isFinite(amount)) {
+                throw new SpendTrackException(
+                        "budget requires a number. Usage: budget <amount>");
+            }
             return new BudgetCommand(amount);
         } catch (NumberFormatException e) {
-            throw new SpendTrackException("budget requires a number. Usage: budget <amount>");
+            throw new SpendTrackException(
+                    "budget requires a number. Usage: budget <amount>");
         }
     }
+    // @@author
 
     // @@author pranavjana
     private static Command parseGoalCommand(String args) throws SpendTrackException {
@@ -378,6 +679,9 @@ public class Parser {
         String valueStr = trimmed.substring(2).trim();
         try {
             double amount = Double.parseDouble(valueStr);
+            if (!Double.isFinite(amount)) {
+                throw new SpendTrackException("Goal amount must be a finite number. Usage: goal g/<amount>");
+            }
             if (amount <= 0) {
                 throw new SpendTrackException("Goal amount must be greater than 0.");
             }

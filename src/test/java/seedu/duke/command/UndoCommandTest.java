@@ -100,6 +100,34 @@ class UndoCommandTest {
         assertEquals(500.00, expenses.getBudget(), 0.01);
     }
 
+    // @@author AbhijitBalajee
+    @Test
+    void execute_undoRestoresBudgetHistory_afterSecondSetBudget() {
+        expenses.setBudget(500.00);
+        undoManager.saveSnapshot(expenses);
+        expenses.setBudget(1000.00);
+        assertEquals(2, expenses.getBudgetHistory().size());
+
+        new UndoCommand(undoManager).execute(expenses, ui);
+
+        assertEquals(500.00, expenses.getBudget(), 0.01);
+        assertEquals(1, expenses.getBudgetHistory().size());
+    }
+
+    @Test
+    void execute_undoRestoresBudgetHistory_afterReset() {
+        expenses.setBudget(500.00);
+        undoManager.saveSnapshot(expenses);
+        expenses.resetBudget();
+        assertEquals(2, expenses.getBudgetHistory().size());
+
+        new UndoCommand(undoManager).execute(expenses, ui);
+
+        assertEquals(500.00, expenses.getBudget(), 0.01);
+        assertEquals(1, expenses.getBudgetHistory().size());
+    }
+    // @@author
+
     @Test
     void execute_undoAfterEdit_restoresOriginalExpense() {
         expenses.addExpense(new Expense("Lunch", 10.00, "Food", LocalDate.now()));

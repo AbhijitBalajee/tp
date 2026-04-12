@@ -83,6 +83,7 @@ public class InputValidationTest {
     }
 
     // ── Budget command validation ─────────────────────────────────────────────
+    // @@author AbhijitBalajee
 
     @Test
     void parse_budgetNonNumeric_throwsException() {
@@ -101,6 +102,32 @@ public class InputValidationTest {
         assertDoesNotThrow(() ->
                 Parser.parse("budget 500"));
     }
+
+    @Test
+    void parse_budgetNaN_throwsException() {
+        assertThrows(SpendTrackException.class, () ->
+                Parser.parse("budget NaN"));
+    }
+
+    @Test
+    void parse_budgetInfinity_throwsException() {
+        assertThrows(SpendTrackException.class, () ->
+                Parser.parse("budget Infinity"));
+    }
+
+    @Test
+    void parse_budgetResetWithExtra_throwsException() {
+        assertThrows(SpendTrackException.class, () ->
+                Parser.parse("budget reset now"));
+    }
+
+    @Test
+    void parse_budgetHistoryWithExtra_throwsException() {
+        assertThrows(SpendTrackException.class, () ->
+                Parser.parse("budget history all"));
+    }
+
+    // @@author
 
     // ── Edit command validation ───────────────────────────────────────────────
 
@@ -226,6 +253,7 @@ public class InputValidationTest {
     }
 
     // ── List command validation ───────────────────────────────────────────────
+    // @@author AbhijitBalajee
 
     @Test
     void parse_listPlain_returnsListCommand() throws SpendTrackException {
@@ -241,6 +269,14 @@ public class InputValidationTest {
     void parse_listAliasL_returnsListCommand() throws SpendTrackException {
         assertTrue(Parser.parse("l") instanceof ListCommand);
     }
+
+    @Test
+    void parse_listInvalidSubcommand_throwsException() {
+        assertThrows(SpendTrackException.class, () ->
+                Parser.parse("list foo"));
+    }
+
+    // @@author
 
     // ── Alias resolution ─────────────────────────────────────────────────────
 
@@ -262,6 +298,58 @@ public class InputValidationTest {
     @Test
     void parse_unknownCommand_doesNotThrow() {
         assertDoesNotThrow(() -> Parser.parse("foobar"));
+    }
+
+    // ── Add: amount cap, date before 2000, pipe in category ──────────────────
+
+    @Test
+    void parse_addAmountOverMax_throwsException() {
+        assertThrows(SpendTrackException.class, () ->
+                Parser.parse("add d/Thing a/1000001 c/Food"));
+    }
+
+    @Test
+    void parse_addAmountAtMax_doesNotThrow() {
+        assertDoesNotThrow(() ->
+                Parser.parse("add d/Thing a/1000000 c/Food"));
+    }
+
+    @Test
+    void parse_addDateBefore2000_throwsException() {
+        assertThrows(SpendTrackException.class, () ->
+                Parser.parse("add d/Thing a/5 c/Food date/1999-12-31"));
+    }
+
+    @Test
+    void parse_addPipeInCategory_throwsException() {
+        assertThrows(SpendTrackException.class, () ->
+                Parser.parse("add d/Thing a/5 c/Food|hack"));
+    }
+
+    // ── Edit: amount cap, date before 2000, pipe in category, empty category ──
+
+    @Test
+    void parse_editAmountOverMax_throwsException() {
+        assertThrows(SpendTrackException.class, () ->
+                Parser.parse("edit 1 a/1000001"));
+    }
+
+    @Test
+    void parse_editDateBefore2000_throwsException() {
+        assertThrows(SpendTrackException.class, () ->
+                Parser.parse("edit 1 date/1999-01-01"));
+    }
+
+    @Test
+    void parse_editPipeInCategory_throwsException() {
+        assertThrows(SpendTrackException.class, () ->
+                Parser.parse("edit 1 c/Food|hack"));
+    }
+
+    @Test
+    void parse_editEmptyCategory_throwsException() {
+        assertThrows(SpendTrackException.class, () ->
+                Parser.parse("edit 1 c/"));
     }
 
     // @@author

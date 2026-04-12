@@ -4,11 +4,11 @@ skinparam backgroundColor BGCOLOR
 skinparam sequenceMessageAlign center
 
 actor User
-participant ":SpendTrack" as ST
-participant "Parser" as P
-participant ":DeleteCommand" as DC
-participant ":ExpenseList" as EL
-participant ":Ui" as UI
+participant "<u>:SpendTrack</u>" as ST
+participant "<<class>>\nParser" as P
+participant "<u>:DeleteCommand</u>" as DC
+participant "<u>:ExpenseList</u>" as EL
+participant "<u>:Ui</u>" as UI
 
 User -> ST : "delete 2"
 activate ST
@@ -35,6 +35,22 @@ deactivate EL
 alt index < 1 or index > size
     DC -> DC : throw SpendTrackException\n("Index out of range...")
 else valid index
+    DC -> EL : getExpense(index - 1)
+    activate EL
+    EL --> DC : expense
+    deactivate EL
+    DC -> UI : confirmDelete(expense)
+    activate UI
+    UI --> User : "About to delete: ... Are you sure? (yes/no)"
+    User --> UI : response
+    deactivate UI
+    opt response != "yes"
+        DC -> UI : showMessage("Delete cancelled.")
+        activate UI
+        UI --> User : "Delete cancelled."
+        deactivate UI
+        DC --> ST
+    end
     DC -> EL : deleteExpense(index - 1)
     activate EL
     EL --> DC : removedExpense
