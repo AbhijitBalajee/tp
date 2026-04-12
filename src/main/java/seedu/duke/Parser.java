@@ -38,8 +38,10 @@ import seedu.duke.command.MonthCommand;
 public class Parser {
 
     private static final Logger logger = Logger.getLogger(Parser.class.getName());
+    // @@author AbhijitBalajee
     private static final String TOKEN_SPLIT_REGEX = " (?=(?:d/|a/(?:[^a-zA-Z]|NaN|Infinity|"
         + "-Infinity)|c/|date/|recurring/))";
+    // @@author
     // @@author AfshalG
     private static final Map<String, String> ALIASES = new HashMap<>();
 
@@ -101,6 +103,7 @@ public class Parser {
             return parseFindCommand(parts.length > 1 ? parts[1] : "");
         case "total":
             return new TotalCommand();
+        // @@author AbhijitBalajee
         case "list":
             if (parts.length > 1) {
                 String listArg = parts[1].trim().toLowerCase();
@@ -113,6 +116,7 @@ public class Parser {
             return new ListCommand();
         case "budget":
             return parseBudgetCommand(parts.length > 1 ? parts[1] : "");
+        // @@author
         case "remaining":
             if (parts.length > 1) {
                 throw new SpendTrackException("Usage: remaining");
@@ -184,6 +188,7 @@ public class Parser {
         double amount = 0.0;
         String category = "Uncategorised";
         LocalDate date = LocalDate.now();
+        // @@author AbhijitBalajee
         boolean isRecurring = false;
 
         boolean seenDescription = false;
@@ -191,6 +196,7 @@ public class Parser {
         boolean seenCategory = false;
         boolean seenDate = false;
         boolean seenRecurring = false;
+        // @@author
 
         String[] tokens = args.split(TOKEN_SPLIT_REGEX);
         for (String token : tokens) {
@@ -266,6 +272,7 @@ public class Parser {
                             + "(reserved for save file format). Please use a different character.");
                 }
                 // @@author
+            // @@author AbhijitBalajee
             } else if (token.startsWith("recurring/")) {
                 if (seenRecurring) {
                     throw new SpendTrackException("Duplicate 'recurring/' detected. "
@@ -278,6 +285,7 @@ public class Parser {
                 }
                 isRecurring = val.equals("true");
             }
+            // @@author
         }
 
         if (description.isEmpty()) {
@@ -287,7 +295,9 @@ public class Parser {
             throw new SpendTrackException("Amount is required and must be greater than 0. Usage: a/<amount>");
         }
 
+        // @@author AbhijitBalajee
         return new AddCommand(description, amount, category, date, isRecurring);
+        // @@author
     }
     // @@author
 
@@ -306,6 +316,7 @@ public class Parser {
         Double newAmount = null;
         String newCategory = null;
         LocalDate newDate = null;
+        // @@author AbhijitBalajee
         Boolean newRecurring = null;
 
         boolean seenDescription = false;
@@ -313,6 +324,7 @@ public class Parser {
         boolean seenCategory = false;
         boolean seenDate = false;
         boolean seenRecurring = false;
+        // @@author
 
         String[] tokens = remaining.split(TOKEN_SPLIT_REGEX);
         for (String token : tokens) {
@@ -391,6 +403,7 @@ public class Parser {
                 }
                 // @@author
 
+            // @@author AbhijitBalajee
             } else if (token.startsWith("recurring/")) {
                 if (seenRecurring) {
                     throw new SpendTrackException("Duplicate 'recurring/' detected. "
@@ -403,9 +416,12 @@ public class Parser {
                 }
                 newRecurring = val.equals("true");
             }
+            // @@author
         }
 
+        // @@author AbhijitBalajee
         return new EditCommand(index, newDescription, newAmount, newCategory, newDate, newRecurring);
+        // @@author
     }
 
     // @@author AfshalG
@@ -568,6 +584,7 @@ public class Parser {
         // @@author
     }
 
+    // @@author AbhijitBalajee
     private static Command parseBudgetCommand(String args) throws SpendTrackException {
         String trimmed = args.trim();
         if (trimmed.equalsIgnoreCase("reset")) {
@@ -598,6 +615,7 @@ public class Parser {
                     "budget requires a number. Usage: budget <amount>");
         }
     }
+    // @@author
 
     // @@author pranavjana
     private static Command parseGoalCommand(String args) throws SpendTrackException {

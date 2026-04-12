@@ -25,7 +25,9 @@ public class AddCommand extends Command {
     private final double amount;
     private final String category;
     private final LocalDate date;
+    // @@author AbhijitBalajee
     private final boolean isRecurring;
+    // @@author
 
     /**
      * Constructs an AddCommand without recurring flag (defaults to false).
@@ -40,7 +42,9 @@ public class AddCommand extends Command {
         this.amount = amount;
         this.category = category;
         this.date = date;
+        // @@author AbhijitBalajee
         this.isRecurring = false;
+        // @@author
     }
 
     /**
@@ -58,7 +62,9 @@ public class AddCommand extends Command {
         this.amount = amount;
         this.category = category;
         this.date = date;
+        // @@author AbhijitBalajee
         this.isRecurring = isRecurring;
+        // @@author
     }
 
     /**

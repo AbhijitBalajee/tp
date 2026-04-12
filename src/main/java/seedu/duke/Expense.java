@@ -11,6 +11,7 @@ public class Expense {
     private double amount;
     private String category;
     private LocalDate date;
+    // @@author AbhijitBalajee
     private boolean isRecurring;
 
     /**
@@ -54,6 +55,7 @@ public class Expense {
         this.date = date;
         this.isRecurring = isRecurring;
     }
+    // @@author
 
     public String getDescription() {
         return description;
@@ -71,9 +73,11 @@ public class Expense {
         return date;
     }
 
+    // @@author AbhijitBalajee
     public boolean isRecurring() {
         return isRecurring;
     }
+    // @@author
 
     public void setDescription(String description) {
         this.description = description;
@@ -91,9 +95,11 @@ public class Expense {
         this.date = date;
     }
 
+    // @@author AbhijitBalajee
     public void setRecurring(boolean isRecurring) {
         this.isRecurring = isRecurring;
     }
+    // @@author
 
     /**
      * Returns a formatted string representation of this expense.
@@ -102,7 +108,9 @@ public class Expense {
      */
     @Override
     public String toString() {
+        // @@author AbhijitBalajee
         String recurringTag = isRecurring ? " [R]" : "";
+        // @@author
         return String.format("[%s] %s - $%.2f (%s)%s",
                 category, description, amount, date, recurringTag);
     }
