@@ -202,6 +202,7 @@ public class ExpenseList {
      * @param restoredBudget the budget amount to restore
      * @param restoredBudgetHistory budget history entries to restore (copied defensively)
      */
+    // @@author AbhijitBalajee
     public void restoreFrom(ArrayList<Expense> restoredExpenses, double restoredBudget,
             ArrayList<String> restoredBudgetHistory) {
         assert restoredExpenses != null : "Restored expenses should not be null";
@@ -212,6 +213,7 @@ public class ExpenseList {
         logger.info("Expenses restored: " + expenses.size() + " entries, budget=" + budget
                 + ", budgetHistoryEntries=" + budgetHistory.size());
     }
+    // @@author
 
     // @@author pranavjana
     /**
