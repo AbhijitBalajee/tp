@@ -171,6 +171,9 @@ public class Parser {
             }
             return new HelpCommand();
         case "bye":
+            if (parts.length > 1) {
+                throw new SpendTrackException("Usage: bye");
+            }
             return new ExitCommand();
         default:
             logger.warning("Unknown command: " + commandWord);
