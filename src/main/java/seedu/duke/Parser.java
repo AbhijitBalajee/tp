@@ -39,8 +39,10 @@ public class Parser {
 
     private static final Logger logger = Logger.getLogger(Parser.class.getName());
     // @@author AbhijitBalajee
-    private static final String TOKEN_SPLIT_REGEX = " (?=(?:d/|a/(?:[^a-zA-Z]|NaN|Infinity|"
+    // @@author AfshalG
+    private static final String TOKEN_SPLIT_REGEX = " (?=(?i)(?:d/|a/(?:[^a-zA-Z]|NaN|Infinity|"
         + "-Infinity)|c/|date/|recurring/))";
+    private static final String[] FLAG_PREFIXES = {"d/", "a/", "c/", "date/", "recurring/"};
     // @@author
     // @@author AfshalG
     private static final Map<String, String> ALIASES = new HashMap<>();
@@ -138,8 +140,13 @@ public class Parser {
                 throw new SpendTrackException("Undo is not available.");
             }
             return new UndoCommand(undoManager);
+        // @@author AfshalG
         case "summary":
+            if (parts.length > 1) {
+                throw new SpendTrackException("Usage: summary");
+            }
             return new SummaryCommand();
+        // @@author
         case "search":
             return new SearchCommand(parts.length > 1 ? parts[1] : "");
         case "sort":
@@ -201,7 +208,8 @@ public class Parser {
         String[] tokens = args.split(TOKEN_SPLIT_REGEX);
         for (String token : tokens) {
             token = token.trim();
-            if (token.startsWith("date/")) {
+            String lower = token.toLowerCase();
+            if (lower.startsWith("date/")) {
                 if (seenDate) {
                     throw new SpendTrackException("Duplicate 'date/' detected. "
                             + "Please provide only one date.");
@@ -213,7 +221,7 @@ public class Parser {
                     throw new SpendTrackException("Date must be year 2000 or later.");
                 }
                 // @@author
-            } else if (token.startsWith("d/")) {
+            } else if (lower.startsWith("d/")) {
                 if (seenDescription) {
                     throw new SpendTrackException("Duplicate 'd/' detected. "
                             + "Please provide only one description.");
@@ -228,13 +236,22 @@ public class Parser {
                     throw new SpendTrackException("Description cannot contain '|' "
                             + "(reserved for save file format). Please use a different character.");
                 }
-            } else if (token.startsWith("a/")) {
+            } else if (lower.startsWith("a/")) {
                 if (seenAmount) {
                     throw new SpendTrackException("Duplicate 'a/' detected. "
                             + "Please provide only one amount.");
                 }
                 seenAmount = true;
                 String amountStr = token.substring(2).trim();
+
+                // @@author AfshalG
+                // Check for trailing unrecognised content (e.g. "5 da/today")
+                if (amountStr.contains(" ")) {
+                    String trailing = amountStr.substring(amountStr.indexOf(' ')).trim();
+                    throw new SpendTrackException("Unrecognised token: '" + trailing
+                            + "'. Valid flags are: d/, a/, c/, date/, recurring/");
+                }
+                // @@author
 
                 // Explicitly reject NaN and Infinity before parseDouble
                 if (amountStr.equalsIgnoreCase("nan")
@@ -259,7 +276,7 @@ public class Parser {
                     throw new SpendTrackException("Amount must not exceed $1,000,000.");
                 }
                 // @@author
-            } else if (token.startsWith("c/")) {
+            } else if (lower.startsWith("c/")) {
                 if (seenCategory) {
                     throw new SpendTrackException("Duplicate 'c/' detected. "
                             + "Please provide only one category.");
@@ -273,7 +290,7 @@ public class Parser {
                 }
                 // @@author
             // @@author AbhijitBalajee
-            } else if (token.startsWith("recurring/")) {
+            } else if (lower.startsWith("recurring/")) {
                 if (seenRecurring) {
                     throw new SpendTrackException("Duplicate 'recurring/' detected. "
                             + "Please provide only one recurring value.");
@@ -284,6 +301,9 @@ public class Parser {
                     throw new SpendTrackException("recurring/ must be 'true' or 'false'.");
                 }
                 isRecurring = val.equals("true");
+            } else if (!token.isEmpty()) {
+                throw new SpendTrackException("Unrecognised token: '" + token
+                        + "'. Valid flags are: d/, a/, c/, date/, recurring/");
             }
             // @@author
         }
@@ -294,6 +314,10 @@ public class Parser {
         if (amount == 0.0) {
             throw new SpendTrackException("Amount is required and must be greater than 0. Usage: a/<amount>");
         }
+
+        // @@author AfshalG
+        validateDescriptionFlags(description);
+        // @@author
 
         // @@author AbhijitBalajee
         return new AddCommand(description, amount, category, date, isRecurring);
@@ -329,7 +353,10 @@ public class Parser {
         String[] tokens = remaining.split(TOKEN_SPLIT_REGEX);
         for (String token : tokens) {
             token = token.trim();
-            if (token.startsWith("date/")) {
+            // @@author AfshalG
+            String lower = token.toLowerCase();
+            // @@author
+            if (lower.startsWith("date/")) {
                 if (seenDate) {
                     throw new SpendTrackException("Duplicate 'date/' detected. "
                             + "Please provide only one date.");
@@ -342,7 +369,7 @@ public class Parser {
                 }
                 // @@author
 
-            } else if (token.startsWith("d/")) {
+            } else if (lower.startsWith("d/")) {
                 if (seenDescription) {
                     throw new SpendTrackException("Duplicate 'd/' detected. "
                             + "Please provide only one description.");
@@ -360,7 +387,7 @@ public class Parser {
                 }
                 // @@author
 
-            } else if (token.startsWith("a/")) {
+            } else if (lower.startsWith("a/")) {
                 if (seenAmount) {
                     throw new SpendTrackException("Duplicate 'a/' detected. "
                             + "Please provide only one amount.");
@@ -383,7 +410,7 @@ public class Parser {
                 }
                 // @@author
 
-            } else if (token.startsWith("c/")) {
+            } else if (lower.startsWith("c/")) {
                 if (seenCategory) {
                     throw new SpendTrackException("Duplicate 'c/' detected. "
                             + "Please provide only one category.");
@@ -404,7 +431,7 @@ public class Parser {
                 // @@author
 
             // @@author AbhijitBalajee
-            } else if (token.startsWith("recurring/")) {
+            } else if (lower.startsWith("recurring/")) {
                 if (seenRecurring) {
                     throw new SpendTrackException("Duplicate 'recurring/' detected. "
                             + "Please provide only one recurring value.");
@@ -415,9 +442,19 @@ public class Parser {
                     throw new SpendTrackException("recurring/ must be 'true' or 'false'.");
                 }
                 newRecurring = val.equals("true");
+            // @@author AfshalG
+            } else if (!token.isEmpty()) {
+                throw new SpendTrackException("Unrecognised token: '" + token
+                        + "'. Valid flags are: d/, a/, c/, date/, recurring/");
             }
             // @@author
         }
+
+        // @@author AfshalG
+        if (newDescription != null) {
+            validateDescriptionFlags(newDescription);
+        }
+        // @@author
 
         // @@author AbhijitBalajee
         return new EditCommand(index, newDescription, newAmount, newCategory, newDate, newRecurring);
@@ -469,6 +506,16 @@ public class Parser {
             }
         }
         return normalized.toString();
+    }
+
+    private static void validateDescriptionFlags(String description) throws SpendTrackException {
+        String lower = description.toLowerCase();
+        for (String flag : FLAG_PREFIXES) {
+            if (lower.contains(flag)) {
+                throw new SpendTrackException("Description contains flag-like pattern '" + flag
+                        + "'. Please remove or rephrase to avoid ambiguity.");
+            }
+        }
     }
     // @@author
 
