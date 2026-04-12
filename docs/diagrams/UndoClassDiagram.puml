@@ -11,7 +11,6 @@ abstract class Command {
 }
 
 class UndoCommand {
-    - undoManager: UndoManager
     + execute(expenses, ui)
     + mutatesData(): boolean
 }
@@ -27,15 +26,12 @@ class UndoManager {
 }
 
 class SpendTrack {
-    - undoManager: UndoManager
-    - expenses: ExpenseList
     - storage: Storage
     - ui: Ui
     + run()
 }
 
 class ExpenseList {
-    - expenses: ArrayList<Expense>
     - budget: double
     + restoreFrom(expenses: ArrayList<Expense>, budget: double)
     + getExpenses(): ArrayList<Expense>

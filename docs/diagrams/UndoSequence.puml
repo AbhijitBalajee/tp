@@ -5,7 +5,7 @@ skinparam sequenceMessageAlign center
 
 actor User
 participant ":SpendTrack" as ST
-participant "Parser" as P
+participant "<<class>>\nParser" as P
 participant ":UndoManager" as UM
 participant ":AddCommand" as AC
 participant ":UndoCommand" as UC
@@ -36,10 +36,14 @@ deactivate UM
 ST -> AC : execute(expenses, ui)
 activate AC
 AC -> EL : addExpense(expense)
+activate EL
+EL --> AC
+deactivate EL
 AC -> UI : showAddSuccess(expense)
 activate UI
 UI --> User : "New expense added: ..."
 deactivate UI
+AC --> ST
 deactivate AC
 
 ST -> ST : storage.save(expenses)
@@ -66,6 +70,7 @@ UC -> UI : print "Last command undone successfully."
 activate UI
 UI --> User : "Last command undone successfully."
 deactivate UI
+UC --> ST
 deactivate UC
 
 ST -> ST : storage.save(expenses)

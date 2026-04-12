@@ -17,6 +17,17 @@ public class ClearCommand extends Command {
         logger.setUseParentHandlers(false);
     }
 
+    private boolean cleared = false;
+
+    /**
+     * Returns true if this command actually cleared the expense list.
+     *
+     * @return true if expenses were cleared, false if cancelled or list was empty
+     */
+    public boolean didClear() {
+        return cleared;
+    }
+
     /**
      * Executes the clear command by prompting for confirmation, then removing all expenses.
      *
@@ -42,11 +53,15 @@ public class ClearCommand extends Command {
         if (confirmation.equalsIgnoreCase("yes")) {
             int count = expenses.size();
             expenses.clearAll();
+            cleared = true;
             ui.showMessage("All expenses cleared. (" + count + " expense(s) removed)");
             logger.info("All " + count + " expenses cleared.");
-        } else {
+        } else if (confirmation.equalsIgnoreCase("no")) {
             ui.showMessage("Clear cancelled.");
             logger.info("Clear cancelled by user.");
+        } else {
+            ui.showMessage("Invalid input. Please type 'yes' or 'no'. Clear cancelled.");
+            logger.info("Clear cancelled due to invalid input: " + confirmation);
         }
     }
 
