@@ -544,7 +544,7 @@ public class Ui {
             double avg = (count > 0) ? amount / count : 0.0;
             int percentage = (int) Math.round(amount / grandTotal * 100);
             String txnLabel = (count == 1) ? "txn" : "txns";
-            System.out.printf(" %-16s: $%-8.2f (%d%%)  | %d %s  | avg $%.2f  | max $%.2f%n",
+            System.out.printf(" %-16s: $%-8.2f (%3d%%)  | %d %s  | avg $%.2f  | max $%.2f%n",
                     category, amount, percentage, count, txnLabel, avg, max);
         }
 

@@ -7,9 +7,9 @@ SpendTrack is a command-line expense tracker for NUS students who prefer typing 
 ## Quick Start
 
 1. Ensure that you have Java 17 or above installed.
-2. Download the latest `spendtrack.jar` from the [GitHub releases page](https://github.com/AY2526S2-CS2113-T11-1/tp/releases).
+2. Download the latest `SpendTrack.jar` from the [GitHub releases page](https://github.com/AY2526S2-CS2113-T11-1/tp/releases).
 3. Open a terminal, navigate to the folder containing the JAR file.
-4. Run: `java -jar spendtrack.jar`
+4. Run: `java -jar SpendTrack.jar`
 5. You should see the welcome message. Start typing commands.
 
 ## Features
