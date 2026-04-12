@@ -580,7 +580,7 @@ Format: `clear`
 Example:
 ```
 ____________________________________________________________
- Are you sure you want to delete all expenses? This cannot be undone. (yes/no):
+ Are you sure you want to delete all expenses? You can undo this with 'undo'. (yes/no):
 ____________________________________________________________
 > yes
 ____________________________________________________________

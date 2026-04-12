@@ -2,6 +2,7 @@ package seedu.duke;
 
 import java.util.logging.Logger;
 
+import seedu.duke.command.ClearCommand;
 import seedu.duke.command.Command;
 
 /**
@@ -47,15 +48,19 @@ public class SpendTrack {
                 Command command = Parser.parse(input, undoManager);
                 if (command.mutatesData() && !(command instanceof
                         seedu.duke.command.UndoCommand)) {
+                    undoManager.backupState();
                     undoManager.saveSnapshot(expenses);
                 }
-                // @@author
                 command.execute(expenses, ui);
-                if (command.mutatesData()) {
+                if (command instanceof ClearCommand && !((ClearCommand) command).didClear()) {
+                    undoManager.rollbackState();
+                } else if (command.mutatesData()) {
                     storage.save(expenses);
                 }
+                // @@author
                 isRunning = !command.isExit();
             } catch (SpendTrackException e) {
+                undoManager.rollbackState();
                 logger.warning("SpendTrackException caught: " + e.getMessage());
                 ui.showError(e.getMessage());
             }

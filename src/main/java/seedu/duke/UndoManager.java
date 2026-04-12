@@ -23,6 +23,12 @@ public class UndoManager {
     // @@author
     private boolean hasSnapshot;
 
+    private ArrayList<Expense> backupSnapshot;
+    private double backupBudget;
+    private ArrayList<String> backupBudgetHistory;
+    private boolean backupHasSnapshot;
+    private boolean hasBackup;
+
     /**
      * Constructs an UndoManager with no stored snapshot.
      */
@@ -33,6 +39,7 @@ public class UndoManager {
         this.snapshotBudgetHistory = null;
         // @@author
         this.hasSnapshot = false;
+        this.hasBackup = false;
     }
 
     /**
@@ -88,6 +95,33 @@ public class UndoManager {
      */
     public boolean hasSnapshot() {
         return hasSnapshot;
+    }
+
+    /**
+     * Backs up the current undo state so it can be restored if a command fails
+     * or does not actually mutate data.
+     */
+    public void backupState() {
+        backupSnapshot = snapshot;
+        backupBudget = snapshotBudget;
+        backupBudgetHistory = snapshotBudgetHistory;
+        backupHasSnapshot = hasSnapshot;
+        hasBackup = true;
+    }
+
+    /**
+     * Restores the undo state from the backup taken by {@link #backupState()}.
+     * Used when a command fails or does not actually mutate data.
+     */
+    public void rollbackState() {
+        if (!hasBackup) {
+            return;
+        }
+        snapshot = backupSnapshot;
+        snapshotBudget = backupBudget;
+        snapshotBudgetHistory = backupBudgetHistory;
+        hasSnapshot = backupHasSnapshot;
+        hasBackup = false;
     }
 
     private ArrayList<Expense> deepCopyExpenses(ArrayList<Expense> original) {

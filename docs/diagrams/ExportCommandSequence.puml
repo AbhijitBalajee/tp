@@ -5,7 +5,7 @@ skinparam sequenceMessageAlign center
 
 actor User
 participant ":SpendTrack" as ST
-participant "Parser" as P
+participant "<<class>>\nParser" as P
 participant ":ExportCommand" as EC
 participant ":ExpenseList" as EL
 

@@ -5,10 +5,10 @@ skinparam sequenceMessageAlign center
 
 actor User
 participant ":SpendTrack" as ST
-participant "Parser" as P
+participant "<<class>>\nParser" as P
 participant ":AddCommand" as AC
 participant ":ExpenseList" as EL
-participant "BudgetChecker" as BC
+participant "<<class>>\nBudgetChecker" as BC
 participant ":Ui" as UI
 
 User -> ST : "add d/Dinner a/50 c/Food"
@@ -61,7 +61,9 @@ else under 90%
     note right of BC : No message shown
 end
 
+BC --> AC
 deactivate BC
+AC --> ST
 deactivate AC
 
 ST -> ST : storage.save(expenses)

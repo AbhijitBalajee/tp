@@ -104,6 +104,9 @@ public class Parser {
         case "find":
             return parseFindCommand(parts.length > 1 ? parts[1] : "");
         case "total":
+            if (parts.length > 1) {
+                throw new SpendTrackException("Usage: total");
+            }
             return new TotalCommand();
         // @@author AbhijitBalajee
         case "list":
@@ -128,6 +131,9 @@ public class Parser {
         case "goal":
             return parseGoalCommand(parts.length > 1 ? parts[1] : "");
         case "clear":
+            if (parts.length > 1) {
+                throw new SpendTrackException("Usage: clear");
+            }
             return new ClearCommand();
         case "export":
             if (parts.length > 1 && parts[1].trim().equalsIgnoreCase("csv")) {
@@ -136,6 +142,9 @@ public class Parser {
             throw new SpendTrackException("Usage: export csv");
         // @@author
         case "undo":
+            if (parts.length > 1) {
+                throw new SpendTrackException("Usage: undo");
+            }
             if (undoManager == null) {
                 throw new SpendTrackException("Undo is not available.");
             }
