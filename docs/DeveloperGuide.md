@@ -954,10 +954,10 @@ As part of v2.0, all commands were audited to ensure no user input can cause an 
 | `add` | Missing `d/` throws error; missing `a/` throws error; zero/negative amount throws error; non-numeric amount throws error |
 | `delete` | Non-integer index throws error; missing index throws error |
 | `edit` | Non-integer index; empty/blank description; zero/negative amount; no fields provided; duplicate flags all throw errors |
-| `budget` | Empty input throws error; non-numeric amount throws error | | `list` | Extra tokens after `list` or unrecognised sub-command throws error |
+| `budget` | Empty input throws error; non-numeric amount throws error; `Infinity` and `NaN` values rejected as invalid amounts |
+| `list` | Extra tokens after `list` or unrecognised sub-command throws error |
 | `budget reset` | Extra tokens after `reset` throws error |
 | `budget history` | Extra tokens after `history` throws error |
-| `budget` | `Infinity` and `NaN` values now rejected as invalid amounts |
 
 #### Design considerations
 
@@ -1126,7 +1126,7 @@ If the list is already empty, `ClearCommand` shows `No expenses to clear.` witho
 
 ### Undo Feature
 
-The undo feature restores the expense list to its state before the last mutating command:
+The undo feature restores saved data (expenses, current budget, and budget history) to its state before the last mutating command:
 
 ```
 undo
@@ -1136,11 +1136,11 @@ undo
 
 1. `SpendTrack` owns an `UndoManager` instance, created on startup.
 2. Before every mutating command executes (except `undo` itself), `SpendTrack` calls `UndoManager.saveSnapshot(expenses)`.
-3. `saveSnapshot()` creates a deep copy of all `Expense` objects in the list and stores the current budget value. This ensures the snapshot is independent of future mutations.
+3. `saveSnapshot()` creates a deep copy of all `Expense` objects in the list, stores the current budget value, and copies the budget history list. This ensures the snapshot is independent of future mutations.
 4. When the user enters `undo`, `Parser` creates an `UndoCommand` with a reference to the `UndoManager`.
 5. `UndoCommand.execute()` calls `UndoManager.undo(expenses)`.
 6. `undo()` checks if a snapshot exists. If not, it returns `false` and the command prints `Nothing to undo.`
-7. If a snapshot exists, it calls `ExpenseList.restoreFrom()` which replaces the internal expense list and budget with the snapshot data. The snapshot is then consumed (set to `null`), preventing a second undo.
+7. If a snapshot exists, it calls `ExpenseList.restoreFrom()` which replaces the internal expense list, budget, and budget history with the snapshot data. The snapshot is then consumed (set to `null`), preventing a second undo.
 8. Because `mutatesData()` returns `true`, `Storage.save()` persists the restored state.
 
 The following sequence diagram shows the undo flow:
