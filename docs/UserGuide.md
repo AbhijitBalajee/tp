@@ -501,6 +501,9 @@ ____________________________________________________________
 Error cases:
 - `budget reset` when no budget is set → `No budget to reset.`
 
+Note: A reset entry is recorded in budget history as `RESET ($0.00)`
+so you can track when your budget was cleared.
+
 ---
 
 ### Viewing budget history: `budget history`
@@ -513,6 +516,7 @@ Expected output:
 ```
 ____________________________________________________________
  ===== Budget History =====
+ 2026-03-28 : RESET ($0.00)
  2026-03-27 : $300.00
  2026-03-22 : $500.00
  ==========================

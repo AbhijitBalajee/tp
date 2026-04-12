@@ -69,6 +69,7 @@ EL --> BRC : true
 deactivate EL
 BRC -> EL : resetBudget()
 activate EL
+EL -> EL : budgetHistory.add(date|0.0)
 EL --> BRC
 deactivate EL
 BRC -> UI : showBudgetReset()

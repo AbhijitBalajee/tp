@@ -899,7 +899,8 @@ budget history
 1. The user enters `budget reset`.
 2. `Parser.parseBudgetCommand()` matches the keyword `reset` and returns a `BudgetResetCommand`.
 3. `BudgetResetCommand.execute()` checks that a budget is currently set — throws `SpendTrackException` if not.
-4. `ExpenseList.resetBudget()` sets the budget field back to 0.0.
+4. `ExpenseList.resetBudget()` sets the budget field back to 0.0 and appends
+   a `date|0.0` reset entry to the budget history list.
 5. `Ui.showBudgetReset()` confirms the reset.
 
 #### How it works — Budget history
@@ -907,7 +908,9 @@ budget history
 1. The user enters `budget history`.
 2. `Parser.parseBudgetCommand()` matches the keyword `history` and returns a `BudgetHistoryCommand`.
 3. `BudgetHistoryCommand.execute()` retrieves the history list from `ExpenseList.getBudgetHistory()`.
-4. `Ui.showBudgetHistory()` displays entries in reverse chronological order, skipping any malformed or zero-amount entries.
+4. `Ui.showBudgetHistory()` displays entries in reverse chronological order.
+   Entries with amount 0.0 are shown as `RESET ($0.00)` to indicate when
+   the budget was cleared. Negative entries are skipped as malformed.
 
 The following sequence diagram shows all three budget sub-command flows:
 
@@ -924,12 +927,15 @@ The following class diagram shows the relationships between the budget-related c
 - **Current approach:** History stored as `ArrayList<String>` of `date|amount` strings inside `ExpenseList`.
   - Pros: Simple format, easy to serialise to the save file as plain text. No additional class needed.
   - Cons: History entries are raw strings — parsing is required at display time in `Ui`.
+  
+- Reset events are recorded as `date|0.0` entries, displayed distinctly as
+  `RESET ($0.00)` in the history view to distinguish them from set budgets.
 
 - **Alternative:** A dedicated `BudgetRecord` class with `LocalDate date` and `double amount` fields.
   - Pros: Type-safe. No string parsing at display time.
   - Cons: Adds an extra class and requires custom serialisation logic for `Storage`.
 
-The current approach was chosen for simplicity. Refactoring to a `BudgetRecord` class is a natural next step if history features expand in later iterations.
+The current approach was chosen for simplicity. Refactoring to a `BudgetRecord` class is a natural next step if history features expand in later iterations. 
 
 **Aspect: Routing set/reset/history through one parser method**
 

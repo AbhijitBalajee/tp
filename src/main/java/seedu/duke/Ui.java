@@ -397,11 +397,15 @@ public class Ui {
             if (parts.length == 2) {
                 try {
                     double amount = Double.parseDouble(parts[1]);
-                    if (amount <= 0) {
+                    if (amount < 0) {
                         logger.warning("Skipping invalid budget history entry: " + entry);
                         continue;
                     }
-                    System.out.printf(" %s : $%.2f%n", parts[0], amount);
+                    if (amount == 0.0) {
+                        System.out.printf(" %s : RESET ($0.00)%n", parts[0]);
+                    } else {
+                        System.out.printf(" %s : $%.2f%n", parts[0], amount);
+                    }
                 } catch (NumberFormatException e) {
                     logger.warning("Malformed budget history entry skipped: " + entry);
                 }
