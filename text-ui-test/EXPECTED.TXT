@@ -98,7 +98,7 @@ ____________________________________________________________
  > ____________________________________________________________
  Available Commands
 ____________________________________________________________
-  add (a) d/DESC a/AMT c/CAT [date/DATE] [recurring/true] -- add expense
+  add (a) d/DESC a/AMT [c/CAT] [date/DATE] [recurring/true|false] -- add expense
   delete (d) INDEX                                 -- delete expense
   list (l)                                         -- list all
   list recurring                                   -- list recurring only

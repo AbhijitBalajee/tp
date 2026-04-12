@@ -69,6 +69,8 @@ Error cases:
 - `add d/Alice|Bob a/20 c/Food` → `Description cannot contain '|' (reserved for save file format). Please use a different character.`
 - `add d/T a/5 c/Food date/29-02-2025` (Feb 29 on a non-leap year) → `Invalid date format. Accepted: YYYY-MM-DD, DD-MM-YYYY, 'today', 'yesterday'.`
 - `add d/T a/5 c/Food date/31-04-2026` (April has 30 days) → same invalid date error.
+- `add d/T a/1000001 c/Food` (exceeds $1,000,000 cap) → `Amount must not exceed $1,000,000.`
+- `add d/T a/0.001 c/Food` (below $0.01 minimum) → `Amount must be at least $0.01.`
 - `add d/Coffee a/5 da/today` (invalid prefix) → `Unrecognised token: 'da/today'. Valid flags are: d/, a/, c/, date/, recurring/`
 - `add d/buy a/c adapter a/50 c/Electronics` (flag prefix in description) → `Description contains flag-like pattern 'a/'. Please remove or rephrase to avoid ambiguity.`
 
@@ -978,7 +980,7 @@ Expected output:
 ```
 ______________________________________________________________________________________________________
  Here are the commands you can use:
-  add (a) d/DESC a/AMT c/CAT [date/DATE] [recurring/true]                     -- add expense
+  add (a) d/DESC a/AMT [c/CAT] [date/DATE] [recurring/true|false]              -- add expense
   delete (d) INDEX                                                            -- delete expense
   list (l)                                                                    -- list all
   list recurring                                                              -- list recurring only
@@ -1048,7 +1050,7 @@ ____________________________________________________________
 
 | Action            | Format | Alias |
 |-------------------|--------|-------|
-| Add expense       | `add d/DESC a/AMT c/CAT [date/DATE] [recurring/true|false]` | `a` |
+| Add expense       | `add d/DESC a/AMT [c/CAT] [date/DATE] [recurring/true|false]` | `a` |
 | Delete expense    | `delete INDEX` | `d` |
 | Edit expense      | `edit INDEX [d/DESC] [a/AMT] [c/CAT] [date/DATE] [recurring/true&#124;false]` | — |
 | List expenses     | `list` | `l` |
