@@ -18,7 +18,9 @@ public class UndoManager {
 
     private ArrayList<Expense> snapshot;
     private double snapshotBudget;
+    // @@author AbhijitBalajee
     private ArrayList<String> snapshotBudgetHistory;
+    // @@author
     private boolean hasSnapshot;
 
     /**
@@ -27,7 +29,9 @@ public class UndoManager {
     public UndoManager() {
         this.snapshot = null;
         this.snapshotBudget = 0.0;
+        // @@author AbhijitBalajee
         this.snapshotBudgetHistory = null;
+        // @@author
         this.hasSnapshot = false;
     }
 
@@ -42,10 +46,12 @@ public class UndoManager {
 
         snapshot = deepCopyExpenses(expenses.getExpenses());
         snapshotBudget = expenses.getBudget();
+        // @@author AbhijitBalajee
         snapshotBudgetHistory = new ArrayList<>(expenses.getBudgetHistory());
-        hasSnapshot = true;
         logger.info("Snapshot saved: " + snapshot.size() + " expenses, budget=" + snapshotBudget
                 + ", budgetHistoryEntries=" + snapshotBudgetHistory.size());
+        // @@author
+        hasSnapshot = true;
     }
 
     /**
@@ -63,10 +69,14 @@ public class UndoManager {
             return false;
         }
 
+        // @@author AbhijitBalajee
         expenses.restoreFrom(snapshot, snapshotBudget, snapshotBudgetHistory);
+        // @@author
         hasSnapshot = false;
         snapshot = null;
+        // @@author AbhijitBalajee
         snapshotBudgetHistory = null;
+        // @@author
         logger.info("Snapshot restored successfully.");
         return true;
     }
