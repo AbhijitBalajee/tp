@@ -274,6 +274,11 @@ public class Parser {
                 if (amount <= 0) {
                     throw new SpendTrackException("Amount must be a positive number. Usage: a/<amount>");
                 }
+                // @@author AfshalG
+                if (amount < 0.01) {
+                    throw new SpendTrackException("Amount must be at least $0.01.");
+                }
+                // @@author
                 // @@author Ariff1422
                 if (amount > 1000000) {
                     throw new SpendTrackException("Amount must not exceed $1,000,000.");
@@ -407,6 +412,11 @@ public class Parser {
                 if (newAmount <= 0) {
                     throw new SpendTrackException("Amount must be greater than 0.");
                 }
+                // @@author AfshalG
+                if (newAmount < 0.01) {
+                    throw new SpendTrackException("Amount must be at least $0.01.");
+                }
+                // @@author
                 // @@author Ariff1422
                 if (newAmount > 1000000) {
                     throw new SpendTrackException("Amount must not exceed $1,000,000.");

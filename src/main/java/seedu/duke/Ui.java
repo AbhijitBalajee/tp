@@ -450,7 +450,7 @@ public class Ui {
         System.out.println(LINE);
         String format = "  %-48s -- %s";
         System.out.println(String.format(format,
-                "add (a) d/DESC a/AMT c/CAT [date/DATE] [recurring/true]", "add expense"));
+                "add (a) d/DESC a/AMT [c/CAT] [date/DATE] [recurring/true|false]", "add expense"));
         System.out.println(String.format(format,
                 "delete (d) INDEX", "delete expense"));
         System.out.println(String.format(format,

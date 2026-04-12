@@ -22,10 +22,6 @@ object "<u>categoryMax : Map</u>" as cm {
     "Transport" = 1.20
 }
 
-object "<u>grandTotal : double</u>" as gt {
-    value = 14.70
-}
-
 object "<u>e1 : Expense</u>" as e1 {
     description = "Coffee"
     amount = 3.50
@@ -47,9 +43,12 @@ object "<u>e3 : Expense</u>" as e3 {
     date = 2026-03-22
 }
 
-sc --> ct : builds
-sc --> cc : builds
-sc --> cm : builds
-sc --> gt : computes
+sc -- ct : builds
+sc -- cc : builds
+sc -- cm : builds
+
+sc -- e1 : processes
+sc -- e2 : processes
+sc -- e3 : processes
 
 @enduml
