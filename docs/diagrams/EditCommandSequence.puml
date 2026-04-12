@@ -4,10 +4,10 @@ skinparam backgroundColor BGCOLOR
 skinparam sequenceMessageAlign center
 
 actor User
-participant ":SpendTrack" as ST
-participant "Parser" as P
-participant ":ExpenseList" as EL
-participant ":Ui" as UI
+participant "<u>:SpendTrack</u>" as ST
+participant "<<class>>\nParser" as P
+participant "<u>:ExpenseList</u>" as EL
+participant "<u>:Ui</u>" as UI
 
 User -> ST : "edit 1 d/Latte a/6.00"
 activate ST
@@ -21,10 +21,10 @@ note right of P
     others remain null
 end note
 
-create participant ":EditCommand" as EC
+create participant "<u>:EditCommand</u>" as EC
 P -> EC : new EditCommand(1, "Latte", 6.00, null, null, null)
 activate EC
-EC --> P :
+EC --> P
 deactivate EC
 
 P --> ST : :EditCommand
@@ -47,8 +47,10 @@ EL --> EC
 deactivate EL
 EC -> UI : showEditSuccess(1, old, updated)
 activate UI
-UI --> User : before/after display
+UI --> EC
 deactivate UI
+EC --> ST : before/after display
 deactivate EC
+ST --> User : before/after display
 deactivate ST
 @enduml
