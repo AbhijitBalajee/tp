@@ -361,6 +361,9 @@ If no expenses have been added:
  No expenses recorded yet.
 ```
 
+Error cases:
+- `list foo` or any second word other than `recurring` → `Invalid list option. Usage: list OR list recurring`
+
 ---
 
 ### Listing recurring expenses: `list recurring`
@@ -500,6 +503,7 @@ ____________________________________________________________
 
 Error cases:
 - `budget reset` when no budget is set → `No budget to reset.`
+- `budget reset` with extra text (e.g. `budget reset please`) → `Usage: budget reset`
 
 Note: A reset entry is recorded in budget history as `RESET ($0.00)`
 so you can track when your budget was cleared.
@@ -527,6 +531,9 @@ If no budget has ever been set:
 ```
  No budget history recorded. 
 ```
+
+Error cases:
+- `budget history` with extra text (e.g. `budget history please`) → `Usage: budget history`
 
 ---
 
@@ -566,7 +573,7 @@ Format: `clear`
 
 - You must type `yes` (case-insensitive) to confirm. Any other input cancels.
 - If the expense list is already empty, shows a message without prompting.
-- A `clear` operation can be reversed with the `undo` command immediately after (undo restores the full expense list and budget state).
+- A `clear` operation can be reversed with the `undo` command immediately after (undo restores the full expense list, current budget, and budget history as they were before that command).
 
 Example:
 ```
@@ -598,13 +605,20 @@ ____________________________________________________________
 
 ### Undoing the last command: `undo`
 
-Restores the expense list to its state before the last mutating command (`add`, `delete`, `edit`, `clear`).
+Restores saved data to its state immediately before the last **mutating** command.
 
 Format: `undo`
 
+Mutating commands (each overwrites the one undo slot when run):
+
+- `add`, `delete`, `edit`, `clear`
+- `budget` / `b` (set a new monthly limit)
+- `budget reset`
+
+Undo restores **expenses**, the **current budget amount**, and the **budget history log** together, so undoing a second `budget` or a `budget reset` also reverts the history entries that command had added.
+
 - Only single-level undo is supported. A second consecutive `undo` prints `Nothing to undo.`
-- Non-mutating commands (`list`, `help`, `summary`, etc.) do not affect the undo history.
-- Budget state is also restored.
+- Non-mutating commands (`list`, `help`, `summary`, `budget history`, etc.) do not affect the undo history.
 
 Example:
 ```
