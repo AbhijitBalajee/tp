@@ -114,6 +114,9 @@ public class Parser {
         case "budget":
             return parseBudgetCommand(parts.length > 1 ? parts[1] : "");
         case "remaining":
+            if (parts.length > 1) {
+                throw new SpendTrackException("Usage: remaining");
+            }
             return new RemainingCommand();
         // @@author pranavjana
         case "goal":
@@ -136,6 +139,9 @@ public class Parser {
         case "search":
             return new SearchCommand(parts.length > 1 ? parts[1] : "");
         case "sort":
+            if (parts.length > 1) {
+                throw new SpendTrackException("Usage: sort");
+            }
             return new SortCommand();
         case "top":
             try {
@@ -160,6 +166,9 @@ public class Parser {
             }
             return new MonthCommand(validateYearMonth(parts[1].trim(), "month"));
         case "help":
+            if (parts.length > 1) {
+                throw new SpendTrackException("Usage: help");
+            }
             return new HelpCommand();
         case "bye":
             return new ExitCommand();
