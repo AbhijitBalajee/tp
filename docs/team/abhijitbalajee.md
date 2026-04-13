@@ -24,11 +24,11 @@ SpendTrack is a CLI expense tracker for NUS students who prefer typing over clic
 
 - **Input validation hardening** (v2.0/v2.1): Audited all commands for missing or inconsistent validation. Added missing description and amount checks to `add`, empty input and non-numeric checks to `budget`, and non-integer index checks to `edit`. Validation is split between `Parser` (format checks) and commands (value/range checks at execute time) for defence-in-depth. **(v2.1)** Parser rejects non-finite `budget` amounts (`NaN`, `Infinity`), extra tokens after `list` / `budget reset` / `budget history`, and invalid `list` subcommands; explicit non-finite rejection for `add` amounts where enforced at parse time.
 
+- **Bug fixes — PE dry run (v2.1)**: Fixed three bugs found during the practical exam: (1) `EditCommand` now overrides `mutatesData()` so edited expenses persist to disk across sessions, (2) `EditCommand` now calls `BudgetChecker.check()` after successful edits so warnings are consistent with `add`, and (3) `showFilteredExpenses()` now includes the `[R]` recurring tag in filtered output. Also fixed `list recurring extra` incorrectly falling through to the full list, corrected `budget reset extra` and `budget history extra` error messages, and rejected `NaN` / `Infinity` as invalid budget amounts.
+
 - **Recurring expenses** (v2.0): Added `recurring/true|false` flag to the `add` command. The flag is stored on `Expense` as `boolean isRecurring`, defaulting to `false`. Recurring expenses display `[R]` in the list. `list recurring` filters on the fly at display time. The recurring flag is also editable via `edit INDEX recurring/false`.
 
 - **Dynamic list alignment** (v2.0): Refactored `Ui.showExpenseList()`, `Ui.showRecurringList()`, and `Ui.showFilteredExpenses()` to use dynamic column widths and per-column separator lines, replacing fixed-width formatting that broke alignment for long categories like `[Entertainment]`.
-
-- **Bug fixes — PE dry run (v2.1)**: Fixed issues found during the practical exam dry run: (1) `EditCommand` was missing `mutatesData()` — edits were not persisted to disk across sessions. (2) `EditCommand` did not call `BudgetChecker.check()` after editing — budget warnings were inconsistent between `add` and `edit`. (3) `showFilteredExpenses()` was missing the `[R]` recurring tag in filtered results. Also fixed `list recurring` with extra tokens incorrectly falling through to the full list (`fix/list-recurring-parsing`), and `budget reset` / `budget history` with extra tokens or non-finite budget amounts showing the wrong error path (`fix/input-validation-extra-tokens`).
 
 - **Assertions and logging** (v1.0/v2.0/v2.1): Added assertions and `java.util.logging` to `ListCommand`, `BudgetCommand`, `BudgetResetCommand`, `BudgetHistoryCommand`, `EditCommand`, `Expense`, `ExpenseList`, and `Ui`. Extended snapshot logging in `UndoManager` (v2.1) when budget history was included in undo. Logger suppressed from console output using `setUseParentHandlers(false)`.
 
@@ -38,8 +38,8 @@ SpendTrack is a CLI expense tracker for NUS students who prefer typing over clic
 - **`BudgetCommandTest`** (v1.0): Tests for valid amount, negative amount, zero amount, exceeds max, and with existing expenses.
 - **`EditCommandTest`** (v2.0): Tests for editing each field individually, editing all fields, unchanged fields staying the same, editing recurring flag, invalid indices (zero, negative, out of range), no fields provided, blank/empty description, zero/negative amount, and list size unchanged after edit.
 - **`RecurringExpenseTest`** (v2.0): Tests for default recurring flag, setting recurring true, `[R]` tag in toString, `list recurring` execution, parsing `recurring/true` and `recurring/false`, invalid recurring value, and recurring count in list.
-- **`InputValidationTest`** (v2.0, extended): Parser-level tests from the audit — `add` / `delete` / `edit`; empty/non-numeric `budget`; `list`, `list recurring`, and invalid `list` subcommands; non-finite budget amounts (`NaN`, `Infinity`); extra tokens after `budget reset` / `budget history`; empty/whitespace input.
-- **`BudgetResetHistoryCommandTest`** (v2.1): Tests for `BudgetResetCommand` and `BudgetHistoryCommand` — `mutatesData`, reset with no budget (throws), reset clears budget and appends history, history command on empty and non-empty history.
+- **`InputValidationTest`** (v2.0): Parser-level tests for validation gaps addressed in the audit — missing/empty description, missing/zero/negative/non-numeric amount for `add`; missing/non-numeric index for `delete` and `edit`; empty/non-numeric for `budget`; `list` and `list recurring` cases; empty/whitespace input.
+- **`InputValidationTest` (extended v2.1)**: Added parser-level tests for extra tokens after `list`, `budget reset`, and `budget history`; rejected `NaN` and `Infinity` budget amounts; and `list abc` as an invalid list option.
 - **`UndoCommandTest`** (v2.1): Tests that undo restores budget history after a second `setBudget` and after `budget reset`, in addition to existing undo coverage.
 - **`ExpenseListTest`** (v2.1): Updated `resetBudget_budgetHistoryPreserved()` to verify a reset appends a `date|0.0` entry and history behaviour stays consistent with the reset flow.
 
@@ -55,7 +55,9 @@ SpendTrack is a CLI expense tracker for NUS students who prefer typing over clic
 - Updated command summary table to include edit, list recurring, budget reset, budget history
 - Undo section updates (v2.1): documented all mutating commands that consume the undo slot (including `budget` / `b` and `budget reset`), and that undo restores **budget history** together with expenses and current budget
 - Error cases for invalid `list` arguments and for extra tokens after `budget reset` / `budget history`
-- Filter command section **(v2.1)**: noted that recurring expenses show the `[R]` tag in filtered date-range output (aligned with list output)
+- Filter section: added note that recurring expenses show `[R]` tag in filtered results
+- Edit section: added note that edits save automatically and a budget warning appears after editing
+- Budget section: added `NaN` / `Infinity` error cases
 
 ### Contributions to the DG
 
@@ -68,6 +70,8 @@ SpendTrack is a CLI expense tracker for NUS students who prefer typing over clic
 - Manual testing sections for listing, editing, budget reset and history
 - Undo feature documentation (v2.1): snapshot and `ExpenseList.restoreFrom()` described to include budget history alongside expenses and budget
 - Input Validation Hardening table: fixed markdown so `list` and `budget` appear on separate rows (with `budget` validation details consolidated)
+- Updated Edit Expense feature section to document `mutatesData()` override and `BudgetChecker.check()` call after edit
+- Updated Input Validation Hardening table with validation rows for `list`, `budget reset`, `budget history`, and `NaN` / `Infinity`
 - **UML notation fixes** across contributed sequence diagrams: standard UML conventions — `<<class>>` for static callers where applicable (`Parser`, `DateParser`, `BudgetChecker`), underlined instance participant names, return arrows to activation bars, and `==` fragment dividers instead of non-standard section headers
 - UML diagrams:
     - Sequence diagram: `EditCommand` execution flow (`EditCommandSequence`)
@@ -85,4 +89,4 @@ SpendTrack is a CLI expense tracker for NUS students who prefer typing over clic
 
 ### Community
 
-Reviewed PRs: #31, #103, #110, #111, #112, #115, #124, #166, #170, #174, #234, #236
+Reviewed PRs: #31, #103, #110, #111, #112, #115, #124, #166, #170, #174, #234, #236, #263, #265
