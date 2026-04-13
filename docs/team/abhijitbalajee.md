@@ -32,7 +32,7 @@ SpendTrack is a CLI expense tracker for NUS students who prefer typing over clic
 
 ### Contributions to testing
 
-- **`ListCommandTest`** (v1.0): Tests for empty list, single expense, multiple expenses, and `isExit()`.
+- **`ListCommandTest`** (v1.0, v2.1): Tests for empty list, single expense, multiple expenses, `isExit()` for default and recurring-only mode (`ListCommand(true)`), and executing with expenses.
 - **`BudgetCommandTest`** (v1.0): Tests for valid amount, negative amount, zero amount, exceeds max, and with existing expenses.
 - **`EditCommandTest`** (v2.0): Tests for editing each field individually, editing all fields, unchanged fields staying the same, editing recurring flag, invalid indices (zero, negative, out of range), no fields provided, blank/empty description, zero/negative amount, and list size unchanged after edit.
 - **`RecurringExpenseTest`** (v2.0): Tests for default recurring flag, setting recurring true, `[R]` tag in toString, `list recurring` execution, parsing `recurring/true` and `recurring/false`, invalid recurring value, and recurring count in list.
