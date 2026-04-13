@@ -4,18 +4,21 @@ skinparam backgroundColor BGCOLOR
 skinparam sequenceMessageAlign center
 
 actor User
-participant ":SpendTrack" as ST
+participant "<u>:SpendTrack</u>" as ST
 participant "<<class>>\nParser" as P
-participant ":UndoManager" as UM
-participant ":AddCommand" as AC
-participant ":UndoCommand" as UC
-participant ":ExpenseList" as EL
-participant ":Ui" as UI
+participant "<u>:UndoManager</u>" as UM
+participant "<u>:ExpenseList</u>" as EL
+participant "<u>:Ui</u>" as UI
 
 User -> ST : "add d/Mistake a/999 c/Oops"
 activate ST
 ST -> P : parse(input, undoManager)
 activate P
+create "<u>:AddCommand</u>" as AC
+P -> AC : new AddCommand(...)
+activate AC
+AC --> P
+deactivate AC
 P --> ST : :AddCommand
 deactivate P
 
@@ -41,18 +44,24 @@ EL --> AC
 deactivate EL
 AC -> UI : showAddSuccess(expense)
 activate UI
-UI --> User : "New expense added: ..."
+UI --> AC
 deactivate UI
 AC --> ST
 deactivate AC
 
 ST -> ST : storage.save(expenses)
+ST --> User : "New expense added: ..."
 deactivate ST
 
 User -> ST : "undo"
 activate ST
 ST -> P : parse("undo", undoManager)
 activate P
+create "<u>:UndoCommand</u>" as UC
+P -> UC : new UndoCommand(undoManager)
+activate UC
+UC --> P
+deactivate UC
 P --> ST : :UndoCommand
 deactivate P
 
@@ -68,11 +77,12 @@ UM --> UC : true
 deactivate UM
 UC -> UI : print "Last command undone successfully."
 activate UI
-UI --> User : "Last command undone successfully."
+UI --> UC
 deactivate UI
 UC --> ST
 deactivate UC
 
 ST -> ST : storage.save(expenses)
+ST --> User : "Last command undone successfully."
 deactivate ST
 @enduml

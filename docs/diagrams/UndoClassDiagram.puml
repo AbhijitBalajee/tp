@@ -26,8 +26,6 @@ class UndoManager {
 }
 
 class SpendTrack {
-    - storage: Storage
-    - ui: Ui
     + run()
 }
 

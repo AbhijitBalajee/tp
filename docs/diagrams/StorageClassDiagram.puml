@@ -5,9 +5,6 @@ skinparam classAttributeIconSize 0
 hide circle
 
 class SpendTrack {
-    - storage: Storage
-    - expenseList: ExpenseList
-    - ui: Ui
     + run()
 }
 
@@ -42,8 +39,15 @@ class Expense {
     + getDate(): LocalDate
 }
 
+class Ui {
+    + showWelcome()
+    + showHelp()
+    + showError(message: String)
+}
+
 SpendTrack "1" --> "1" Storage : uses
 SpendTrack "1" --> "1" ExpenseList : owns
+SpendTrack "1" --> "1" Ui : uses
 Storage ..> ExpenseList : loads into / saves from
 ExpenseList "1" *-- "0..*" Expense : contains
 @enduml

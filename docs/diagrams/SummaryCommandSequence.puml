@@ -4,10 +4,10 @@ skinparam backgroundColor BGCOLOR
 skinparam sequenceMessageAlign center
 
 actor User
-participant ":SpendTrack" as ST
+participant "<u>:SpendTrack</u>" as ST
 participant "<<class>>\nParser" as P
-participant ":ExpenseList" as EL
-participant ":Ui" as UI
+participant "<u>:ExpenseList</u>" as EL
+participant "<u>:Ui</u>" as UI
 
 User -> ST : "summary" or "s"
 activate ST
@@ -15,7 +15,7 @@ activate ST
 ST -> P : parse(input)
 activate P
 P -> P : resolve alias ("s" -> "summary")
-create ":SummaryCommand" as SC
+create "<u>:SummaryCommand</u>" as SC
 P -> SC : new SummaryCommand()
 activate SC
 SC --> P
@@ -33,6 +33,9 @@ deactivate EL
 
 alt expenses list is empty
     SC -> UI : showError("No expenses recorded yet.")
+    activate UI
+    UI --> SC
+    deactivate UI
 else expenses exist
     loop for each expense in allExpenses
         SC -> SC : update categoryTotals
@@ -43,14 +46,16 @@ else expenses exist
     SC -> SC : sort categories descending by total
     SC -> UI : showEnhancedSummary(sorted, counts, max, grandTotal)
     activate UI
-    UI --> User : formatted summary table
     note right of UI
       Food    : $13.50 (63%) | 3 txns | avg $4.50 | max $10.00
       Transport: $5.00 (37%) | 2 txns | avg $2.50 | max $3.00
     end note
+    UI --> SC
     deactivate UI
 end
 
+SC --> ST
 deactivate SC
+ST --> User : output
 deactivate ST
 @enduml

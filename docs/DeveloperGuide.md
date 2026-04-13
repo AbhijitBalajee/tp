@@ -363,16 +363,16 @@ The following class diagram shows the relationships between `Storage`, `ExpenseL
 The `filter` command allows users to view expenses within an inclusive date range, with an optional category filter:
 
 ```
-filter from/DATE to/DATE [cat/CATEGORY]
+filter from/DATE to/DATE [c/CATEGORY]
 ```
 
 **How it works:**
 
-1. The user enters `filter from/2026-03-01 to/2026-03-31` (optionally with `cat/Food`).
+1. The user enters `filter from/2026-03-01 to/2026-03-31` (optionally with `c/Food`).
 2. `Parser.parse()` delegates to `Parser.parseFilterCommand()`.
 3. `parseFilterCommand()` iterates over each space-delimited token:
    - `from/` and `to/` are passed to `DateParser.parse()`. Duplicates throw an exception.
-   - `cat/` sets an optional category string. Duplicates, empty values, and values containing `|` throw an exception.
+   - `c/` sets an optional category string. Duplicates, empty values, and values containing `|` throw an exception.
    - Any unrecognised token throws: `Unknown filter option: '<token>'`.
 4. If either date is missing, or `from` is after `to`, a `SpendTrackException` is thrown.
 5. A `FilterCommand(from, to, category)` is created and returned (`category` may be `null`).
@@ -425,7 +425,7 @@ The following sequence diagram shows the execution flow for `filter` and `find`:
 
 **Aspect: Pipe character rejection in filter and find**
 
-Both `cat/` in `filter` and `d/` in `find` reject values containing `|`. This is consistent with `add` and `edit`, which apply the same restriction. The pipe character is the field delimiter in the save file, so allowing it in any user input would corrupt stored data or cause checksum mismatches on load.
+Both `c/` in `filter` and `d/` in `find` reject values containing `|`. This is consistent with `add` and `edit`, which apply the same restriction. The pipe character is the field delimiter in the save file, so allowing it in any user input would corrupt stored data or cause checksum mismatches on load.
 
 ### Edit Expense Feature
 
@@ -1324,7 +1324,7 @@ SpendTrack helps students track expenses faster than a typical GUI app. Users ca
 1. Should work on any mainstream OS (Windows, macOS, Linux) with Java 17 installed.
 2. Should respond to any command within 1 second.
 3. A user with average typing speed should be able to log an expense faster than using a GUI app.
-4. Data files should be human-readable plain text. 
+4. Data files should be human-readable plain text. Each record includes a CRC32 checksum as the last field to detect accidental corruption or tampering, while keeping the file manually editable.
 5. The application should handle invalid inputs gracefully without crashing. 
 6. The code should follow object-oriented design principles. 
 7. Logging and assertions should be used for debugging and reliability.
