@@ -27,18 +27,7 @@ SpendTrack is a CLI expense tracker for NUS students who prefer typing over clic
 - **Recurring flag persistence** (v2.1): Fixed `Storage` to save and load the `recurring` field of each expense. Before this fix, recurring expenses lost their `[R]` tag on restart.
 - **ASCII logo and UI polish** (v2.1): Added a SpendTrack ASCII logo to the welcome banner, improved error hint messages (contextual `Hint:` lines based on error type), and standardised the help command column alignment.
 - **Assertions and logging** (v1.0): Added assertions and `java.util.logging` to `DeleteCommand`, `SpendTrack`, `Storage`, `FilterCommand`, `FindCommand`, and `Ui`.
-
-### Contributions to testing
-
-- **`DeleteCommandTest`** (v1.0, updated v2.1): Tests for valid deletion, correct item removed, last index, out-of-range, and zero index. Updated in v2.1 to simulate `yes/no` confirmation input via `ByteArrayInputStream`. Added tests for cancel with `no` and cancel with invalid response.
-- **`ExpenseTest`** (v2.0): Tests for both constructors, all getters/setters, recurring flag defaults, and `toString` formatting.
-- **`ExpenseListTest`** (v2.0): Tests for add/get/set/delete, size tracking, `getTotal`, budget set/reset/directly, `hasBudget`, and budget history ordering.
-- **`StorageTest`** (v2.0, updated v2.1): Full round-trip save/load tests for expenses, budget, and budget history. Also covers missing file, zero/malformed budget value, and field-level precision. Updated in v2.1 with CRC32 tamper-detection tests: tampered checksum causes line to be skipped, valid file loads fully.
-- **`DateParserTest`** (v2.0): Tests for ISO format, Singapore DD-MM-YYYY format, `today`/`yesterday` keywords (case-insensitive), whitespace tolerance, and invalid inputs including empty string, wrong separator, invalid month/day.
-- **`FilterCommandTest`** (v2.0, extended v2.1): Tests for date range filtering, no matches, list immutability, `isExit`/`mutatesData`, and parser-level validation (missing dates, reversed range, invalid format). Extended in v2.1 with tests for `c/` category filter, duplicate `c/`, empty `c/`, pipe in category, and garbage token rejection.
-- **`FindCommandTest`** (v2.0, extended v2.1): Tests for valid/invalid/negative/zero indices, empty list, list immutability, `isExit`/`mutatesData`, and parser-level validation. Extended in v2.1 with tests for `find d/KEYWORD` mode including case-insensitive match, no match, partial match, trailing garbage rejection, and `mutatesData` returning false.
-- **`StartupReminderTest`** (v2.0): Tests for `showLastExpense` output content (description, amount, category, date), empty list logic, and recurring expense display.
-- **`InputValidationTest` (extended)** (v2.0): Added parser-level tests for `filter`, `find`, `list`, alias resolution, `bye`, and unknown commands.
+- **JUnit tests**: Wrote and maintained tests for `DeleteCommand`, `FilterCommand`, `FindCommand`, `Storage`, `ExpenseList`, `Expense`, `DateParser`, and `InputValidation`. Extended `FilterCommandTest` and `FindCommandTest` in v2.1 to cover `c/` category filter, `find d/KEYWORD` mode, duplicate flag rejection, and pipe character validation.
 
 ### Contributions to the UG
 
