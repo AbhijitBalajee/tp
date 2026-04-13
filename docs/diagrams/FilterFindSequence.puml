@@ -24,6 +24,11 @@ note right of P
   Rejects unknown tokens and '|' in c/
   Validates from <= to
 end note
+create "<u>:FilterCommand</u>" as FC
+P -> FC : new FilterCommand(from, to, category)
+activate FC
+FC --> P
+deactivate FC
 P --> ST : :FilterCommand(from, to, category)
 deactivate P
 
@@ -43,9 +48,11 @@ end
 
 FC -> UI : showFilteredExpenses(filtered, from, to, category)
 activate UI
-UI --> User : filtered expense table
+UI --> FC
 deactivate UI
+FC --> ST
 deactivate FC
+ST --> User : filtered expense table
 deactivate ST
 
 User -> ST : "find 2"
@@ -58,6 +65,11 @@ note right of P
   Single token only — rejects trailing garbage
   Integer parsed -> FindCommand
 end note
+create "<u>:FindCommand</u>" as FNC
+P -> FNC : new FindCommand(2)
+activate FNC
+FNC --> P
+deactivate FNC
 P --> ST : :FindCommand(2)
 deactivate P
 
@@ -79,10 +91,11 @@ EL --> FNC : expense
 deactivate EL
 FNC -> UI : showExpenseDetail(index, expense)
 activate UI
-UI --> User : detailed expense view (incl. Recurring)
+UI --> FNC
 deactivate UI
-
+FNC --> ST
 deactivate FNC
+ST --> User : detailed expense view (incl. Recurring)
 deactivate ST
 
 User -> ST : "find d/coffee"
@@ -95,6 +108,11 @@ note right of P
   Detects d/ prefix
   Validates keyword non-empty, no '|'
 end note
+create "<u>:FindByKeywordCommand</u>" as FKC
+P -> FKC : new FindByKeywordCommand("coffee")
+activate FKC
+FKC --> P
+deactivate FKC
 P --> ST : :FindByKeywordCommand("coffee")
 deactivate P
 
@@ -111,8 +129,10 @@ end
 
 FKC -> UI : showExpensesByKeyword(matchIndices, matches, keyword)
 activate UI
-UI --> User : keyword search results table
+UI --> FKC
 deactivate UI
+FKC --> ST
 deactivate FKC
+ST --> User : keyword search results table
 deactivate ST
 @enduml

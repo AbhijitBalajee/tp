@@ -21,11 +21,12 @@ deactivate S
 
 ST -> UI : showWelcome()
 activate UI
-UI --> User : welcome message
+UI --> ST
 deactivate UI
+ST --> User : welcome message
 
 loop until isExit
-    UI --> User : "> " prompt
+    ST --> User : "> " prompt
     User -> ST : input string
     ST -> P : parse(input)
     activate P
@@ -40,10 +41,11 @@ loop until isExit
     deactivate EL
     CMD -> UI : show result
     activate UI
-    UI --> User : output
+    UI --> CMD
     deactivate UI
     CMD --> ST
     deactivate CMD
+    ST --> User : output
 
     opt command.mutatesData()
         ST -> S : save(expenseList)

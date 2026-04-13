@@ -1324,7 +1324,7 @@ SpendTrack helps students track expenses faster than a typical GUI app. Users ca
 1. Should work on any mainstream OS (Windows, macOS, Linux) with Java 17 installed.
 2. Should respond to any command within 1 second.
 3. A user with average typing speed should be able to log an expense faster than using a GUI app.
-4. Data files should be human-readable plain text. 
+4. Data files should be human-readable plain text. Each record includes a CRC32 checksum as the last field to detect accidental corruption or tampering, while keeping the file manually editable.
 5. The application should handle invalid inputs gracefully without crashing. 
 6. The code should follow object-oriented design principles. 
 7. Logging and assertions should be used for debugging and reliability.

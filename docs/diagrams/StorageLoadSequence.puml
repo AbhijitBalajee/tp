@@ -61,14 +61,14 @@ deactivate S
 opt expenseList is non-empty
     ST -> UI : showLastExpense(lastExpense)
     activate UI
-    UI --> User : "Last recorded expense: ..."
+    UI --> ST
     deactivate UI
 end
 
 ST -> UI : showWelcome()
 activate UI
-UI --> User : welcome message
+UI --> ST
 deactivate UI
-
+ST --> User : welcome message
 deactivate ST
 @enduml

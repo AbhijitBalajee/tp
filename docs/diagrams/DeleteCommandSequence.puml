@@ -21,6 +21,11 @@ note right of P
   if index is non-integer
   or missing
 end note
+create "<u>:DeleteCommand</u>" as DC
+P -> DC : new DeleteCommand(2)
+activate DC
+DC --> P
+deactivate DC
 P --> ST : :DeleteCommand(2)
 deactivate P
 
@@ -41,15 +46,14 @@ else valid index
     deactivate EL
     DC -> UI : confirmDelete(expense)
     activate UI
-    UI --> User : "About to delete: ... Are you sure? (yes/no)"
-    User --> UI : response
+    UI --> DC
     deactivate UI
+    note right of UI : prompts user and reads response
     opt response != "yes"
         DC -> UI : showMessage("Delete cancelled.")
         activate UI
-        UI --> User : "Delete cancelled."
+        UI --> DC
         deactivate UI
-        DC --> ST
     end
     DC -> EL : deleteExpense(index - 1)
     activate EL
@@ -57,14 +61,15 @@ else valid index
     deactivate EL
     DC -> UI : showDeleteSuccess(removedExpense)
     activate UI
-    UI --> User : "Expense deleted: ..."
+    UI --> DC
     deactivate UI
 end
 
+DC --> ST
 deactivate DC
 
 ST -> ST : command.mutatesData() == true
 ST -> ST : storage.save(expenseList)
-
+ST --> User : output
 deactivate ST
 @enduml
