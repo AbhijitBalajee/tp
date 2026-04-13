@@ -199,7 +199,7 @@ Commands and flags are case-insensitive: `ADD D/Coffee A/5 C/Food` works the sam
 
 ### Saving and loading data: auto-save
 
-SpendTrack automatically saves your expenses and budget to `data/spendtrack.txt` after every `add`, `delete`, and `edit`. The file is created automatically if it does not exist.
+SpendTrack automatically saves your expenses, budget, budget history, goal, and other persisted fields to `data/spendtrack.txt` after **any command that changes stored data** — including `add`, `delete`, `edit`, `clear`, `budget` / `b`, `budget reset`, `undo` (which writes the restored state), and `goal` when you set or update a goal (not when you only check goal status). The file is created automatically if it does not exist.
 
 On startup, SpendTrack loads your saved data before accepting commands. If the save file is missing, the app starts with an empty list silently.
 
@@ -367,6 +367,7 @@ If no expenses have been added:
 
 Error cases:
 - `list foo` or any second word other than `recurring` → `Invalid list option. Usage: list OR list recurring`
+- `list recurring foo`, `list recurring please`, etc. — anything after `recurring` → same error (`list recurring` must be exactly two words; no extra tokens)
 
 ---
 
@@ -422,8 +423,8 @@ Format: `edit INDEX [d/DESCRIPTION] [a/AMOUNT] [c/CATEGORY] [date/DATE] [recurri
 - `INDEX` is 1-based (same numbering as `list`).
 - At least one field must be provided.
 - Duplicate flags (e.g. `d/Latte d/Coffee`) are not allowed.
-- Changes are saved automatically after editing.
-- If the updated total meets or exceeds 90% of your budget, a warning is shown after editing.
+- Changes are saved automatically after editing (auto-save applies to all mutating commands — see **Saving and loading data: auto-save** above).
+- After a successful edit, spending is checked against your budget the same way as after `add`: at **90% or above**, a warning; when spending **exceeds** the budget, an alert; **no message** if no budget is set or spending is under 90%. See **Budget check after add or edit** below for wording and examples.
 
 Examples:
 - `edit 1 d/Latte` — updates description only
@@ -541,13 +542,13 @@ Error cases:
 
 ---
 
-### Budget alert on add
+### Budget check after add or edit
 
-After each `add` command, SpendTrack automatically checks your spending against the budget. No command is needed — alerts appear inline after the expense is added.
+After each **`add`** or successful **`edit`**, SpendTrack automatically checks your total spending against the budget. No extra command is needed — messages appear inline right after the success output.
 
-- At **90% or above** of your budget, a warning is shown.
-- When spending **exceeds** the budget, an alert is shown.
-- No message is shown if no budget is set or spending is under 90%.
+- At **90% or above** of your budget, a **warning** is shown.
+- When spending **exceeds** the budget, an **alert** is shown.
+- **No message** is shown if no budget is set or spending is under 90%.
 
 Example (budget is $100, total spent is now $95 after adding):
 ```
@@ -565,6 +566,16 @@ ____________________________________________________________
    [Food] Groceries - $40.00 (2026-03-29)
 ____________________________________________________________
  [ALERT] You have exceeded your monthly budget! ($120.00 spent, budget is $100.00)
+```
+
+Example (budget is $100; you already have Coffee $3.50 and Snack $5.00; after `edit` the Snack amount becomes $91.50 so total spent is $95):
+```
+____________________________________________________________
+ Expense #2 updated:
+   Before: [Food] Snack - $5.00 (2026-03-29)
+   After:  [Food] Snack - $91.50 (2026-03-29)
+____________________________________________________________
+ [WARNING] You are close to your monthly budget! ($95.00 / $100.00 used)
 ```
 
 ---
