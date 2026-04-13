@@ -4,12 +4,12 @@ skinparam backgroundColor BGCOLOR
 skinparam sequenceMessageAlign center
 
 actor User
-participant ":SpendTrack" as ST
+participant "<u>:SpendTrack</u>" as ST
 participant "<<class>>\nParser" as P
-participant ":AddCommand" as AC
-participant ":ExpenseList" as EL
+participant "<u>:AddCommand</u>" as AC
+participant "<u>:ExpenseList</u>" as EL
 participant "<<class>>\nBudgetChecker" as BC
-participant ":Ui" as UI
+participant "<u>:Ui</u>" as UI
 
 User -> ST : "add d/Dinner a/50 c/Food"
 activate ST
@@ -27,7 +27,7 @@ EL --> AC
 deactivate EL
 AC -> UI : showAddSuccess(expense)
 activate UI
-UI --> User : "New expense added: ..."
+UI --> AC
 deactivate UI
 
 AC -> BC : check(expenses, ui)
@@ -50,12 +50,12 @@ deactivate EL
 alt totalSpent > budget
     BC -> UI : showBudgetAlert(totalSpent, budget)
     activate UI
-    UI --> User : "[ALERT] You have exceeded..."
+    UI --> BC
     deactivate UI
 else usageRatio >= 0.9
     BC -> UI : showBudgetWarning(totalSpent, budget)
     activate UI
-    UI --> User : "[WARNING] You are close..."
+    UI --> BC
     deactivate UI
 else under 90%
     note right of BC : No message shown
@@ -66,6 +66,7 @@ deactivate BC
 AC --> ST
 deactivate AC
 
+ST --> User : output
 ST -> ST : storage.save(expenses)
 
 deactivate ST

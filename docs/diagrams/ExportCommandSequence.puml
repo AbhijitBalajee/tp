@@ -4,10 +4,10 @@ skinparam backgroundColor BGCOLOR
 skinparam sequenceMessageAlign center
 
 actor User
-participant ":SpendTrack" as ST
+participant "<u>:SpendTrack</u>" as ST
 participant "<<class>>\nParser" as P
-participant ":ExportCommand" as EC
-participant ":ExpenseList" as EL
+participant "<u>:ExportCommand</u>" as EC
+participant "<u>:ExpenseList</u>" as EL
 
 User -> ST : "export csv"
 activate ST
@@ -31,7 +31,8 @@ EL --> EC : size
 deactivate EL
 
 alt size == 0
-    EC --> User : "No expenses to export."
+    EC --> ST : "No expenses to export."
+    ST --> User : "No expenses to export."
 else size > 0
     EC -> EC : ensureDirectoryExists()
     EC -> EC : new FileWriter("data/spendtrack_export.csv")
@@ -45,7 +46,8 @@ else size > 0
         end note
         EC -> EC : write(csvRow)
     end
-    EC --> User : "Expenses exported to data/spendtrack_export.csv"
+    EC --> ST : "Expenses exported to data/spendtrack_export.csv"
+    ST --> User : "Expenses exported to data/spendtrack_export.csv"
 end
 
 deactivate EC
