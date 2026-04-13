@@ -470,13 +470,13 @@ Examples:
 Expected output:
 ```
 ____________________________________________________________
- Monthly budget set to: $500.00
- Current total spent:   $12.00
+ Monthly budget set to:  $500.00
+ Spent this month:      $12.00
  Remaining budget:      $488.00
 ____________________________________________________________
 ```
 
-If your total spending already exceeds the new budget:
+If your spending this month already exceeds the new budget:
 ```
 ____________________________________________________________
  WARNING: You have exceeded your budget by $50.00!
@@ -548,7 +548,7 @@ Error cases:
 
 ### Budget check after add or edit
 
-After each **`add`** or successful **`edit`**, SpendTrack automatically checks your total spending against the budget. No extra command is needed — messages appear inline right after the success output.
+After each **`add`** or successful **`edit`**, SpendTrack automatically checks your current month's spending against the budget. No extra command is needed — messages appear inline right after the success output.
 
 - At **90% or above** of your budget, a **warning** is shown.
 - When spending **exceeds** the budget, an **alert** is shown.
@@ -958,16 +958,16 @@ Displays how much of your monthly budget is left after deducting all recorded ex
 Format: `remaining`
 
 - A budget must be set using the `budget` command before using this.
-- The remaining balance is calculated as: budget - total expenses.
+- The remaining balance is calculated as: budget - current month's expenses.
 
 Example: `remaining`
 
 Expected output:
 ```
 ____________________________________________________________
- Budget:         $500.00
- Total spent:    $87.30
- Remaining:      $412.70
+ Budget:              $500.00
+ Spent this month:    $87.30
+ Remaining:           $412.70
 ____________________________________________________________
 ```
 
