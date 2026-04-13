@@ -12,16 +12,16 @@ participant "<u>:FindByKeywordCommand</u>" as FKC
 participant "<u>:ExpenseList</u>" as EL
 participant "<u>:Ui</u>" as UI
 
-User -> ST : "filter from/2026-03-01 to/2026-03-31 [cat/Food]"
+User -> ST : "filter from/2026-03-01 to/2026-03-31 [c/Food]"
 activate ST
 
 ST -> P : parse(input)
 activate P
 P -> P : parseFilterCommand(args)
 note right of P
-  Extracts from/, to/, cat/ tokens
+  Extracts from/, to/, c/ tokens
   via DateParser.parse()
-  Rejects unknown tokens and '|' in cat/
+  Rejects unknown tokens and '|' in c/
   Validates from <= to
 end note
 P --> ST : :FilterCommand(from, to, category)

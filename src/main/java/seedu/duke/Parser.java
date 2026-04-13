@@ -621,28 +621,28 @@ public class Parser {
                 // @@author
                 to = DateParser.parse(token.substring(3).trim());
             // @@author Ariff1422
-            } else if (token.startsWith("cat/")) {
+            } else if (token.startsWith("c/")) {
                 if (seenCategory) {
-                    throw new SpendTrackException("Duplicate 'cat/' detected. "
+                    throw new SpendTrackException("Duplicate 'c/' detected. "
                             + "Please provide only one category.");
                 }
                 seenCategory = true;
-                category = token.substring(4).trim();
+                category = token.substring(2).trim();
                 if (category.isEmpty()) {
-                    throw new SpendTrackException("Category cannot be empty after 'cat/'.");
+                    throw new SpendTrackException("Category cannot be empty after 'c/'.");
                 }
                 if (category.contains("|")) {
                     throw new SpendTrackException("Category cannot contain '|'.");
                 }
             } else {
                 throw new SpendTrackException("Unknown filter option: '" + token + "'. "
-                        + "Usage: filter from/YYYY-MM-DD to/YYYY-MM-DD [cat/CATEGORY]");
+                        + "Usage: filter from/YYYY-MM-DD to/YYYY-MM-DD [c/CATEGORY]");
             }
             // @@author
         }
 
         if (from == null || to == null) {
-            throw new SpendTrackException("Usage: filter from/YYYY-MM-DD to/YYYY-MM-DD [cat/CATEGORY]");
+            throw new SpendTrackException("Usage: filter from/YYYY-MM-DD to/YYYY-MM-DD [c/CATEGORY]");
         }
         if (from.isAfter(to)) {
             throw new SpendTrackException("Start date must be before end date.");

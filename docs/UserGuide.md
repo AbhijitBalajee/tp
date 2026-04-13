@@ -239,11 +239,11 @@ This helps you avoid accidentally logging the same expense twice.
 
 Shows only expenses whose date falls within the given range (inclusive), with an optional category filter.
 
-Format: `filter from/DATE to/DATE [cat/CATEGORY]`
+Format: `filter from/DATE to/DATE [c/CATEGORY]`
 
 - `DATE` accepts the same formats as the `add` command: `YYYY-MM-DD`, `DD-MM-YYYY`, `today`, `yesterday`.
 - The `from` date must not be after the `to` date.
-- `cat/CATEGORY` is optional. If provided, only expenses matching that category are shown (case-insensitive).
+- `c/CATEGORY` is optional. If provided, only expenses matching that category are shown (case-insensitive).
 - `CATEGORY` cannot contain `|`.
 - Filtering does not modify the expense list.
 - Recurring expenses are shown with `[R]` tag in filtered results.
@@ -253,7 +253,7 @@ Examples:
 
 - `filter from/2026-03-01 to/2026-03-31` — shows all expenses in March 2026
 - `filter from/today to/today` — shows only today's expenses
-- `filter from/2026-03-15 to/2026-03-22 cat/Food` — shows only Food expenses between 15 and 22 March
+- `filter from/2026-03-15 to/2026-03-22 c/Food` — shows only Food expenses between 15 and 22 March
 
 Expected output (with category filter):
 ```
@@ -271,16 +271,16 @@ ____________________________________________________________
 If no expenses fall in the range:
 ```
  No expenses found in the given date range.
- Hint: Use 'filter from/YYYY-MM-DD to/YYYY-MM-DD [cat/CATEGORY]' to adjust the range.
+ Hint: Use 'filter from/YYYY-MM-DD to/YYYY-MM-DD [c/CATEGORY]' to adjust the range.
 ```
 
 Error cases:
 - `filter from/2026-03-31 to/2026-03-01` → `Start date must be before end date.`
-- Missing `from/` or `to/` → `Usage: filter from/YYYY-MM-DD to/YYYY-MM-DD [cat/CATEGORY]`
+- Missing `from/` or `to/` → `Usage: filter from/YYYY-MM-DD to/YYYY-MM-DD [c/CATEGORY]`
 - `filter from/2026-03-01 from/2026-03-05 to/2026-03-31` (duplicate `from/`) → `Duplicate 'from/' detected. Please provide only one start date.`
 - `filter from/2026-03-01 to/2026-03-05 to/2026-03-31` (duplicate `to/`) → `Duplicate 'to/' detected. Please provide only one end date.`
-- `filter from/2026-03-01 to/2026-03-31 cat/Food cat/Transport` (duplicate `cat/`) → `Duplicate 'cat/' detected. Please provide only one category.`
-- `filter from/2026-03-01 to/2026-03-31 cat/Food|hack` → `Category cannot contain '|'.`
+- `filter from/2026-03-01 to/2026-03-31 c/Food c/Transport` (duplicate `c/`) → `Duplicate 'c/' detected. Please provide only one category.`
+- `filter from/2026-03-01 to/2026-03-31 c/Food|hack` → `Category cannot contain '|'.`
 - `filter from/2026-03-01 to/2026-03-31 garbage` → `Unknown filter option: 'garbage'.`
 
 ---
@@ -329,7 +329,7 @@ ____________________________________________________________
 Error cases:
 - `find 0` or `find 99` (out of range) → `Index X is out of range. There are Y expense(s).`
 - `find abc` → `Index must be a whole number. Usage: find <index> OR find d/<keyword>`
-- `find 1 extra` → `Too many arguments for 'find'.`
+- `find 1 extra` → `Too many arguments for 'find'. Usage: find <index> OR find d/<keyword>`
 - `find` on empty list → `No expenses recorded yet.`
 - `find d/` → `Keyword cannot be empty after 'd/'.`
 - `find d/coffee|hack` → `Keyword cannot contain '|'.`
@@ -488,7 +488,7 @@ Error cases:
 - `budget abc` → `budget requires a number. Usage: budget <amount>`
 - `budget` → `budget requires a number. Usage: budget <amount>`
 - `budget 0.001` or any amount below one cent → `Budget must be at least $0.01.`
-- `budget NaN` or `budget Infinity` → `Budget must be a finite number. Usage: budget <amount>`
+- `budget NaN` or `budget Infinity` → `budget requires a number. Usage: budget <amount>`
 
 ---
 
@@ -524,17 +524,21 @@ Format: `budget history`
 Expected output:
 ```
 ____________________________________________________________
- ===== Budget History =====
+ Budget History
+____________________________________________________________
  2026-03-28 : RESET ($0.00)
  2026-03-27 : $300.00
  2026-03-22 : $500.00
- ==========================
 ____________________________________________________________
 ```
 
 If no budget has ever been set:
 ```
- No budget history recorded. 
+____________________________________________________________
+ Budget History
+____________________________________________________________
+ No budget history recorded.
+____________________________________________________________
 ```
 
 Error cases:
@@ -959,9 +963,9 @@ Example: `remaining`
 Expected output:
 ```
 ____________________________________________________________
- Budget    : $500.00
- Spent     : $87.30
- Remaining : $412.70
+ Budget:         $500.00
+ Total spent:    $87.30
+ Remaining:      $412.70
 ____________________________________________________________
 ```
 
@@ -989,35 +993,37 @@ Example: `help` or `h`
 
 Expected output:
 ```
-______________________________________________________________________________________________________
- Here are the commands you can use:
-  add (a) d/DESC a/AMT [c/CAT] [date/DATE] [recurring/true|false]              -- add expense
-  delete (d) INDEX                                                            -- delete expense
-  list (l)                                                                    -- list all
-  list recurring                                                              -- list recurring only
-  summary (s)                                                                 -- category breakdown
-  total                                                                       -- show total
-  budget (b) AMOUNT                                                           -- set budget
-  budget reset                                                                -- reset budget
-  budget history                                                              -- view budget history
-  remaining                                                                   -- show remaining
-  edit INDEX [d/DESC] [a/AMT] [c/CAT] [date/DATE] [recurring/true|false]      -- edit expense
-  filter from/DATE to/DATE                                                    -- filter by date
-  find INDEX                                                                  -- view expense details
-  search KEYWORD                                                              -- search by keyword
-  sort                                                                        -- sort by amount
-  top N                                                                       -- top N expenses
-  last N                                                                      -- last N added
-  report YYYY-MM                                                              -- monthly report
-  month YYYY-MM                                                               -- list by month
-  clear                                                                       -- clear all
-  undo                                                                        -- undo last
-  export csv                                                                  -- export to CSV
-  goal g/AMOUNT                                                               -- set savings goal
-  goal status                                                                 -- check goal
-  help (h)                                                                    -- show this help
-  bye                                                                         -- exit
-______________________________________________________________________________________________________
+____________________________________________________________
+ Available Commands
+____________________________________________________________
+  add (a) d/DESC a/AMT [c/CAT] [date/DATE] [recurring/true|false]          -- add expense
+  delete (d) INDEX                                                         -- delete expense
+  list (l)                                                                 -- list all
+  list recurring                                                           -- list recurring only
+  summary (s)                                                              -- category breakdown
+  total                                                                    -- show total
+  budget (b) AMOUNT                                                        -- set budget
+  budget reset                                                             -- reset budget
+  budget history                                                           -- view budget history
+  remaining                                                                -- show remaining
+  edit INDEX [d/DESC] [a/AMT] [c/CAT] [date/DATE] [recurring/true|false]   -- edit expense
+  filter from/DATE to/DATE [c/CATEGORY]                                  -- filter by date range and/or category
+  find INDEX                                                               -- view expense details
+  find d/KEYWORD                                                           -- search by description keyword
+  search KEYWORD                                                           -- search by keyword
+  sort                                                                     -- sort by amount
+  top N                                                                    -- top N expenses
+  last N                                                                   -- last N added
+  report YYYY-MM                                                           -- monthly report
+  month YYYY-MM                                                            -- list by month
+  clear                                                                    -- clear all
+  undo                                                                     -- undo last
+  export csv                                                               -- export to CSV
+  goal g/AMOUNT                                                            -- set savings goal
+  goal status                                                              -- check goal
+  help (h)                                                                 -- show this help
+  bye                                                                      -- exit
+____________________________________________________________
 ```
 
 ---
@@ -1066,7 +1072,7 @@ ____________________________________________________________
 | Edit expense      | `edit INDEX [d/DESC] [a/AMT] [c/CAT] [date/DATE] [recurring/true&#124;false]` | — |
 | List expenses     | `list` | `l` |
 | List recurring    | `list recurring` | — |
-| Filter by date/category | `filter from/DATE to/DATE [cat/CATEGORY]` | — |
+| Filter by date/category | `filter from/DATE to/DATE [c/CATEGORY]` | — |
 | Find by index     | `find INDEX` | — |
 | Find by keyword   | `find d/KEYWORD` | — |
 | Summary           | `summary` | `s` |

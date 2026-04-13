@@ -448,7 +448,7 @@ public class Ui {
         System.out.println(LINE);
         System.out.println(" Available Commands");
         System.out.println(LINE);
-        String format = "  %-48s -- %s";
+        String format = "  %-72s -- %s";
         System.out.println(String.format(format,
                 "add (a) d/DESC a/AMT [c/CAT] [date/DATE] [recurring/true|false]", "add expense"));
         System.out.println(String.format(format,
@@ -473,9 +473,11 @@ public class Ui {
                 "edit INDEX [d/DESC] [a/AMT] [c/CAT] [date/DATE] [recurring/true|false]",
                 "edit expense"));
         System.out.println(String.format(format,
-                "filter from/DATE to/DATE", "filter by date"));
+                "filter from/DATE to/DATE [c/CATEGORY]", "filter by date range and/or category"));
         System.out.println(String.format(format,
                 "find INDEX", "view expense details"));
+        System.out.println(String.format(format,
+                "find d/KEYWORD", "search by description keyword"));
         System.out.println(String.format(format,
                 "search KEYWORD", "search by keyword"));
         System.out.println(String.format(format,
@@ -611,7 +613,7 @@ public class Ui {
         if (filtered.isEmpty()) {
             System.out.println(" No expenses found in the given date range"
                     + (category != null ? " for category '" + category + "'" : "") + ".");
-            System.out.println(" Hint: Use 'filter from/YYYY-MM-DD to/YYYY-MM-DD [cat/CATEGORY]'"
+            System.out.println(" Hint: Use 'filter from/YYYY-MM-DD to/YYYY-MM-DD [c/CATEGORY]'"
                     + " to adjust the range.");
             System.out.println(LINE);
             return;

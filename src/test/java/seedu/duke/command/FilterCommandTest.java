@@ -155,30 +155,30 @@ class FilterCommandTest {
         assertDoesNotThrow(() -> cmd.execute(expenses, ui));
     }
 
-    // --- Parser: cat/ flag ---
+    // --- Parser: c/ flag ---
 
     @Test
     void parser_withCatFlag_returnsFilterCommand() throws SpendTrackException {
-        Command cmd = Parser.parse("filter from/2026-01-01 to/2026-03-31 cat/Food");
+        Command cmd = Parser.parse("filter from/2026-01-01 to/2026-03-31 c/Food");
         assertInstanceOf(FilterCommand.class, cmd);
     }
 
     @Test
     void parser_duplicateCatFlag_throwsException() {
         assertThrows(SpendTrackException.class,
-                () -> Parser.parse("filter from/2026-01-01 to/2026-03-31 cat/Food cat/Transport"));
+                () -> Parser.parse("filter from/2026-01-01 to/2026-03-31 c/Food c/Transport"));
     }
 
     @Test
     void parser_emptyCatFlag_throwsException() {
         assertThrows(SpendTrackException.class,
-                () -> Parser.parse("filter from/2026-01-01 to/2026-03-31 cat/"));
+                () -> Parser.parse("filter from/2026-01-01 to/2026-03-31 c/"));
     }
 
     @Test
     void parser_pipeInCatFlag_throwsException() {
         assertThrows(SpendTrackException.class,
-                () -> Parser.parse("filter from/2026-01-01 to/2026-03-31 cat/Food|hack"));
+                () -> Parser.parse("filter from/2026-01-01 to/2026-03-31 c/Food|hack"));
     }
 
     // --- Reject unknown/garbage tokens ---
