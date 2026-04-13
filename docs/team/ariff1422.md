@@ -73,6 +73,8 @@ SpendTrack is a CLI expense tracker for NUS students who prefer typing over clic
 - Set up the team GitHub organisation and repo (together with Afshal)
 - Maintained issue tracker: created and assigned issues for v1.0 and v2.0 milestones
 - Reviewed PRs from all teammates throughout v1.0 and v2.0
+- Recorded v2.1 demo video
+- Performed v2.1 final checks before submission
 
 ### Community
 
