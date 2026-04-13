@@ -36,7 +36,8 @@ SpendTrack is a CLI expense tracker for NUS students who prefer typing over clic
 - **`BudgetCommandTest`** (v1.0): Tests for valid amount, negative amount, zero amount, exceeds max, and with existing expenses.
 - **`EditCommandTest`** (v2.0): Tests for editing each field individually, editing all fields, unchanged fields staying the same, editing recurring flag, invalid indices (zero, negative, out of range), no fields provided, blank/empty description, zero/negative amount, and list size unchanged after edit.
 - **`RecurringExpenseTest`** (v2.0): Tests for default recurring flag, setting recurring true, `[R]` tag in toString, `list recurring` execution, parsing `recurring/true` and `recurring/false`, invalid recurring value, and recurring count in list.
-- **`InputValidationTest`** (v2.0): Parser-level tests for validation gaps addressed in the audit — missing/empty description, missing/zero/negative/non-numeric amount for `add`; missing/non-numeric index for `delete` and `edit`; empty/non-numeric for `budget`; `list` and `list recurring` cases; empty/whitespace input.
+- **`InputValidationTest`** (v2.0, extended): Parser-level tests from the audit — `add` / `delete` / `edit`; empty/non-numeric `budget`; `list`, `list recurring`, and invalid `list` subcommands; non-finite budget amounts (`NaN`, `Infinity`); extra tokens after `budget reset` / `budget history`; empty/whitespace input.
+- **`BudgetResetHistoryCommandTest`** (v2.1): Tests for `BudgetResetCommand` and `BudgetHistoryCommand` — `mutatesData`, reset with no budget (throws), reset clears budget and appends history, history command on empty and non-empty history.
 - **`UndoCommandTest`** (v2.1): Tests that undo restores budget history after a second `setBudget` and after `budget reset`, in addition to existing undo coverage.
 
 ### Contributions to the UG
