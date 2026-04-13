@@ -179,6 +179,69 @@ class ExpenseListTest {
         assertTrue(resetEntry.endsWith("|0.0"));
     }
 
+    // @@author AfshalG
+    // --- getMonthlyTotal ---
+
+    @Test
+    void getMonthlyTotal_emptyList_returnsZero() {
+        assertEquals(0.0, list.getMonthlyTotal(), 0.001);
+    }
+
+    @Test
+    void getMonthlyTotal_onlyCurrentMonthExpenses_returnsSumOfAll() {
+        list.addExpense(new Expense("Coffee", 10.00, "Food", LocalDate.now()));
+        list.addExpense(new Expense("Bus", 5.00, "Transport", LocalDate.now()));
+        assertEquals(15.0, list.getMonthlyTotal(), 0.001);
+    }
+
+    @Test
+    void getMonthlyTotal_mixedMonths_returnsSumOfCurrentMonthOnly() {
+        list.addExpense(new Expense("Coffee", 10.00, "Food", LocalDate.now()));
+        list.addExpense(new Expense("Bus", 5.00, "Transport", LocalDate.now()));
+        list.addExpense(new Expense("Old item", 20.00, "Misc", LocalDate.now().minusMonths(1)));
+        assertEquals(15.0, list.getMonthlyTotal(), 0.001);
+        assertEquals(35.0, list.getTotal(), 0.001);
+    }
+
+    @Test
+    void getMonthlyTotal_noCurrentMonthExpenses_returnsZero() {
+        list.addExpense(new Expense("Old item", 10.00, "Misc", LocalDate.now().minusMonths(2)));
+        assertEquals(0.0, list.getMonthlyTotal(), 0.001);
+    }
+
+    @Test
+    void getMonthlyTotal_firstDayOfCurrentMonth_included() {
+        LocalDate firstDay = LocalDate.now().withDayOfMonth(1);
+        list.addExpense(new Expense("Rent", 500.00, "Housing", firstDay));
+        assertEquals(500.0, list.getMonthlyTotal(), 0.001);
+    }
+
+    @Test
+    void getMonthlyTotal_lastDayOfPreviousMonth_excluded() {
+        LocalDate lastDayPrevMonth = LocalDate.now().withDayOfMonth(1).minusDays(1);
+        list.addExpense(new Expense("Old rent", 500.00, "Housing", lastDayPrevMonth));
+        assertEquals(0.0, list.getMonthlyTotal(), 0.001);
+    }
+
+    @Test
+    void getMonthlyTotal_sameMonthDifferentYear_excluded() {
+        LocalDate sameMonthLastYear = LocalDate.now().minusYears(1);
+        list.addExpense(new Expense("Last year", 100.00, "Misc", sameMonthLastYear));
+        assertEquals(0.0, list.getMonthlyTotal(), 0.001);
+    }
+
+    @Test
+    void getMonthlyTotal_manyOldExpensesOneCurrentMonth_returnsOnlyCurrent() {
+        for (int i = 1; i <= 10; i++) {
+            list.addExpense(new Expense("Old " + i, 50.00, "Misc",
+                    LocalDate.now().minusMonths(i)));
+        }
+        list.addExpense(new Expense("Current", 7.50, "Food", LocalDate.now()));
+        assertEquals(7.50, list.getMonthlyTotal(), 0.001);
+        assertEquals(507.50, list.getTotal(), 0.001);
+    }
+    // @@author
+
     // --- Budget History ---
 
     @Test

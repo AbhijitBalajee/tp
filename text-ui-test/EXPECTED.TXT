@@ -47,14 +47,14 @@ ____________________________________________________________
  Error: No budget set. Use 'budget <amount>' to set one first.
 ____________________________________________________________
  > ____________________________________________________________
- Monthly budget set to: $50.00
- Current total spent:   $12.00
- Remaining budget:      $38.00
+ Monthly budget set to:  $50.00
+ Spent this month:      $0.00
+ Remaining budget:      $50.00
 ____________________________________________________________
  > ____________________________________________________________
- Budget:         $50.00
- Total spent:    $12.00
- Remaining:      $38.00
+ Budget:              $50.00
+ Spent this month:    $0.00
+ Remaining:           $50.00
 ____________________________________________________________
  > ____________________________________________________________
  Error: Budget must be greater than $0.00.
@@ -90,7 +90,7 @@ ____________________________________________________________
  Expenses from 2026-01-01 to 2026-01-31
 ____________________________________________________________
  No expenses found in the given date range.
- Hint: Use 'filter from/YYYY-MM-DD to/YYYY-MM-DD [cat/CATEGORY]' to adjust the range.
+ Hint: Use 'filter from/YYYY-MM-DD to/YYYY-MM-DD [c/CATEGORY]' to adjust the range.
 ____________________________________________________________
  > ____________________________________________________________
  Error: Start date must be before end date.
@@ -98,32 +98,33 @@ ____________________________________________________________
  > ____________________________________________________________
  Available Commands
 ____________________________________________________________
-  add (a) d/DESC a/AMT [c/CAT] [date/DATE] [recurring/true|false] -- add expense
-  delete (d) INDEX                                 -- delete expense
-  list (l)                                         -- list all
-  list recurring                                   -- list recurring only
-  summary (s)                                      -- category breakdown
-  total                                            -- show total
-  budget (b) AMOUNT                                -- set budget
-  budget reset                                     -- reset budget
-  budget history                                   -- view budget history
-  remaining                                        -- show remaining
-  edit INDEX [d/DESC] [a/AMT] [c/CAT] [date/DATE] [recurring/true|false] -- edit expense
-  filter from/DATE to/DATE                         -- filter by date
-  find INDEX                                       -- view expense details
-  search KEYWORD                                   -- search by keyword
-  sort                                             -- sort by amount
-  top N                                            -- top N expenses
-  last N                                           -- last N added
-  report YYYY-MM                                   -- monthly report
-  month YYYY-MM                                    -- list by month
-  clear                                            -- clear all
-  undo                                             -- undo last
-  export csv                                       -- export to CSV
-  goal g/AMOUNT                                    -- set savings goal
-  goal status                                      -- check goal
-  help (h)                                         -- show this help
-  bye                                              -- exit
+  add (a) d/DESC a/AMT [c/CAT] [date/DATE] [recurring/true|false]          -- add expense
+  delete (d) INDEX                                                         -- delete expense
+  list (l)                                                                 -- list all
+  list recurring                                                           -- list recurring only
+  summary (s)                                                              -- category breakdown
+  total                                                                    -- show total
+  budget (b) AMOUNT                                                        -- set budget
+  budget reset                                                             -- reset budget
+  budget history                                                           -- view budget history
+  remaining                                                                -- show remaining
+  edit INDEX [d/DESC] [a/AMT] [c/CAT] [date/DATE] [recurring/true|false]   -- edit expense
+  filter from/DATE to/DATE [c/CATEGORY]                                    -- filter by date range and/or category
+  find INDEX                                                               -- view expense details
+  find d/KEYWORD                                                           -- search by description keyword
+  search KEYWORD                                                           -- search by keyword
+  sort                                                                     -- sort by amount
+  top N                                                                    -- top N expenses
+  last N                                                                   -- last N added
+  report YYYY-MM                                                           -- monthly report
+  month YYYY-MM                                                            -- list by month
+  clear                                                                    -- clear all
+  undo                                                                     -- undo last
+  export csv                                                               -- export to CSV
+  goal g/AMOUNT                                                            -- set savings goal
+  goal status                                                              -- check goal
+  help (h)                                                                 -- show this help
+  bye                                                                      -- exit
 ____________________________________________________________
  > ____________________________________________________________
  New expense added:

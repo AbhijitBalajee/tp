@@ -39,7 +39,9 @@ public class BudgetChecker {
             return;
         }
 
-        double totalSpent = expenses.getTotal();
+        // @@author AfshalG
+        double totalSpent = expenses.getMonthlyTotal();
+        // @@author
         double budget = expenses.getBudget();
 
         assert budget > 0 : "Budget should be positive when hasBudget() returns true";

@@ -50,9 +50,9 @@ public class LastCommand extends Command {
         // Determine starting index for last N expenses
         int start = Math.max(0, total - count);
 
-        // Collect last N expenses into a list
+        // Collect last N expenses in reverse order (most recent first)
         ArrayList<Expense> lastExpenses = new ArrayList<>();
-        for (int i = start; i < total; i++) {
+        for (int i = total - 1; i >= start; i--) {
             lastExpenses.add(expenses.getExpense(i));
         }
 

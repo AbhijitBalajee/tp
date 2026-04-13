@@ -4,11 +4,11 @@ skinparam backgroundColor BGCOLOR
 skinparam sequenceMessageAlign center
 
 actor User
-participant ":SpendTrack" as ST
+participant "<u>:SpendTrack</u>" as ST
 participant "<<class>>\nParser" as P
-participant ":GoalCommand" as GC
-participant ":ExpenseList" as EL
-participant ":Ui" as UI
+participant "<u>:GoalCommand</u>" as GC
+participant "<u>:ExpenseList</u>" as EL
+participant "<u>:Ui</u>" as UI
 
 User -> ST : "goal g/200"
 activate ST
@@ -30,9 +30,14 @@ GC -> EL : setGoal(200.0)
 activate EL
 EL --> GC
 deactivate EL
-GC --> User : "Savings goal set to: $200.00"
+GC -> UI : showMessage("Savings goal set to: $200.00")
+activate UI
+UI --> GC
+deactivate UI
+GC --> ST
 deactivate GC
 
+ST --> User : "Savings goal set to: $200.00"
 ST -> ST : storage.save(expenses)
 deactivate ST
 
@@ -63,11 +68,19 @@ EL --> GC : 87.30
 deactivate EL
 
 alt spent <= goal
-    GC --> User : "Saved: $112.70 (56% of goal reached)"
+    GC -> UI : showMessage("Saved: $112.70 (56% of goal reached)")
+    activate UI
+    UI --> GC
+    deactivate UI
 else spent > goal
-    GC --> User : "Goal not reached. Over by $X.XX."
+    GC -> UI : showMessage("Goal not reached. Over by $X.XX.")
+    activate UI
+    UI --> GC
+    deactivate UI
 end
 
+GC --> ST
 deactivate GC
+ST --> User : output
 deactivate ST
 @enduml

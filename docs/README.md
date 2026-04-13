@@ -1,6 +1,6 @@
-# Duke
+# SpendTrack
 
-{Give product intro here}
+SpendTrack is a CLI expense tracker for NUS students who prefer typing over clicking. Users can log, categorise, and analyse daily spending with short typed commands.
 
 Useful links:
 * [User Guide](UserGuide.md)

@@ -47,7 +47,9 @@ public class BudgetCommand extends Command {
         expenses.setBudget(budgetAmount);
         logger.log(Level.INFO, "Budget set to {0}", budgetAmount);
 
-        double totalSpent = expenses.getTotal();
+        // @@author AfshalG
+        double totalSpent = expenses.getMonthlyTotal();
+        // @@author
         ui.showBudgetSet(budgetAmount, totalSpent);
 
         if (totalSpent > budgetAmount) {

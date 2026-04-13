@@ -18,6 +18,8 @@ SpendTrack is a CLI expense tracker for NUS students who prefer typing over clic
 - **Undo command** (v2.0): Implemented `UndoManager` and `UndoCommand` for single-level undo. Saves a deep copy snapshot of the expense list before each mutating command. Restores expenses and budget state on undo. Wired into `SpendTrack` main loop and `Parser`.
 - **Export to CSV** (v2.0): Implemented `ExportCommand` that writes all expenses to `data/spendtrack_export.csv`. Handles CSV quoting for descriptions containing commas or double quotes. Creates the data directory automatically if missing.
 - **Savings goal** (v2.0): Implemented `GoalCommand` for setting a savings target (`goal g/AMOUNT`) and viewing progress (`goal status`). Shows percentage saved or over-by amount. Goal persisted via Storage.
+- **PE-D bug fixes** (v2.1): Fixed seven PE-D bugs across undo, input validation, and documentation. Undo stack corruption (#199, #202, #230): added backup/rollback to `UndoManager` so failed commands and cancelled `clear` no longer overwrite the undo snapshot; `ClearCommand` now tracks whether it actually cleared via a `didClear()` flag; main loop rolls back undo state on `SpendTrackException`. Input validation (#212, #213): reject extra parameters on `total`, `clear`, and `undo` commands; `ClearCommand` now rejects non-yes/no confirmation input with a clear error message. UG documentation (#214, #222): updated `clear` command example to match actual app output.
+- **UML diagram fixes** (v2.1): Fixed three UML issues across diagrams for owned features (#145, #146, #155). Added `<<class>>` stereotype to static classes (`Parser`, `BudgetChecker`) in sequence diagrams. Removed double-counted associations in `UndoClassDiagram` where relationships were shown as both attributes and lines. Added missing activation bars and return arrows in `BudgetAlertSequence` and `UndoSequence`.
 
 ### Contributions to the UG
 
@@ -28,6 +30,7 @@ SpendTrack is a CLI expense tracker for NUS students who prefer typing over clic
 - Export CSV section with file format and quoting details
 - Savings goal section with set and status sub-commands
 - Updated command summary table with all new commands
+- Fixed clear command example output to match actual app behaviour (#214, #222)
 
 ### Contributions to the DG
 
@@ -45,6 +48,7 @@ SpendTrack is a CLI expense tracker for NUS students who prefer typing over clic
   - Sequence diagram: goal set and status flows (`GoalCommandSequence`)
   - Class diagram: UndoManager, UndoCommand, SpendTrack, ExpenseList, Expense relationships (`UndoClassDiagram`)
 - Added user stories for budget alert, clear, undo, export, and savings goal
+- Fixed UML diagrams: added `<<class>>` stereotypes, removed double-counted associations, added missing activation bars and return arrows (#145, #146, #155)
 
 ### Contributions to team-based tasks
 
@@ -54,4 +58,4 @@ SpendTrack is a CLI expense tracker for NUS students who prefer typing over clic
 
 ### Community
 
-- Reviewed PRs: #86, #103, #113, #116, #129, #130, #132
+- Reviewed PRs: [#86](https://github.com/AY2526S2-CS2113-T11-1/tp/pull/86), [#103](https://github.com/AY2526S2-CS2113-T11-1/tp/pull/103), [#113](https://github.com/AY2526S2-CS2113-T11-1/tp/pull/113), [#116](https://github.com/AY2526S2-CS2113-T11-1/tp/pull/116), [#129](https://github.com/AY2526S2-CS2113-T11-1/tp/pull/129), [#130](https://github.com/AY2526S2-CS2113-T11-1/tp/pull/130), [#132](https://github.com/AY2526S2-CS2113-T11-1/tp/pull/132)
