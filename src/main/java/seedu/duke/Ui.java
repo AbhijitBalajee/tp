@@ -351,9 +351,11 @@ public class Ui {
     public void showBudgetSet(double budget, double totalSpent) {
         assert budget > 0 : "Budget should be positive when showing budget set message";
         System.out.println(LINE);
-        System.out.printf(" Monthly budget set to: $%.2f%n", budget);
-        System.out.printf(" Current total spent:   $%.2f%n", totalSpent);
+        // @@author AfshalG
+        System.out.printf(" Monthly budget set to:  $%.2f%n", budget);
+        System.out.printf(" Spent this month:      $%.2f%n", totalSpent);
         System.out.printf(" Remaining budget:      $%.2f%n", budget - totalSpent);
+        // @@author
         System.out.println(LINE);
     }
 
@@ -432,9 +434,11 @@ public class Ui {
      */
     public void showRemaining(double budget, double totalSpent, double remaining) {
         System.out.println(LINE);
-        System.out.printf(" Budget:         $%.2f%n", budget);
-        System.out.printf(" Total spent:    $%.2f%n", totalSpent);
-        System.out.printf(" Remaining:      $%.2f%n", remaining);
+        // @@author AfshalG
+        System.out.printf(" Budget:              $%.2f%n", budget);
+        System.out.printf(" Spent this month:    $%.2f%n", totalSpent);
+        System.out.printf(" Remaining:           $%.2f%n", remaining);
+        // @@author
         if (remaining < 0) {
             System.out.printf(" WARNING: You are over budget by $%.2f!%n", Math.abs(remaining));
         }
