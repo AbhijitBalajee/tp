@@ -167,13 +167,13 @@ public class Parser {
             try {
                 return new TopCommand(Integer.parseInt(parts[1].trim()));
             } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
-                throw new SpendTrackException("Usage: top <number>");
+                throw new SpendTrackException("top requires a whole number. Usage: top <N>");
             }
         case "last":
             try {
                 return new LastCommand(Integer.parseInt(parts[1].trim()));
             } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
-                throw new SpendTrackException("Usage: last <number>");
+                throw new SpendTrackException("last requires a whole number. Usage: last <N>");
             }
         case "report":
             if (parts.length < 2 || parts[1].trim().isEmpty()) {

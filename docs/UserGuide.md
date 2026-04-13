@@ -853,6 +853,7 @@ ____________________________________________________________
 
 Error cases:
 - `top 0` or `top -1` → `Number must be greater than 0.`
+- `top 3.5` or `top abc` → `top requires a whole number. Usage: top <N>`
 - `top` on an empty list → `No expenses recorded.`
 
 ---
@@ -882,6 +883,7 @@ ____________________________________________________________
 
 Error cases:
 - `last 0` or `last -5` → `Number must be greater than 0.`
+- `last 3.5` or `last abc` → `last requires a whole number. Usage: last <N>`
 - `last` on an empty list → `No expenses recorded.`
 
 ---
