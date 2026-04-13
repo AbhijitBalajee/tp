@@ -40,7 +40,9 @@ public class RemainingCommand extends Command {
         }
 
         double budget = expenses.getBudget();
-        double total = expenses.getTotal();
+        // @@author AfshalG
+        double total = expenses.getMonthlyTotal();
+        // @@author
         double remaining = budget - total;
 
         logger.info("Budget: " + budget + ", Total: " + total + ", Remaining: " + remaining);

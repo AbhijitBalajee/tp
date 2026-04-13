@@ -130,6 +130,33 @@ public class ExpenseList {
         return total;
     }
 
+    // @@author AfshalG
+    /**
+     * Returns the total sum of expenses for the current month and year only.
+     *
+     * @return the monthly total amount
+     */
+    public double getMonthlyTotal() {
+        assert expenses != null : "Internal expense list should not be null";
+
+        LocalDate now = LocalDate.now();
+        int currentMonth = now.getMonthValue();
+        int currentYear = now.getYear();
+
+        double total = 0;
+        for (Expense expense : expenses) {
+            assert expense != null : "Expense entries should not be null";
+            LocalDate date = expense.getDate();
+            if (date.getMonthValue() == currentMonth && date.getYear() == currentYear) {
+                total += expense.getAmount();
+            }
+        }
+        logger.log(Level.FINE, "Computed monthly total {0} for {1}-{2}",
+                new Object[]{total, currentYear, currentMonth});
+        return total;
+    }
+    // @@author
+
     // @@author AbhijitBalajee
     /**
      * Sets the monthly budget limit.
