@@ -26,6 +26,7 @@ SpendTrack is a CLI expense tracker for NUS students who prefer typing over clic
 - **PE-D bug fixes and input validation** (v2.1): Triaged 20 PE-D bug reports, assigned labels/milestones/owners for all issues. Fixed bugs assigned to me: misleading error for unrecognised flag prefixes like `da/today` (#219); UG jar filename case mismatch (#220); summary percentage column alignment (#229). Also fixed: summary command silently accepting extra arguments; sub-cent amounts below `$0.01` accepted and displayed as `$0.00` in `add` and `edit`.
 - **Case-insensitive flags** (v2.1): Made `TOKEN_SPLIT_REGEX` and all `startsWith` checks in `parseAddCommand` and `parseEditCommand` case-insensitive, so `D/`, `A/`, `C/`, `DATE/`, `RECURRING/` work the same as lowercase. Consistent with case-insensitive command words.
 - **Flag-in-description validation** (v2.1): Added `validateDescriptionFlags()` to reject descriptions containing flag prefixes (`a/`, `d/`, `c/`, `date/`, `recurring/`) that would cause ambiguous parsing. Non-flag slashes like `I/O`, `w/`, `N/A`, `24/7` are accepted. Applied consistently to both `add` and `edit`.
+- **Monthly budget fix** (v2.1): Fixed high-severity PE-D bug (#195) where budget, remaining, and budget alerts compared against all-time spending instead of current month only. Added `getMonthlyTotal()` to `ExpenseList` and updated `BudgetChecker`, `BudgetCommand`, and `RemainingCommand` to use it.
 
 ### Contributions to the UG
 
@@ -72,6 +73,8 @@ SpendTrack is a CLI expense tracker for NUS students who prefer typing over clic
 - Fixed critical release-blocking bugs: wired 4 missing commands into Parser, fixed output formatting across 6 commands, updated help and expected test output
 - Triaged all 20 PE-D bug reports: assigned owners, labels (severity + type), and v2.1 milestone to every issue
 - Removed misplaced `docs/diagrams/images/` folder created by a teammate
+- Fixed high-severity PE-D bug #195 (budget compared against all-time total instead of current month)
+- Performed v2.1 final submission: created GitHub release, generated PDFs, uploaded to Canvas
 
 ### Community
 
