@@ -277,7 +277,7 @@ The alias map is defined as a static `HashMap<String, String>` initialised in a 
 
 ### Storage Feature
 
-The storage feature allows SpendTrack to persist expense data and budget across sessions. Expenses are saved to `data/spendtrack.txt` automatically after every mutating command (`add`, `delete`, `edit`), and loaded back on startup. The file is plain-text and human-editable as required by the course constraint `Constraint-Human-Editable-File`.
+The storage feature allows SpendTrack to persist expense data, budget, budget history, goal, and related fields across sessions. Data is saved to `data/spendtrack.txt` automatically after **any command whose `mutatesData()` is true** — for example `add`, `delete`, `edit`, `clear`, `budget`, `budget reset`, `undo`, and `goal` when setting or updating a goal (not when only viewing status). The file is loaded back on startup. The file is plain-text and human-editable as required by the course constraint `Constraint-Human-Editable-File`.
 
 #### How it works
 
@@ -325,8 +325,8 @@ Each expense line has 6 pipe-delimited fields: `DESCRIPTION|AMOUNT|CATEGORY|DATE
 
 **Aspect: Where to trigger saves**
 
-- **Current approach:** Every mutating command calls `Storage.save()` after executing.
-    - Pros: Data is never lost even if the app crashes mid-session.
+- **Current approach:** `SpendTrack` calls `Storage.save()` after any command execution where `mutatesData()` returns `true` (see the `Command` contract in the architecture section), rather than listing commands ad hoc in `Storage`.
+    - Pros: Data is never lost even if the app crashes mid-session; new mutating commands get persistence automatically if they follow the contract.
     - Cons: Slightly more I/O per command, but negligible for typical expense list sizes.
 
 - **Alternative:** Save only on `bye` command.
@@ -377,7 +377,7 @@ filter from/DATE to/DATE [cat/CATEGORY]
 4. If either date is missing, or `from` is after `to`, a `SpendTrackException` is thrown.
 5. A `FilterCommand(from, to, category)` is created and returned (`category` may be `null`).
 6. `FilterCommand.execute()` iterates over all expenses, keeping those whose date is within range and (if `category` is set) whose category matches case-insensitively.
-7. `Ui.showFilteredExpenses()` displays the results in a table. The header shows `[CATEGORY]` when a category filter is active.
+7. `Ui.showFilteredExpenses()` displays the results in a table with the same dynamic column widths as `list`. The header shows `[CATEGORY]` when a category filter is active. Recurring expenses show the `[R]` tag in the description column, consistent with `Ui.showExpenseList()`.
 8. The original `ExpenseList` is not modified — filtering is display-only.
 
 #### Find expense by index or keyword
@@ -474,7 +474,7 @@ The current approach was chosen to keep `Parser` stateless and decoupled from `E
 
 **Aspect: Recurring flag as an editable field**
 
-The `recurring/` flag is editable via `edit INDEX recurring/false` to allow users to un-mark an expense. This follows the same `null`-sentinel pattern as other fields — if `recurring/` is not provided, the existing value is preserved. Only `true` or `false` are accepted; any other value throws a `SpendTrackException`.
+The `recurring/` flag is editable via `edit INDEX recurring/false` to allow users to un-mark an expense. This follows the same `null`-sentinel pattern as other fields — if `recurring/` is not provided, the existing value is preserved. Only `true` or `false` are accepted (case-insensitive, same as in `parseAddCommand()`); any other value throws a `SpendTrackException`.
 
 ---
 
@@ -839,7 +839,7 @@ The `list recurring` sub-command filters to show only expenses marked as recurri
 #### How it works
 
 1. The user enters `list` or `list recurring`.
-2. `Parser.parse()` checks if a second token `recurring` is present.
+2. `Parser.parse()` splits the input once on the first space (`split(" ", 2)`). If there is no remainder, a full list is requested. If there is a remainder, it must be **exactly** `recurring` after trim and case-folding (e.g. `RECURRING` is allowed); any other text (including `recurring` with extra trailing words) throws an invalid list option error.
 3. A `ListCommand(false)` or `ListCommand(true)` is created accordingly.
 4. `ListCommand.execute()` delegates to either `Ui.showExpenseList()` or `Ui.showRecurringList()`.
 5. Both methods calculate column widths dynamically by iterating over all expenses first, then print the table with the correct widths.
@@ -951,11 +951,11 @@ As part of v2.0, all commands were audited to ensure no user input can cause an 
 
 | Command | Validation added |
 |---------|-----------------|
-| `add` | Missing `d/` throws error; missing `a/` throws error; zero/negative amount throws error; non-numeric amount throws error |
+| `add` | Missing `d/` throws error; missing `a/` throws error; zero/negative amount throws error; non-numeric amount throws error; `Infinity`, `NaN`, and other non-finite amounts rejected at parse time |
 | `delete` | Non-integer index throws error; missing index throws error |
 | `edit` | Non-integer index; empty/blank description; zero/negative amount; no fields provided; duplicate flags all throw errors |
 | `budget` | Empty input throws error; non-numeric amount throws error; `Infinity` and `NaN` values rejected as invalid amounts |
-| `list` | Extra tokens after `list` or unrecognised sub-command throws error |
+| `list` | Invalid remainder after `list` throws error — only `list` alone or exactly `list recurring` is valid (no extra tokens after `recurring`) |
 | `budget reset` | Extra tokens after `reset` throws error |
 | `budget history` | Extra tokens after `history` throws error |
 
@@ -984,7 +984,7 @@ edit INDEX recurring/false
 #### How it works
 
 1. The user adds `recurring/true` to any `add` command.
-2. `Parser.parseAddCommand()` extracts the `recurring/` token using the same flag regex as other tokens, and validates it is either `true` or `false` — throws `SpendTrackException` otherwise.
+2. `Parser.parseAddCommand()` extracts the `recurring/` token using the same flag regex as other tokens, and validates it is either `true` or `false` (case-insensitive) — throws `SpendTrackException` otherwise.
 3. `AddCommand` passes the flag to the `Expense` constructor. If omitted, `isRecurring` defaults to `false`.
 4. `list` shows `[R]` next to recurring expenses in the description column.
 5. `list recurring` passes `true` to `ListCommand`, which calls `Ui.showRecurringList()` to filter and display only recurring expenses.
@@ -1002,7 +1002,7 @@ The flag is stored directly on `Expense` as a `boolean isRecurring` field. This 
 
 **Aspect: Validating the recurring/ value**
 
-Only `true` or `false` are accepted — any other value throws a `SpendTrackException`. This is validated in `Parser` at parse time since it requires no state knowledge, consistent with the validation approach used for other flag values.
+Only `true` or `false` are accepted (compared case-insensitively after normalising the value to lower case) — any other value throws a `SpendTrackException`. This is validated in `Parser` at parse time since it requires no state knowledge, consistent with the validation approach used for other flag values.
 
 ---
 
@@ -1040,7 +1040,7 @@ The on-demand approach was chosen because expense lists in a student budget trac
 
 ### Budget Alert Feature
 
-The budget alert feature automatically warns users when their spending approaches or exceeds their monthly budget. The check runs after every `add` command — no separate command is needed.
+The budget alert feature automatically warns users when their spending approaches or exceeds their monthly budget. The check runs after every successful **`add`** and **`edit`** — no separate command is needed.
 
 ```
 add d/Dinner a/50 c/Food
@@ -1049,7 +1049,7 @@ add d/Dinner a/50 c/Food
 
 #### How it works
 
-1. After `AddCommand.execute()` adds the expense and displays the success message, it calls `BudgetChecker.check(expenses, ui)`.
+1. After `AddCommand.execute()` adds the expense and displays the success message, it calls `BudgetChecker.check(expenses, ui)`. After `EditCommand.execute()` updates an expense and shows the success message, it calls the same `BudgetChecker.check(expenses, ui)` so totals stay consistent when amounts or categories change.
 2. `BudgetChecker.check()` is a static utility method. It first checks if a budget has been set via `ExpenseList.hasBudget()`. If not, it returns silently.
 3. It retrieves the total spent via `ExpenseList.getTotal()` and the budget via `ExpenseList.getBudget()`.
 4. It computes the usage ratio (`totalSpent / budget`).
@@ -1057,7 +1057,7 @@ add d/Dinner a/50 c/Food
 6. Otherwise, if the usage ratio is at or above 0.9 (90%), it calls `Ui.showBudgetWarning()` to display a warning.
 7. If spending is under 90%, no message is shown.
 
-The following sequence diagram shows the budget alert flow after an add command:
+The following sequence diagram shows the budget alert flow after an `add` command; the same `BudgetChecker.check()` call is used on the `edit` path after a successful edit.
 
 ![Sequence diagram for budget alert](images/BudgetAlertSequence.png)
 
@@ -1065,15 +1065,15 @@ The following sequence diagram shows the budget alert flow after an add command:
 
 **Aspect: Where to place the budget check logic**
 
-- **Current approach:** A separate static `BudgetChecker` utility class called from `AddCommand.execute()`.
-    - Pros: Follows the Single Responsibility Principle — `AddCommand` handles adding, `BudgetChecker` handles the budget check. Easy to test independently. Can be reused by other commands in the future if needed.
+- **Current approach:** A separate static `BudgetChecker` utility class invoked from `AddCommand.execute()` and `EditCommand.execute()` after successful mutations.
+    - Pros: Follows the Single Responsibility Principle — command classes handle their command, `BudgetChecker` handles the threshold logic in one place. Easy to test independently. Avoids duplicating warning/alert rules.
     - Cons: Adds an extra class for a relatively simple check.
 
-- **Alternative:** Inline the check directly in `AddCommand.execute()`.
-    - Pros: Fewer classes. All add logic in one place.
-    - Cons: Violates SRP. Makes `AddCommand` harder to test in isolation.
+- **Alternative:** Inline the check in each command that affects totals.
+    - Pros: All logic visible inside each command class.
+    - Cons: Duplicated thresholds and messages; easy for `add` and `edit` to drift out of sync.
 
-The separate class was chosen because it keeps `AddCommand` focused on its primary responsibility and makes the budget check independently testable.
+The shared utility was chosen so behaviour stays consistent whenever the expense list totals change after `add` or `edit`.
 
 **Aspect: Threshold value**
 
