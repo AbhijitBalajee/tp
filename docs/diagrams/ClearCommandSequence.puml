@@ -4,11 +4,11 @@ skinparam backgroundColor BGCOLOR
 skinparam sequenceMessageAlign center
 
 actor User
-participant ":SpendTrack" as ST
+participant "<u>:SpendTrack</u>" as ST
 participant "<<class>>\nParser" as P
-participant ":ClearCommand" as CC
-participant ":ExpenseList" as EL
-participant ":Ui" as UI
+participant "<u>:ClearCommand</u>" as CC
+participant "<u>:ExpenseList</u>" as EL
+participant "<u>:Ui</u>" as UI
 
 User -> ST : "clear"
 activate ST
@@ -29,12 +29,12 @@ deactivate EL
 alt size == 0
     CC -> UI : showMessage("No expenses to clear.")
     activate UI
-    UI --> User : "No expenses to clear."
+    UI --> CC
     deactivate UI
 else size > 0
     CC -> UI : showMessage("Are you sure...? (yes/no):")
     activate UI
-    UI --> User : "Are you sure...? (yes/no):"
+    UI --> CC
     deactivate UI
     CC -> UI : readCommand()
     activate UI
@@ -48,18 +48,20 @@ else size > 0
         deactivate EL
         CC -> UI : showMessage("All expenses cleared.")
         activate UI
-        UI --> User : "All expenses cleared."
+        UI --> CC
         deactivate UI
     else any other input
         CC -> UI : showMessage("Clear cancelled.")
         activate UI
-        UI --> User : "Clear cancelled."
+        UI --> CC
         deactivate UI
     end
 end
 
+CC --> ST
 deactivate CC
 
+ST --> User : output
 ST -> ST : storage.save(expenses)
 
 deactivate ST

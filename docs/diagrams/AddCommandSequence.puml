@@ -4,12 +4,12 @@ skinparam backgroundColor BGCOLOR
 skinparam sequenceMessageAlign center
 
 actor User
-participant ":SpendTrack" as ST
+participant "<u>:SpendTrack</u>" as ST
 participant "<<class>>\nParser" as P
 participant "<<class>>\nDateParser" as DP
-participant ":ExpenseList" as EL
+participant "<u>:ExpenseList</u>" as EL
 participant "<<class>>\nBudgetChecker" as BC
-participant ":Ui" as UI
+participant "<u>:Ui</u>" as UI
 
 User -> ST : "add d/Coffee a/3.50 c/food date/22-03-2026"
 activate ST
@@ -37,7 +37,7 @@ else valid flags present
         deactivate DP
     end
 
-    create ":AddCommand" as AC
+    create "<u>:AddCommand</u>" as AC
     P -> AC : new AddCommand("Coffee", 3.50, "Food", 2026-03-22)
     activate AC
     AC --> P
@@ -48,7 +48,7 @@ deactivate P
 
 ST -> AC : execute(expenses, ui)
 activate AC
-create ":Expense" as E
+create "<u>:Expense</u>" as E
 AC -> E ** : new Expense("Coffee", 3.50, "Food", 2026-03-22, false)
 activate E
 E --> AC
@@ -59,18 +59,27 @@ EL --> AC
 deactivate EL
 AC -> UI : showAddSuccess(expense)
 activate UI
-UI --> User : "Added: [Food] Coffee - $3.50 (2026-03-22)"
+UI --> AC
 deactivate UI
 AC -> BC : check(expenses, ui)
 activate BC
 alt totalSpent > budget
     BC -> UI : showBudgetAlert(...)
+    activate UI
+    UI --> BC
+    deactivate UI
 else totalSpent >= 90% of budget
     BC -> UI : showBudgetWarning(...)
+    activate UI
+    UI --> BC
+    deactivate UI
 else under threshold
 end
+BC --> AC
 deactivate BC
+AC --> ST
 deactivate AC
 
+ST --> User : output
 deactivate ST
 @enduml
