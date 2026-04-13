@@ -16,11 +16,16 @@ SpendTrack is a CLI expense tracker for NUS students who prefer typing over clic
 - **Delete expense command** (v1.0): Implemented `DeleteCommand` with 1-based index validation. Throws a `SpendTrackException` with a clear range message for out-of-bounds indices.
 - **Delete confirmation** (v2.1): Extended `DeleteCommand` to prompt the user for `yes/no` confirmation before deleting. If the user does not type `yes`, the deletion is cancelled and the list is unchanged. Prevents accidental deletion of the wrong expense.
 - **Save and load to file — Storage** (v2.0): Created the `Storage` class that persists the expense list, budget, and budget history to `data/spendtrack.txt` using a pipe-delimited format with section markers. Save is triggered automatically after every mutating command. Load is called on startup; malformed lines are skipped with a warning and the rest of the data is preserved.
-- **Encrypted save file** (v2.1): Extended `Storage` to encrypt the save file using AES-128-CBC with a machine-derived key (SHA-256 of OS name and username). The file is unreadable outside the application. If the file is tampered with or loaded on a different machine, decryption fails and the app starts fresh with a warning. The key is never stored — it is derived at runtime — so access to the source code alone is not sufficient to forge a valid save file.
+- **CRC32 checksum integrity** (v2.1): Replaced AES encryption with a per-line CRC32 checksum appended to each saved record. On load, lines whose checksum does not match are skipped with a warning, protecting against file corruption and manual tampering while keeping the save file human-readable and portable across machines.
 - **Load-time data validation** (v2.1): Added `validateExpense()` to `Storage` — each expense parsed from the save file is checked for blank description, non-positive amount, amount exceeding $1,000,000, and dates before year 2000. Invalid entries are skipped with a warning while the rest of the data loads normally.
-- **Filter expenses by date range** (v2.0): Implemented `FilterCommand` which filters expenses inclusively between two dates. Depends on Afshal's date tagging. Validates that `from` is not after `to` and displays results in the same table format as `list`.
-- **Find expense by index** (v2.0): Implemented `FindCommand` which displays full details of a single expense at a given 1-based index in a labelled detail view.
+- **Filter expenses by date range** (v2.0): Implemented `FilterCommand` which filters expenses inclusively between two dates. Validates that `from` is not after `to` and displays results in the same table format as `list`. Rejects duplicate or unknown flags and pipe characters.
+- **Filter by category** (v2.1): Extended `FilterCommand` to accept an optional `c/CATEGORY` flag. When provided, only expenses matching the category (case-insensitive) are shown. The header updates to display the active category filter.
+- **Find expense by index** (v2.0): Implemented `FindCommand` which displays full details of a single expense at a given 1-based index in a labelled detail view. Rejects trailing garbage tokens.
+- **Find expense by keyword** (v2.1): Implemented `FindByKeywordCommand` for `find d/KEYWORD` mode. Scans all expenses for descriptions containing the keyword (case-insensitive) and displays results in a table with original list indices, enabling easy chaining into `delete` or `find INDEX`.
 - **Startup reminder** (v2.0): After loading from file, if the list is non-empty, the most recently added expense is shown before the first prompt via `Ui.showLastExpense()`. Helps users avoid duplicate entries.
+- **Input validation hardening** (v2.1): Added parse-time validation for `add` and `edit` — amount is checked to be finite and positive before the command object is created, category and description reject the pipe character `|` to prevent save file corruption, and duplicate flags (e.g. two `d/` in one command) throw an error.
+- **Recurring flag persistence** (v2.1): Fixed `Storage` to save and load the `recurring` field of each expense. Before this fix, recurring expenses lost their `[R]` tag on restart.
+- **ASCII logo and UI polish** (v2.1): Added a SpendTrack ASCII logo to the welcome banner, improved error hint messages (contextual `Hint:` lines based on error type), and standardised the help command column alignment.
 - **Assertions and logging** (v1.0): Added assertions and `java.util.logging` to `DeleteCommand`, `SpendTrack`, `Storage`, `FilterCommand`, `FindCommand`, and `Ui`.
 
 ### Contributions to testing
@@ -28,10 +33,10 @@ SpendTrack is a CLI expense tracker for NUS students who prefer typing over clic
 - **`DeleteCommandTest`** (v1.0, updated v2.1): Tests for valid deletion, correct item removed, last index, out-of-range, and zero index. Updated in v2.1 to simulate `yes/no` confirmation input via `ByteArrayInputStream`. Added tests for cancel with `no` and cancel with invalid response.
 - **`ExpenseTest`** (v2.0): Tests for both constructors, all getters/setters, recurring flag defaults, and `toString` formatting.
 - **`ExpenseListTest`** (v2.0): Tests for add/get/set/delete, size tracking, `getTotal`, budget set/reset/directly, `hasBudget`, and budget history ordering.
-- **`StorageTest`** (v2.0, updated v2.1): Full round-trip save/load tests for expenses, budget, and budget history. Also covers missing file, zero/malformed budget value, and field-level precision. Updated in v2.1 to add tamper-detection tests: tampered file starts fresh, corrupted file starts fresh.
+- **`StorageTest`** (v2.0, updated v2.1): Full round-trip save/load tests for expenses, budget, and budget history. Also covers missing file, zero/malformed budget value, and field-level precision. Updated in v2.1 with CRC32 tamper-detection tests: tampered checksum causes line to be skipped, valid file loads fully.
 - **`DateParserTest`** (v2.0): Tests for ISO format, Singapore DD-MM-YYYY format, `today`/`yesterday` keywords (case-insensitive), whitespace tolerance, and invalid inputs including empty string, wrong separator, invalid month/day.
-- **`FilterCommandTest`** (v2.0): Tests for date range filtering, no matches, list immutability, `isExit`/`mutatesData`, and parser-level validation (missing dates, reversed range, invalid format).
-- **`FindCommandTest`** (v2.0): Tests for valid/invalid/negative/zero indices, empty list, list immutability, `isExit`/`mutatesData`, and parser-level validation.
+- **`FilterCommandTest`** (v2.0, extended v2.1): Tests for date range filtering, no matches, list immutability, `isExit`/`mutatesData`, and parser-level validation (missing dates, reversed range, invalid format). Extended in v2.1 with tests for `c/` category filter, duplicate `c/`, empty `c/`, pipe in category, and garbage token rejection.
+- **`FindCommandTest`** (v2.0, extended v2.1): Tests for valid/invalid/negative/zero indices, empty list, list immutability, `isExit`/`mutatesData`, and parser-level validation. Extended in v2.1 with tests for `find d/KEYWORD` mode including case-insensitive match, no match, partial match, trailing garbage rejection, and `mutatesData` returning false.
 - **`StartupReminderTest`** (v2.0): Tests for `showLastExpense` output content (description, amount, category, date), empty list logic, and recurring expense display.
 - **`InputValidationTest` (extended)** (v2.0): Added parser-level tests for `filter`, `find`, `list`, alias resolution, `bye`, and unknown commands.
 
@@ -39,26 +44,28 @@ SpendTrack is a CLI expense tracker for NUS students who prefer typing over clic
 
 - Auto-save and load section explaining the file format, startup behaviour, data transfer, and load-time validation
 - Delete command section updated with confirmation prompt, expected outputs for confirmed and cancelled deletion
-- File encryption section explaining tamper detection, machine-specific key, and portability limitation
-- Updated FAQ: data transfer answer updated to reflect encryption
+- CRC32 checksum section explaining tamper detection and portability
+- Updated FAQ: data transfer answer updated to reflect plain-text save with checksum integrity
 - Startup reminder section with example output
-- Filter command section with format, date format notes, examples, and error cases
-- Find command section with format, examples, and error cases
+- Filter command section with format, date format notes, `c/CATEGORY` optional flag, examples, and error cases
+- Find command section covering both index mode and `find d/KEYWORD` keyword mode, with examples and error cases
+- Help command expected output updated to reflect aligned column format and all current commands
 - Expanded command summary table with all commands
 
 ### Contributions to the DG
 
 - Architecture section — overview of the command-driven loop and component responsibilities
 - Delete expense feature section with design considerations (1-based indexing, parse vs execute validation, delete confirmation)
-- Storage implementation section (save/load design, file format, section markers, encryption design, key derivation, design considerations)
-- Filter and Find feature section with design considerations (list immutability, index validation)
+- Storage implementation section (save/load design, file format, section markers, CRC32 checksum design, design considerations)
+- Filter and Find feature section updated with `c/CATEGORY` filter, `find d/KEYWORD` keyword mode, `FindByKeywordCommand` design, and design considerations (list immutability, index validation, pipe rejection, find d/ vs search)
 - User stories for save/load, filter, find, and startup reminder features
+- Fixed UML sequence diagram notation across all diagrams to follow PlantUML conventions (`<<class>>` for static utility classes, `<u>...</u>` underline for instance participants, `create` for object instantiation, activation bar routing so return arrows do not cross active bars)
 - UML diagrams:
     - Sequence diagram: full SpendTrack runtime architecture (`ArchitectureSequence`)
     - Sequence diagram: delete command flow with index validation and auto-save (`DeleteCommandSequence`)
     - Sequence diagram: Storage startup load flow including startup reminder (`StorageLoadSequence`)
     - Class diagram: Storage, ExpenseList, Expense, SpendTrack relationships (`StorageClassDiagram`)
-    - Sequence diagram: filter and find command execution flows (`FilterFindSequence`)
+    - Sequence diagram: filter (with category) and find (index + keyword) execution flows (`FilterFindSequence`)
 
 
 ### Contributions to team-based tasks
@@ -69,4 +76,4 @@ SpendTrack is a CLI expense tracker for NUS students who prefer typing over clic
 
 ### Community
 
-Reviewed PRs: #3, #5, #14, #17, #18, #20, #21, #22, #23, #24, #27, #28, #29, #32, #34, #35, #36, #78, #79, #80, #81, #86, #90, #92, #93, #94, #95, #96, #97, #113, #117, #118, #119, #120, #121, #123, #126, #127, #128, #131, #132, #133, #135, #137, #138, #139, #140, #141, #142, #143, #144, #159, #161, #162, #163, #167, #171, #173
+Reviewed and approved PRs: #3, #5, #14, #17, #18, #20, #21, #22, #23, #24, #27, #28, #29, #32, #34, #35, #36, #77, #78, #79, #80, #81, #86, #90, #92, #93, #94, #95, #96, #97, #113, #117, #118, #119, #120, #121, #123, #126, #127, #128, #131, #132, #133, #135, #137, #138, #139, #140, #141, #142, #143, #144, #159, #161, #162, #172, #185, #186, #235, #238, #239, #240, #244, #245, #246, #247, #248, #249, #250, #259, #260, #261, #262

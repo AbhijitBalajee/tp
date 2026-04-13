@@ -90,7 +90,7 @@ ____________________________________________________________
  Expenses from 2026-01-01 to 2026-01-31
 ____________________________________________________________
  No expenses found in the given date range.
- Hint: Use 'filter from/YYYY-MM-DD to/YYYY-MM-DD [cat/CATEGORY]' to adjust the range.
+ Hint: Use 'filter from/YYYY-MM-DD to/YYYY-MM-DD [c/CATEGORY]' to adjust the range.
 ____________________________________________________________
  > ____________________________________________________________
  Error: Start date must be before end date.

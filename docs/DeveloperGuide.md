@@ -363,16 +363,16 @@ The following class diagram shows the relationships between `Storage`, `ExpenseL
 The `filter` command allows users to view expenses within an inclusive date range, with an optional category filter:
 
 ```
-filter from/DATE to/DATE [cat/CATEGORY]
+filter from/DATE to/DATE [c/CATEGORY]
 ```
 
 **How it works:**
 
-1. The user enters `filter from/2026-03-01 to/2026-03-31` (optionally with `cat/Food`).
+1. The user enters `filter from/2026-03-01 to/2026-03-31` (optionally with `c/Food`).
 2. `Parser.parse()` delegates to `Parser.parseFilterCommand()`.
 3. `parseFilterCommand()` iterates over each space-delimited token:
    - `from/` and `to/` are passed to `DateParser.parse()`. Duplicates throw an exception.
-   - `cat/` sets an optional category string. Duplicates, empty values, and values containing `|` throw an exception.
+   - `c/` sets an optional category string. Duplicates, empty values, and values containing `|` throw an exception.
    - Any unrecognised token throws: `Unknown filter option: '<token>'`.
 4. If either date is missing, or `from` is after `to`, a `SpendTrackException` is thrown.
 5. A `FilterCommand(from, to, category)` is created and returned (`category` may be `null`).
@@ -425,7 +425,7 @@ The following sequence diagram shows the execution flow for `filter` and `find`:
 
 **Aspect: Pipe character rejection in filter and find**
 
-Both `cat/` in `filter` and `d/` in `find` reject values containing `|`. This is consistent with `add` and `edit`, which apply the same restriction. The pipe character is the field delimiter in the save file, so allowing it in any user input would corrupt stored data or cause checksum mismatches on load.
+Both `c/` in `filter` and `d/` in `find` reject values containing `|`. This is consistent with `add` and `edit`, which apply the same restriction. The pipe character is the field delimiter in the save file, so allowing it in any user input would corrupt stored data or cause checksum mismatches on load.
 
 ### Edit Expense Feature
 
