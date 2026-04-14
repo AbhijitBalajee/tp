@@ -64,7 +64,7 @@ Error cases:
 - `add d/Coffee a/5` (missing category) behaves as if `c/Uncategorised` was provided — defaults are applied silently.
 - `add d/Coffee a/NaN c/Food` or `a/Infinity` → `Amount must be a finite number. Usage: a/<amount>`
 - `add d/Coffee a/-5 c/Food` → `Amount must be a positive number. Usage: a/<amount>`
-- `add d/Coffee a/abc c/Food` → `Amount must be a number. Usage: a/<amount>`
+- `add d/Coffee a/abc c/Food` → `Amount is required and must be greater than 0. Usage: a/<amount>`
 - `add d/Coffee d/Tea a/5 c/Food` (duplicate flag) → `Duplicate 'd/' detected. Please provide only one description.`
 - `add d/Alice|Bob a/20 c/Food` → `Description cannot contain '|' (reserved for save file format). Please use a different character.`
 - `add d/T a/5 c/Food date/29-02-2025` (Feb 29 on a non-leap year) → `Invalid date format. Accepted: YYYY-MM-DD, DD-MM-YYYY, 'today', 'yesterday'.`
@@ -228,7 +228,9 @@ ____________________________________________________________
  Welcome to SpendTrack!
  ...
 ____________________________________________________________
- Last recorded expense: Coffee | $3.50 | Food | 2026-03-22
+ Last recorded expense:
+   Coffee | $3.50 | Food | 2026-03-22
+____________________________________________________________
 ```
 
 This helps you avoid accidentally logging the same expense twice.
@@ -281,7 +283,7 @@ Error cases:
 - `filter from/2026-03-01 to/2026-03-05 to/2026-03-31` (duplicate `to/`) → `Duplicate 'to/' detected. Please provide only one end date.`
 - `filter from/2026-03-01 to/2026-03-31 c/Food c/Transport` (duplicate `c/`) → `Duplicate 'c/' detected. Please provide only one category.`
 - `filter from/2026-03-01 to/2026-03-31 c/Food|hack` → `Category cannot contain '|'.`
-- `filter from/2026-03-01 to/2026-03-31 garbage` → `Unknown filter option: 'garbage'.`
+- `filter from/2026-03-01 to/2026-03-31 garbage` → `Unknown filter option: 'garbage'. Usage: filter from/YYYY-MM-DD to/YYYY-MM-DD [c/CATEGORY]`
 
 ---
 
@@ -362,7 +364,12 @@ ____________________________________________________________
 
 If no expenses have been added:
 ```
+____________________________________________________________
+ Your Expenses
+____________________________________________________________
  No expenses recorded yet.
+ Hint: Use 'add d/DESCRIPTION a/AMOUNT c/CATEGORY' to add one.
+____________________________________________________________
 ```
 
 Error cases:
@@ -788,7 +795,8 @@ ____________________________________________________________
 ```
 
 Error cases:
-- `report 03-2026` or `report abc` → `Usage: report <YYYY-MM>`
+- `report` (no argument) → `Usage: report <YYYY-MM>`
+- `report 03-2026` or `report abc` → `Invalid format. Usage: report <YYYY-MM> (e.g. 2026-03)`
 - `report 2026-13` or `report 2026-00` (month out of range) → `Invalid month. Use YYYY-MM with month between 01 and 12.`
 
 ---
@@ -823,7 +831,8 @@ ____________________________________________________________
 ```
 
 Error cases:
-- `month abc` or `month 03-2026` → `Usage: month <YYYY-MM>`
+- `month` (no argument) → `Usage: month <YYYY-MM>`
+- `month abc` or `month 03-2026` → `Invalid format. Usage: month <YYYY-MM> (e.g. 2026-03)`
 - `month 2026-13` or `month 2026-00` (month out of range) → `Invalid month. Use YYYY-MM with month between 01 and 12.`
 
 ---
@@ -912,6 +921,7 @@ ____________________________________________________________
 If no matches are found:
 ```
 ____________________________________________________________
+ Search results:
  No matches found.
 ____________________________________________________________
 ```
@@ -1009,7 +1019,7 @@ ____________________________________________________________
   budget history                                                           -- view budget history
   remaining                                                                -- show remaining
   edit INDEX [d/DESC] [a/AMT] [c/CAT] [date/DATE] [recurring/true|false]   -- edit expense
-  filter from/DATE to/DATE [c/CATEGORY]                                  -- filter by date range and/or category
+  filter from/DATE to/DATE [c/CATEGORY]                                    -- filter by date range and/or category
   find INDEX                                                               -- view expense details
   find d/KEYWORD                                                           -- search by description keyword
   search KEYWORD                                                           -- search by keyword

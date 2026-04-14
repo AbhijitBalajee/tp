@@ -562,7 +562,7 @@ The `search` command allows users to find expenses based on a keyword in the des
 3. `SearchCommand.execute()` iterates through all expenses using `getExpenses()`.
 4. For each expense, `.getDescription().toLowerCase().contains(keyword.toLowerCase())` is used for case-insensitive substring matching.
 5. Matching expenses are printed with a running count.
-6. If no matches are found, `No matches found.` is shown.
+6. If no matches are found, the `Search results:` header is still printed followed by ` No matches found.` on the next line.
 
 The following activity diagram shows the logic of the search feature:
 
@@ -725,15 +725,15 @@ The following activity diagram shows the logic of the report feature:
 
 **Aspect: Error handling for malformed input**
 
-- **Current approach:** A broad `catch (Exception e)` catches any parsing failure and shows `Usage: report <YYYY-MM>`.
-    - Pros: Simple and robust. Any malformed input (wrong format, missing parts, non-numeric) is caught cleanly.
-    - Cons: Catches too broadly — unexpected errors may be silently swallowed.
+- **Current approach:** `Parser.validateYearMonth()` validates the input against a strict `\d{4}-\d{2}` regex before parsing, and checks the month is in `01`..`12`. An empty argument throws `Usage: report <YYYY-MM>`; a malformed argument throws `Invalid format. Usage: report <YYYY-MM> (e.g. 2026-03)`; a month out of range throws `Invalid month. Use YYYY-MM with month between 01 and 12.`
+    - Pros: Precise error messages help the user correct the exact problem. Rejects `2026-13`, `2026-00`, and `03-2026` deterministically without relying on exception-based flow.
+    - Cons: Slightly more code than a single broad catch.
 
-- **Alternative:** Validate the format explicitly with a regex before parsing.
-    - Pros: More precise error detection. Can give more specific error messages.
-    - Cons: Adds complexity for a simple format check.
+- **Alternative:** A broad `catch (Exception e)` that shows one generic usage message.
+    - Pros: Fewer branches in the parser.
+    - Cons: Users cannot distinguish between "wrong format" and "month out of range", making error messages less actionable.
 
-The broad catch was chosen for simplicity in v1.0.
+The explicit validation approach was adopted in v2.0.1 PE-D hardening (issue #178) to reject ambiguous year-month inputs that earlier silently passed.
 
 ---
 
@@ -1348,8 +1348,8 @@ SpendTrack helps students track expenses faster than a typical GUI app. Users ca
 ### Launch
 
 1. Ensure Java 17 is installed.
-2. Download the latest `spendtrack.jar` from the GitHub releases page.
-3. Open a terminal, navigate to the folder containing the JAR, and run: `java -jar spendtrack.jar`
+2. Download the latest `SpendTrack.jar` from the GitHub releases page.
+3. Open a terminal, navigate to the folder containing the JAR, and run: `java -jar SpendTrack.jar`
 
 ### Adding an expense
 
@@ -1458,7 +1458,7 @@ SpendTrack helps students track expenses faster than a typical GUI app. Users ca
 4. Enter `report 2026-04` for a month with no expenses.
 5. Expected: `No expenses found for 2026-04`
 6. Enter `report abc`
-7. Expected: `Usage: report <YYYY-MM>`
+7. Expected: `Invalid format. Usage: report <YYYY-MM> (e.g. 2026-03)`
 
 ### Viewing expenses by month
 1. Add expenses with explicit dates across different months.
